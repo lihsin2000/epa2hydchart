@@ -1,6 +1,12 @@
 import re
 import pandas as pd
 import ezdxf
+import sys
+
+from Ui_ui import Ui_MainWindow
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
 
 def main():
     global msp, df_Reservoirs, df_Tanks, df_Coords, df_Junctions, df_Pumps, df_Pipes, df_Vertices, df_NodeResults, df_LinkResults
@@ -77,6 +83,13 @@ def main():
         #                     segment1=Vec2.from_deg_angle(45, leader_distance),)
 
     cad.saveas("new_name.dxf")
+    export(cad)
+
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super(MainWindow, self).__init__()
+        self.MainWindow = Ui_MainWindow()
+        self.MainWindow.setupUi(self)
 
 def headPressureLeader(color):
     for i in range(0, len(df_Junctions)):
@@ -564,14 +577,6 @@ def rptProces(rptInputFile):
     if os.path.exists(output):
         os.remove(output)
 
-    # with open(rptFile, 'r') as file_in:
-    #     content=file_in.read()
-    #     file_in.close()
-        
-    # with open(output, 'w') as file_out:
-    #     file_out.write(content)
-    #     file_out.write('[END]')
-    #     file_out.close()
     with open(rptInputFile, 'r') as file_in, open(output, 'w') as file_out:
         lines=file_in.readlines()
         i=0
@@ -600,16 +605,47 @@ def rptProces(rptInputFile):
                     i+=1
     file_out.close()
 
-    # with open(output, 'w') as file_out:
-    #     lines=file_out.readlines()
-    #     while i < len(lines):
-    #         if '\x0c\n' in lines[i]:
-    #             i+=1
-    #         else:
-    #             file_out.write(lines[i])
-    #             i+=1
     return output
 
+
+def export(doc):
+    from ezdxf.addons.drawing import Frontend, RenderContext, svg, layout, config, pymupdf
+    msp = doc.modelspace()
+    context = RenderContext(doc)
+    backend = svg.SVGBackend()
+    cfg = config.Configuration(
+        background_policy=config.BackgroundPolicy.WHITE,
+    )
+    frontend = Frontend(context, backend, config=cfg)
+    frontend.draw_layout(msp)
+    page = layout.Page(0, 0, layout.Units.mm, margins=layout.Margins.all(2))
+    svg_string = backend.get_string(
+        page, settings=layout.Settings(scale=1, fit_page=False)
+    )
+    with open("output.svg", "wt", encoding="utf8") as fp:
+        fp.write(svg_string)
+
+
+    backend = pymupdf.PyMuPdfBackend()
+    # 3. create the frontend
+    frontend = Frontend(context, backend, config=cfg)
+    # 4. draw the modelspace
+    frontend.draw_layout(msp)
+    # 5. create an A4 page layout
+    page = layout.Page(210, 297, layout.Units.mm, margins=layout.Margins.all(20))
+    # 6. get the PDF rendering as bytes
+    pdf_bytes = backend.get_pdf_bytes(page)
+    with open("pdf_dark_bg.pdf", "wb") as fp:
+        fp.write(pdf_bytes)
+
+    # 6. get the PNG rendering as bytes
+    png_bytes = backend.get_pixmap_bytes(page, fmt="png", dpi=200)
+    with open("png_white_bg.png", "wb") as fp:
+        fp.write(png_bytes)
+
 if __name__ == '__main__':
-    main()
-pass
+    QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)   # Enable high DPI
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    sys.exit(app.exec())
