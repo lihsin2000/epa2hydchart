@@ -104,13 +104,15 @@
 
 [CURVES]
 ;ID              	X-Value     	Y-Value
-;PUMP: PUMP: 
+;PUMP: PUMP: PUMP: 
  1               	30          	80          
 
 [CONTROLS]
 
 
+
 [RULES]
+
 
 
 [ENERGY]
