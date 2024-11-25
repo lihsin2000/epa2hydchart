@@ -7,7 +7,6 @@ from Ui_ui import Ui_MainWindow
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QIntValidator
-from PyQt5.QtCore import QThread, pyqtSignal
 from PyQt5.QtGui import *
 import config
 class MainWindow(QMainWindow):
@@ -29,108 +28,155 @@ class MainWindow(QMainWindow):
         self.MainWindow.l_leader_distance.setValidator(QIntValidator())
 
     def main(self):
-        global msp, df_Reservoirs, df_Tanks, df_Coords, df_Junctions, df_Pumps, df_Pipes, df_Vertices, df_NodeResults, df_LinkResults, df_Valves
-
+        global df_NodeResults, df_LinkResults
+        
         # inpFile='test2.inp'
         # rptFile='test2.rpt'
 
         inpFile=config.inpFile
         rptFile=config.rptFile
         if inpFile != '' and rptFile != '':
-            try:
-                rptFile2=self.rptProces(rptFile)
-                self.MainWindow.browser_log.append('rpt preprocess finish')
+            # try:
+            rptFile2=self.rptProces(rptFile)
+            self.MainWindow.browser_log.append('rpt preprocess finish')
 
-                df_Coords=self.readCoords(inpFile)
-                print('Coords')
-                print(df_Coords)
+            hr_list=self.multiHr(rptFile2)
 
-                df_Junctions=self.readJunctions(inpFile)
-                print('Junctions')
-                print(df_Junctions)
+            self.readinpdf(inpFile)
 
-                df_Reservoirs=self.readReservoirs(inpFile)
-                print('Reservoirs')
-                print(df_Reservoirs)
-                
-                df_Tanks=self.readTanks(inpFile)
-                print('Tanks')
-                print(df_Tanks)
-
-                df_Pumps=self.readPumps(inpFile)
-                print('Pumps')
-                print(df_Pumps)
-
-                df_Valves=self.readValves(inpFile)
-                print('Valves')
-                print(df_Valves)
-
-                df_Pipes=self.readPipes(inpFile)
-                print('Pipes')
-                print(df_Pipes)
-
-                df_Vertices=self.readVertices(inpFile)
-                print('Vertices')
-                print(df_Vertices)
-
-                df_NodeResults=self.readNodeResults(rptFile2)
+            if hr_list==[]: # without patteren
+                df_NodeResults=self.readNodeResults('', rptFile2)
                 print('NodeResults')
                 print(df_NodeResults)
 
-                df_LinkResults=self.readLinkResults(rptFile2)
+                df_LinkResults=self.readLinkResults('', '', rptFile2)
                 print('LinkResults')
                 print(df_LinkResults)
+            else:   # with patteren
+                for hr in hr_list:
+                    i=hr_list.index(hr)
 
-                inputAllLink=pd.concat([df_Pipes['ID'], df_Valves['ID'], df_Pumps['ID']])
-                inputAllLink=inputAllLink.sort_values().reset_index(drop=True)
-                outputAllLink=df_LinkResults['ID']
-                outputAllLink=outputAllLink.sort_values().reset_index(drop=True)
+                    df_NodeResults=self.readNodeResults(hr, rptFile2)
+                    print(f'NodeResults at {hr}')
+                    print(df_NodeResults)
 
-                matchLink=outputAllLink.equals(outputAllLink)
+                    if i==len(hr_list)-1:
+                        df_LinkResults=self.readLinkResults(hr, '', rptFile2)   # with patteren and last hour
+                    else:
+                        hr2=hr_list[i+1]
+                        df_LinkResults=self.readLinkResults(hr, hr2, rptFile2)
+                    print(f'LinkResults at {hr}')
+                    print(df_LinkResults)
 
-                inputAllNode=pd.concat([df_Junctions['ID'], df_Tanks['ID'], df_Reservoirs['ID']])
-                inputAllNode=inputAllNode.sort_values().reset_index(drop=True)
-                outputAllNode=df_NodeResults['ID']
-                outputAllNode=outputAllNode.sort_values().reset_index(drop=True)
+            matchLink, matchNode = self.inprptmatch()
 
-                matchNode=outputAllNode.equals(inputAllNode)
+            self.create_dxf_export(matchLink, matchNode)
 
-                if matchLink and matchNode:
-                    self.MainWindow.browser_log.append(f'Both input match')
-                    cad = ezdxf.new()
-                    msp = cad.modelspace()
+    def create_dxf_export(self, matchLink, matchNode):
+        global msp
+        if matchLink and matchNode:
+            self.MainWindow.browser_log.append(f'Both input match')
+            cad = ezdxf.new()
+            msp = cad.modelspace()
 
-                    tankerLeaderColor=210
-                    reservoirLeaderColor=210
-                    elevLeaderColor=headPressureLeaderColor=210
-                    demandColor=2
+            tankerLeaderColor=210
+            reservoirLeaderColor=210
+            elevLeaderColor=headPressureLeaderColor=210
+            demandColor=2
 
-                    junctionBlock=cad.blocks.new(name='arrow')
-                    junctionBlock.add_hatch(color=demandColor).paths.add_polyline_path([(0,0), (30,-50), (-30,-50)], is_closed=True)
+            junctionBlock=cad.blocks.new(name='arrow')
+            junctionBlock.add_hatch(color=demandColor).paths.add_polyline_path([(0,0), (30,-50), (-30,-50)], is_closed=True)
 
-                    self.createBlocks(cad)
-                    self.insertBlocks()
-                    self.drawPipes()
-                    self.pipeInfo()
-                    self.demandLeader(demandColor)
-                    self.elevLeader(elevLeaderColor)
-                    self.headPressureLeader(headPressureLeaderColor)
-                    self.reservoirsLeader(reservoirLeaderColor)
-                    self.tankLeader(tankerLeaderColor)
+            self.createBlocks(cad)
+            self.insertBlocks()
+            self.drawPipes()
+            self.pipeInfo()
+            self.demandLeader(demandColor)
+            self.elevLeader(elevLeaderColor)
+            self.headPressureLeader(headPressureLeaderColor)
+            self.reservoirsLeader(reservoirLeaderColor)
+            self.tankLeader(tankerLeaderColor)
 
-                    # cad.saveas("new_name.dxf")
-                    savePath, _= QFileDialog.getSaveFileName(self, "儲存", "", filter='dxf (*.dxf)')
-                    cad.saveas(savePath)
+                # cad.saveas("new_name.dxf")
+            savePath, _= QFileDialog.getSaveFileName(self, "儲存", "", filter='dxf (*.dxf)')
+            cad.saveas(savePath)
 
-                    self.MainWindow.browser_log.append('.dxf saved')
-                    self.export(cad)
-                    self.MainWindow.browser_log.append('All done')
-                    self.MainWindow.browser_log.append(f'---------------------')
-                else:
-                    self.MainWindow.browser_log.append(f'Both input NOT match, please check both input files')
-                    self.MainWindow.browser_log.append(f'---------------------')
-            except Exception as err:
-                print(err)
+            self.MainWindow.browser_log.append('.dxf saved')
+            self.export(cad)
+            self.MainWindow.browser_log.append('All done')
+            self.MainWindow.browser_log.append(f'---------------------')
+        else:
+            self.MainWindow.browser_log.append(f'Both input NOT match, please check both input files')
+            self.MainWindow.browser_log.append(f'---------------------')
+
+    def inprptmatch(self):
+        inputAllLink=pd.concat([df_Pipes['ID'], df_Valves['ID'], df_Pumps['ID']])
+        inputAllLink=inputAllLink.sort_values().reset_index(drop=True)
+        outputAllLink=df_LinkResults['ID']
+        outputAllLink=outputAllLink.sort_values().reset_index(drop=True)
+
+        matchLink=outputAllLink.equals(outputAllLink)
+
+        inputAllNode=pd.concat([df_Junctions['ID'], df_Tanks['ID'], df_Reservoirs['ID']])
+        inputAllNode=inputAllNode.sort_values().reset_index(drop=True)
+        outputAllNode=df_NodeResults['ID']
+        outputAllNode=outputAllNode.sort_values().reset_index(drop=True)
+
+        matchNode=outputAllNode.equals(inputAllNode)
+        return matchLink,matchNode
+
+    def readinpdf(self, inpFile):
+        global df_Reservoirs, df_Tanks, df_Coords, df_Junctions, df_Pumps, df_Pipes, df_Vertices, df_Valves
+        df_Coords=self.readCoords(inpFile)
+        print('Coords')
+        print(df_Coords)
+
+        df_Junctions=self.readJunctions(inpFile)
+        print('Junctions')
+        print(df_Junctions)
+
+        df_Reservoirs=self.readReservoirs(inpFile)
+        print('Reservoirs')
+        print(df_Reservoirs)
+            
+        df_Tanks=self.readTanks(inpFile)
+        print('Tanks')
+        print(df_Tanks)
+
+        df_Pumps=self.readPumps(inpFile)
+        print('Pumps')
+        print(df_Pumps)
+
+        df_Valves=self.readValves(inpFile)
+        print('Valves')
+        print(df_Valves)
+
+        df_Pipes=self.readPipes(inpFile)
+        print('Pipes')
+        print(df_Pipes)
+
+        df_Vertices=self.readVertices(inpFile)
+        print('Vertices')
+        print(df_Vertices)
+
+    def multiHr(self, rptFile2):
+        rptFile2_lines=open(rptFile2).readlines()
+
+        i=0
+        hr_list=[]
+        for l in rptFile2_lines:
+            if ' Hrs' in l and i==0:
+                h_new=l.split()[3]
+                hr_list.append(h_new)
+                i+=1
+            elif ' Hrs' in l and i>0:
+                h_old=h_new
+                h_new=l.split()[3]
+                if h_new!=h_old:
+                    hr_list.append(h_new)
+                i+=1
+
+        return hr_list
 
     def loadinp(self):
         file, type=QFileDialog.getOpenFileName(self, '開啟inp檔',filter='inp (*.inp)')
@@ -496,9 +542,9 @@ class MainWindow(QMainWindow):
                     msp.add_blockref(item, [x,y], dxfattribs={'xscale':config.joint_scale, 'yscale':config.joint_scale})
                     self.MainWindow.browser_log.append(f'Node {id} created')
                 
-    def lineStartEnd(self, file, startStr, endStr, start_offset, end_offset):
+    def lineStartEnd(self, input, startStr, endStr, start_offset, end_offset):
         index = 0
-        with open(file, 'r') as file:
+        with open(input, 'r') as file:
             for line in file:
                 index += 1
                 if startStr in line:
@@ -723,8 +769,14 @@ class MainWindow(QMainWindow):
         # df=getCoords(df)
         return df
 
-    def readNodeResults(self, rptFile):
-        start, end=self.lineStartEnd(rptFile, 'Node Results:', 'Link Results:',5,2)
+    def readNodeResults(self, hr1, rptFile):
+        if hr1=='':
+            start_str='Node Results:'
+            end_str='Link Results:'
+        else:
+            start_str=f'Node Results at {hr1} Hrs:'
+            end_str=f'Link Results at {hr1} Hrs:'
+        start, end=self.lineStartEnd(rptFile, start_str, end_str,5,2)
         lines = open(rptFile).readlines()
         df=pd.DataFrame(columns=['ID', 'Demand', 'Head', 'Pressure'])
         for l in range (start-1, end):
@@ -751,8 +803,17 @@ class MainWindow(QMainWindow):
         df=df.reset_index(drop=True)
         return df
 
-    def readLinkResults(self, rptFile):
-        start, end=self.lineStartEnd(rptFile, 'Link Results:', '[END]',5,1)
+    def readLinkResults(self, hr1, hr2, rptFile):
+        if hr1=='':     # without patteren
+            start_str='Link Results:'
+            end_str='[END]'
+        elif hr2=='':    # with patteren and last hour
+            start_str=f'Link Results at {hr1} Hrs:'
+            end_str='[END]'
+        elif hr1!='' and hr2!='':
+            start_str=f'Link Results at {hr1} Hrs:'
+            end_str=f'Node Results at {hr2} Hrs:'
+        start, end=self.lineStartEnd(rptFile, start_str, end_str,5,2)
         lines = open(rptFile).readlines()
         df=pd.DataFrame(columns=['ID', 'Flow', 'Headloss'])
         for l in range (start-1, end):
@@ -799,6 +860,7 @@ class MainWindow(QMainWindow):
                     continue
                 else:
                     if i == len(lines)-1:
+                        file_out.write('\n')
                         file_out.write('[END]')
                         break
                     else:
@@ -844,8 +906,6 @@ class MainWindow(QMainWindow):
         # with open("png_white_bg.png", "wb") as fp:
         #     fp.write(png_bytes)
         # self.MainWindow.browser_log.append('.png saved')
-
-
 
 if __name__ == '__main__':
     QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)   # Enable high DPI
