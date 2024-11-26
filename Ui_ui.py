@@ -17,6 +17,9 @@ class Ui_MainWindow(object):
         MainWindow.resize(500, 400)
         MainWindow.setMinimumSize(QtCore.QSize(500, 400))
         MainWindow.setMaximumSize(QtCore.QSize(500, 400))
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap("d:\\Work\\code\\epa2hydchart\\icon.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        MainWindow.setWindowIcon(icon)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.gridLayoutWidget = QtWidgets.QWidget(self.centralwidget)
@@ -117,7 +120,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "epa2hydchart"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "epa2HydChart"))
         self.label_6.setText(_translate("MainWindow", "文字大小"))
         self.label_5.setText(_translate("MainWindow", "節點圖塊比例"))
         self.label_7.setText(_translate("MainWindow", "引線長度"))

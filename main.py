@@ -19,11 +19,11 @@ class MainWindow(QMainWindow):
         self.MainWindow.b_reset.clicked.connect(self.reset)
         self.MainWindow.b_draw.clicked.connect(self.draw)
         self.MainWindow.l_block_scale.setText(str(str(config.block_scale)))
-        self.MainWindow.l_block_scale.setValidator(QIntValidator())
+        self.MainWindow.l_block_scale.setValidator(QDoubleValidator())
         self.MainWindow.l_joint_scale.setText(str(config.joint_scale))
-        self.MainWindow.l_joint_scale.setValidator(QIntValidator())
+        self.MainWindow.l_joint_scale.setValidator(QDoubleValidator())
         self.MainWindow.l_text_size.setText(str(config.text_size))
-        self.MainWindow.l_text_size.setValidator(QIntValidator())
+        self.MainWindow.l_text_size.setValidator(QDoubleValidator())
         self.MainWindow.l_leader_distance.setText(str(config.leader_distance))
         self.MainWindow.l_leader_distance.setValidator(QIntValidator())
 
@@ -41,10 +41,14 @@ class MainWindow(QMainWindow):
             self.MainWindow.browser_log.append('rpt preprocess finish')
 
             hr_list=self.multiHr(rptFile2)
+            if hr_list==[]:
+                multiPattern=False
+            else:
+                multiPattern=True
 
             self.readinpdf(inpFile)
 
-            if hr_list==[]: # without patteren
+            if multiPattern==False: # without patteren
                 df_NodeResults=self.readNodeResults('', rptFile2)
                 print('NodeResults')
                 print(df_NodeResults)
@@ -52,10 +56,18 @@ class MainWindow(QMainWindow):
                 df_LinkResults=self.readLinkResults('', '', rptFile2)
                 print('LinkResults')
                 print(df_LinkResults)
-            else:   # with patteren
+
+                matchLink, matchNode = self.inp_rpt_match()
+                if matchLink and matchNode:
+                    self.MainWindow.browser_log.append(f'Both input match')
+                    self.create_dxf_export()
+                else:
+                    self.MainWindow.browser_log.append(f'Both input NOT match, please check input files')
+                    self.MainWindow.browser_log.append(f'---------------------')
+
+            elif multiPattern==True:   # with patteren
                 for hr in hr_list:
                     i=hr_list.index(hr)
-
                     df_NodeResults=self.readNodeResults(hr, rptFile2)
                     print(f'NodeResults at {hr}')
                     print(df_NodeResults)
@@ -68,37 +80,41 @@ class MainWindow(QMainWindow):
                     print(f'LinkResults at {hr}')
                     print(df_LinkResults)
 
-            matchLink, matchNode = self.inprptmatch()
+                    matchLink, matchNode = self.inp_rpt_match()
+                    if matchLink and matchNode:
+                        self.MainWindow.browser_log.append(f'{hr} Both input match')
+                        self.create_dxf_export()
+                    else:
+                        self.MainWindow.browser_log.append(f'{hr} Both input NOT match, please check input files')
+                        self.MainWindow.browser_log.append(f'---------------------')
 
-            self.create_dxf_export(matchLink, matchNode)
-
-    def create_dxf_export(self, matchLink, matchNode):
+    def create_dxf_export(self, *args, **kwargs):
         global msp
-        if matchLink and matchNode:
-            self.MainWindow.browser_log.append(f'Both input match')
-            cad = ezdxf.new()
-            msp = cad.modelspace()
 
-            tankerLeaderColor=210
-            reservoirLeaderColor=210
-            elevLeaderColor=headPressureLeaderColor=210
-            demandColor=2
+        cad = ezdxf.new()
+        msp = cad.modelspace()
 
-            junctionBlock=cad.blocks.new(name='arrow')
-            junctionBlock.add_hatch(color=demandColor).paths.add_polyline_path([(0,0), (30,-50), (-30,-50)], is_closed=True)
+        tankerLeaderColor=210
+        reservoirLeaderColor=210
+        elevLeaderColor=headPressureLeaderColor=210
+        demandColor=2
 
-            self.createBlocks(cad)
-            self.insertBlocks()
-            self.drawPipes()
-            self.pipeInfo()
-            self.demandLeader(demandColor)
-            self.elevLeader(elevLeaderColor)
-            self.headPressureLeader(headPressureLeaderColor)
-            self.reservoirsLeader(reservoirLeaderColor)
-            self.tankLeader(tankerLeaderColor)
+        junctionBlock=cad.blocks.new(name='arrow')
+        junctionBlock.add_hatch(color=demandColor).paths.add_polyline_path([(0,0), (30,-50), (-30,-50)], is_closed=True)
 
-                # cad.saveas("new_name.dxf")
-            savePath, _= QFileDialog.getSaveFileName(self, "儲存", "", filter='dxf (*.dxf)')
+        self.createBlocks(cad)
+        self.insertBlocks()
+        self.drawPipes()
+        self.pipeInfo()
+        self.demandLeader(demandColor)
+        self.elevLeader(elevLeaderColor)
+        self.headPressureLeader(headPressureLeaderColor)
+        self.reservoirsLeader(reservoirLeaderColor)
+        self.tankLeader(tankerLeaderColor)
+
+        # cad.saveas("new_name.dxf")
+        savePath, _= QFileDialog.getSaveFileName(self, "儲存", "", filter='dxf (*.dxf)')
+        if savePath:
             cad.saveas(savePath)
 
             self.MainWindow.browser_log.append('.dxf saved')
@@ -106,10 +122,9 @@ class MainWindow(QMainWindow):
             self.MainWindow.browser_log.append('All done')
             self.MainWindow.browser_log.append(f'---------------------')
         else:
-            self.MainWindow.browser_log.append(f'Both input NOT match, please check both input files')
             self.MainWindow.browser_log.append(f'---------------------')
 
-    def inprptmatch(self):
+    def inp_rpt_match(self):
         inputAllLink=pd.concat([df_Pipes['ID'], df_Valves['ID'], df_Pumps['ID']])
         inputAllLink=inputAllLink.sort_values().reset_index(drop=True)
         outputAllLink=df_LinkResults['ID']
@@ -235,14 +250,13 @@ class MainWindow(QMainWindow):
                 leader_up_end_x=leader_up_start_x+config.leader_distance
                 leader_up_end_y=leader_up_start_y+config.leader_distance
 
-                msp.add_text(Head, height=config.text_size, dxfattribs={'color': color_head}).set_placement((leader_up_end_x+200,leader_up_end_y+5+2*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
-                msp.add_text(Pressure, height=config.text_size, dxfattribs={'color': color_pressure}).set_placement((leader_up_end_x+200,leader_up_end_y+5-1.0*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
+                msp.add_text(Head, height=config.text_size, dxfattribs={'color': color_head}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y+5+2*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
+                msp.add_text(Pressure, height=config.text_size, dxfattribs={'color': color_pressure}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y+5-1.0*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
                 self.MainWindow.browser_log.append(f'Node {id} pressure created')
         except:
             # print(i)
             pass
     
-
     def createBlocks(self, cad):
         reservoirBlock=cad.blocks.new(name='tank')
         reservoirBlock.add_hatch().paths.add_polyline_path([(100,0), (100,100), (-100,100), (-100,0)], is_closed=True)
@@ -285,12 +299,11 @@ class MainWindow(QMainWindow):
 
             msp.add_polyline2d([(leader_up_start_x,leader_up_start_y),
                                 (leader_up_end_x,leader_up_end_y),
-                                (leader_up_end_x+200,leader_up_end_y)], dxfattribs={'color': color})
-            msp.add_text(elev, height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+200,leader_up_end_y+5+0.5*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
+                                (leader_up_end_x+6*config.text_size,leader_up_end_y)], dxfattribs={'color': color})
+            msp.add_text(elev, height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y+5+0.5*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
             self.MainWindow.browser_log.append(f'Node {id} elev info created')
 
     def demandLeader(self, color):
-        from ezdxf.math import Vec2
         from ezdxf.enums import TextEntityAlignment
 
         for i in range(0, len(df_Junctions)):
@@ -330,10 +343,10 @@ class MainWindow(QMainWindow):
 
             msp.add_polyline2d([(leader_up_start_x,leader_up_start_y),
                                 (leader_up_end_x,leader_up_end_y),
-                                (leader_up_end_x+200,leader_up_end_y)], dxfattribs={'color': color})
-            msp.add_text(head, height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+200,leader_up_end_y+5+2.0*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
-            msp.add_text('ELEV', height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+200,leader_up_end_y+5+0.5*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
-            msp.add_text('Pressure', height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+200,leader_up_end_y+5-1.0*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
+                                (leader_up_end_x+6*config.text_size,leader_up_end_y)], dxfattribs={'color': color})
+            msp.add_text(head, height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y+5+2.0*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
+            msp.add_text('ELEV', height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y+5+0.5*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
+            msp.add_text('Pressure', height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y+5-1.0*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
             self.MainWindow.browser_log.append(f'Reservoir {id} info created')
 
     def tankLeader(self, color):
@@ -361,11 +374,11 @@ class MainWindow(QMainWindow):
 
             msp.add_polyline2d([(leader_up_start_x,leader_up_start_y),
                                 (leader_up_end_x,leader_up_end_y),
-                                (leader_up_end_x+400,leader_up_end_y)], dxfattribs={'color': 210})
-            msp.add_text(f'___T', height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+400,leader_up_end_y+5+3.5*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
-            msp.add_text(f'Hwl:{maxElev}', height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+400,leader_up_end_y+5+2.0*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
-            msp.add_text(f'Mwl:{minElev}', height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+400,leader_up_end_y+5+0.5*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
-            msp.add_text(f'Elev:{elev}', height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+400,leader_up_end_y+5-1.0*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
+                                (leader_up_end_x+10*config.text_size,leader_up_end_y)], dxfattribs={'color': 210})
+            msp.add_text(f'___T', height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+10*config.text_size,leader_up_end_y+5+3.5*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
+            msp.add_text(f'Hwl:{maxElev}', height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+10*config.text_size,leader_up_end_y+5+2.0*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
+            msp.add_text(f'Mwl:{minElev}', height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+10*config.text_size,leader_up_end_y+5+0.5*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
+            msp.add_text(f'Elev:{elev}', height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+10*config.text_size,leader_up_end_y+5-1.0*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
             self.MainWindow.browser_log.append(f'Tank {id} info created')
 
     def pipeInfo(self):
@@ -834,6 +847,11 @@ class MainWindow(QMainWindow):
         import os
         from pathlib import Path
 
+        if os.path.exists('temp'):
+            pass
+        else:
+            os.mkdir('temp')
+            
         name=Path(rptPath).name
         output=f'temp/{name}'
         if os.path.exists(output):
