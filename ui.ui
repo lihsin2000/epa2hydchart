@@ -6,19 +6,19 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>500</width>
+    <width>800</width>
     <height>400</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>500</width>
+    <width>800</width>
     <height>400</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>500</width>
+    <width>800</width>
     <height>400</height>
    </size>
   </property>
@@ -35,7 +35,7 @@
      <rect>
       <x>20</x>
       <y>70</y>
-      <width>321</width>
+      <width>181</width>
       <height>111</height>
      </rect>
     </property>
@@ -78,7 +78,7 @@
      <item row="3" column="0">
       <widget class="QLabel" name="label_7">
        <property name="text">
-        <string>引線長度</string>
+        <string>引線偏移</string>
        </property>
       </widget>
      </item>
@@ -103,7 +103,7 @@
      <rect>
       <x>20</x>
       <y>0</y>
-      <width>461</width>
+      <width>761</width>
       <height>65</height>
      </rect>
     </property>
@@ -174,9 +174,9 @@
    <widget class="QWidget" name="horizontalLayoutWidget">
     <property name="geometry">
      <rect>
-      <x>350</x>
-      <y>70</y>
-      <width>131</width>
+      <x>680</x>
+      <y>90</y>
+      <width>91</width>
       <height>65</height>
      </rect>
     </property>
@@ -202,7 +202,7 @@
      <rect>
       <x>20</x>
       <y>190</y>
-      <width>461</width>
+      <width>761</width>
       <height>181</height>
      </rect>
     </property>
@@ -220,7 +220,7 @@ p, li { white-space: pre-wrap; }
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>500</width>
+     <width>800</width>
      <height>25</height>
     </rect>
    </property>

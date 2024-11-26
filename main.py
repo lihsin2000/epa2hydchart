@@ -116,9 +116,8 @@ class MainWindow(QMainWindow):
         savePath, _= QFileDialog.getSaveFileName(self, "儲存", "", filter='dxf (*.dxf)')
         if savePath:
             cad.saveas(savePath)
-
             self.MainWindow.browser_log.append('.dxf saved')
-            self.export(cad)
+            self.export(cad, savePath)
             self.MainWindow.browser_log.append('All done')
             self.MainWindow.browser_log.append(f'---------------------')
         else:
@@ -888,8 +887,8 @@ class MainWindow(QMainWindow):
 
         return output
 
-    def export(self, doc):
-        from ezdxf.addons.drawing import Frontend, RenderContext, svg, layout, config, pymupdf
+    def export(self, doc, path):
+        from ezdxf.addons.drawing import Frontend, RenderContext, svg, layout, config
         msp = doc.modelspace()
         context = RenderContext(doc)
         backend = svg.SVGBackend()
@@ -902,7 +901,9 @@ class MainWindow(QMainWindow):
         svg_string = backend.get_string(
             page, settings=layout.Settings(scale=1, fit_page=False)
         )
-        with open("output.svg", "wt", encoding="utf8") as fp:
+
+        path=path.replace('.dxf', '.svg')
+        with open(path, "wt", encoding="utf8") as fp:
             fp.write(svg_string)
         self.MainWindow.browser_log.append('.svg saved')
 
