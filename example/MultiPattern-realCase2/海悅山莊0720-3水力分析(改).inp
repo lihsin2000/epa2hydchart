@@ -1,0 +1,266 @@
+[TITLE]
+
+
+[JUNCTIONS]
+;ID              	Elev        	Demand      	Pattern         
+ 3               	96          	0           	1               	;
+ 4               	106         	0           	1               	;
+ 5               	106         	0           	1               	;
+ 7               	117         	0           	1               	;
+ 8               	120         	296         	1               	;
+ 9               	109         	0           	1               	;
+ 10              	117         	0           	1               	;
+ 11              	96          	161         	1               	;
+ 12              	125         	80          	1               	;
+ 13              	103         	0           	1               	;
+ 14              	125         	122         	1               	;
+ 15              	133         	72          	1               	;
+ 21              	119         	34          	1               	;
+ 6               	82          	245         	1               	;
+ 23              	127         	81          	1               	;
+ 17              	124         	36          	1               	;
+ 1               	159         	0           	1               	;
+ 2               	112         	490         	1               	;
+ 24              	163         	1351        	1               	;
+ 18              	110         	125         	1               	;
+ 20              	105         	120         	1               	;
+ 26              	122         	0           	                	;
+ 27              	122         	0           	                	;
+
+[RESERVOIRS]
+;ID              	Head        	Pattern         
+ 19              	176         	                	;
+ 16              	115.5       	                	;
+ 22              	163         	                	;
+
+[TANKS]
+;ID              	Elevation   	InitLevel   	MinLevel    	MaxLevel    	Diameter    	MinVol      	VolCurve        	Overflow
+
+[PIPES]
+;ID              	Node1           	Node2           	Length      	Diameter    	Roughness   	MinorLoss   	Status
+ 3               	3               	4               	150         	200         	100         	0           	Open  	;
+ 8               	10              	9               	120         	200         	100         	0           	Open  	;
+ 10              	13              	11              	100         	200         	100         	0           	Open  	;
+ 11              	13              	12              	168         	200         	100         	0           	Open  	;
+ 12              	12              	10              	140         	200         	100         	0           	Open  	;
+ 13              	7               	8               	100         	300         	100         	0           	Open  	;
+ 23              	4               	5               	145         	200         	100         	0           	Open  	;
+ 2               	6               	3               	135         	200         	100         	0           	Open  	;
+ 21              	8               	9               	45          	200         	100         	0           	Open  	;
+ 7               	7               	10              	45          	200         	100         	0           	Open  	;
+ 17              	5               	16              	100         	200         	100         	0           	Open  	;
+ 24              	21              	23              	110         	200         	100         	0           	Open  	;
+ 25              	23              	15              	135         	200         	100         	0           	Open  	;
+ 20              	14              	17              	105         	200         	100         	0           	Open  	;
+ 22              	17              	21              	100         	200         	100         	0           	Open  	;
+ 31              	19              	1               	850         	300         	100         	0           	Open  	;
+ 32              	1               	24              	445         	300         	100         	0           	Open  	;
+ 33              	22              	14              	771         	300         	100         	0           	Open  	;
+ 5               	7               	2               	100         	300         	100         	0           	Open  	;
+ 1               	5               	18              	200         	200         	100         	0           	Open  	;
+ 4               	18              	20              	110         	200         	100         	0           	Open  	;
+ 6               	20              	4               	200         	200         	100         	0           	Open  	;
+ 16              	9               	13              	320         	200         	100         	0           	Open  	;
+ 18              	14              	26              	35          	300         	100         	0           	Open  	;
+ 19              	27              	8               	35          	300         	100         	0           	Open  	;
+
+[PUMPS]
+;ID              	Node1           	Node2           	Parameters
+
+[VALVES]
+;ID              	Node1           	Node2           	Diameter    	Type	Setting     	MinorLoss   
+ 14              	26              	27              	300         	PRV 	10          	0           	;
+
+[TAGS]
+
+[DEMANDS]
+;Junction        	Demand      	Pattern         	Category
+
+[STATUS]
+;ID              	Status/Setting
+
+[PATTERNS]
+;ID              	Multipliers
+;
+ 1               	0.8         	1.5         	1           
+
+[CURVES]
+;ID              	X-Value     	Y-Value
+;PUMP: 
+ CCV             	2010        	40          
+;PUMP: 
+;PUMP: 
+;PUMP: 
+;PUMP: 
+ 4               	1131        	35          
+;PUMP: 
+ 5               	1131        	75          
+;PUMP: 
+ 6               	1131        	75          
+;PUMP: 
+ 7               	1131        	54          
+;PUMP: 
+ 8               	1131        	54          
+;PUMP: 
+ 9               	1131        	54          
+;PUMP: 
+;PUMP: 
+;PUMP: 
+;PUMP: 
+;PUMP: 
+;PUMP: 
+;PUMP: 
+;PUMP: 
+;PUMP: 
+ CC              	11321       	54          
+;PUMP: 
+;PUMP: 
+;PUMP: 
+;PUMP: 
+;PUMP: 
+ 22              	2010        	40          
+;PUMP: 
+ 23              	2010        	40          
+;PUMP: 
+ 24              	2010        	50          
+;PUMP: 
+ 25              	2010        	40          
+;PUMP: 
+;PUMP: 
+ 27              	2010        	40          
+
+[CONTROLS]
+
+[RULES]
+
+[ENERGY]
+ Global Efficiency  	75
+ Global Price       	0
+ Demand Charge      	0
+
+[EMITTERS]
+;Junction        	Coefficient
+
+[QUALITY]
+;Node            	InitQual
+
+[SOURCES]
+;Node            	Type        	Quality     	Pattern
+
+[REACTIONS]
+;Type     	Pipe/Tank       	Coefficient
+
+
+[REACTIONS]
+ Order Bulk            	1
+ Order Tank            	1
+ Order Wall            	1
+ Global Bulk           	0
+ Global Wall           	0
+ Limiting Potential    	0
+ Roughness Correlation 	0
+
+[MIXING]
+;Tank            	Model
+
+[TIMES]
+ Duration           	3
+ Hydraulic Timestep 	1:00
+ Quality Timestep   	0:05
+ Pattern Timestep   	1:00
+ Pattern Start      	0:00
+ Report Timestep    	1:00
+ Report Start       	0:00
+ Start ClockTime    	12 am
+ Statistic          	None
+
+[REPORT]
+ Status             	No
+ Summary            	No
+ Page               	0
+
+[OPTIONS]
+ Units              	CMD
+ Headloss           	H-W
+ Specific Gravity   	1
+ Viscosity          	1
+ Trials             	40
+ Accuracy           	0.001
+ CHECKFREQ          	2
+ MAXCHECK           	10
+ DAMPLIMIT          	0
+ Unbalanced         	Continue 10
+ Pattern            	1
+ Demand Multiplier  	1
+ Emitter Exponent   	0.5
+ Quality            	None mg/L
+ Diffusivity        	1
+ Tolerance          	0.01
+
+[COORDINATES]
+;Node            	X-Coord           	Y-Coord
+3               	7431.193          	6207.951          
+4               	6529.052          	6024.465          
+5               	5779.817          	5703.364          
+7               	5007.342          	6563.877          
+8               	4373.089          	6941.896          
+9               	4594.421          	7212.634          
+10              	5266.824          	7040.546          
+11              	6321.644          	8155.783          
+12              	5859.031          	7180.617          
+13              	5242.291          	8046.990          
+14              	3990.826          	7171.254          
+15              	1533.273          	5784.695          
+21              	3037.493          	6151.119          
+6               	7882.782          	6875.064          
+23              	2196.694          	6053.332          
+17              	3543.885          	6649.859          
+1               	425.844           	6828.194          
+2               	5257.715          	6493.128          
+24              	1366.524          	7401.165          
+18              	5672.780          	5043.534          
+20              	6532.814          	5004.186          
+26              	4111.003          	7111.454          
+27              	4257.152          	7038.379          
+19              	-205.874          	6210.066          
+16              	5145.292          	6200.829          
+22              	1546.400          	7564.178          
+
+[VERTICES]
+;Link            	X-Coord           	Y-Coord
+3               	6987.768          	6207.951          
+8               	4709.480          	7018.349          
+11              	5244.648          	7614.679          
+11              	5382.263          	7477.064          
+23              	6192.661          	5779.817          
+24              	2832.076          	6179.337          
+24              	2538.584          	6180.466          
+25              	1863.607          	5944.557          
+20              	3551.222          	6620.512          
+33              	2325.352          	7714.128          
+1               	5661.537          	5021.050          
+1               	5684.022          	5021.050          
+16              	4538.209          	7459.964          
+16              	4504.482          	7757.885          
+16              	4645.011          	7965.867          
+16              	5134.050          	8016.457          
+14              	4262.773          	7015.894          
+
+[LABELS]
+;X-Coord             Y-Coord             Label & Anchor Node
+776.953           	7596.959          	"1200,M3 配水池"	
+931.343           	7464.674          	"EL162"	
+-39.269           	6902.276          	"EL：159"	
+-369.429          	6073.207          	"原有1000M3 配水池"	
+-37.420           	6239.666          	"EL:：171m"	
+5628.045          	6708.132          	"節點2為600T水池出水量Q"	
+4493.240          	6296.388          	"EL：115"	
+4487.619          	6397.569          	"600M3配水池"	
+
+[BACKDROP]
+  DIMENSIONS  	0.000             	0.000             	10000.000         	10000.000         
+ UNITS          	None
+ FILE           	
+ OFFSET         	0.00            	0.00            
+
+[END]
