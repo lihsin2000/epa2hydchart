@@ -97,7 +97,7 @@ class MainWindow(QMainWindow):
         tankerLeaderColor=210
         reservoirLeaderColor=210
         elevLeaderColor=headPressureLeaderColor=210
-        demandColor=2
+        demandColor=74
 
         junctionBlock=cad.blocks.new(name='arrow')
         junctionBlock.add_hatch(color=demandColor).paths.add_polyline_path([(0,0), (30,-50), (-30,-50)], is_closed=True)
@@ -113,11 +113,42 @@ class MainWindow(QMainWindow):
         self.tankLeader(tankerLeaderColor)
 
         # cad.saveas("new_name.dxf")
-        savePath, _= QFileDialog.getSaveFileName(self, "儲存", "", filter='dxf (*.dxf)')
-        if savePath:
-            cad.saveas(savePath)
+        dxfPath, _= QFileDialog.getSaveFileName(self, "儲存", "", filter='dxf (*.dxf)')
+        if dxfPath:
+            while True:
+                try:
+                    cad.saveas(dxfPath)
+                    break
+                except:
+                    from PyQt5.QtWidgets import (QApplication, QMessageBox)
+                    msg_box = QMessageBox(self)
+                    msg_box.setIcon(QMessageBox.Critical)
+                    msg_box.setWindowTitle("錯誤")
+                    msg_box.setText(f'{dxfPath}無法儲存')
+                    retry_button = msg_box.addButton("重試", QMessageBox.ActionRole)
+                    msg_box.exec()
+                    if msg_box.clickedButton() == retry_button:
+                        continue
+
             self.MainWindow.browser_log.append('.dxf saved')
-            self.export(cad, savePath)
+            svgPath=self.exportSVG(cad, dxfPath)
+            self.MainWindow.browser_log.append('.svg saved')
+
+            pngPath=svgPath.replace('.svg', '.png')
+
+            import cairosvg
+            # lib: GTK+ for Windows Runtime Environment Installer
+            # https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer
+            # https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/releases/download/2022-01-04/gtk3-runtime-3.24.31-2022-01-04-ts-win64.exe
+
+            cairosvg.svg2png(
+                url=svgPath,
+                write_to=pngPath,
+                output_width=10000,
+                dpi=600
+                )
+            self.MainWindow.browser_log.append('.png saved')
+
             self.MainWindow.browser_log.append('All done')
             self.MainWindow.browser_log.append(f'---------------------')
         else:
@@ -310,7 +341,9 @@ class MainWindow(QMainWindow):
             id=df_Junctions.at[i,'ID']
             x=float(df_Junctions.at[i,'x'])
             y=float(df_Junctions.at[i,'y'])
-            demand=df_Junctions.at[i,'Demand']
+
+            l=df_NodeResults.index[df_NodeResults['ID']==id].tolist()[0]
+            demand=df_NodeResults.at[l,'Demand']
 
             if demand != '0':
                 leader_down_start_x=x+config.text_size
@@ -420,23 +453,16 @@ class MainWindow(QMainWindow):
                 pass
 
     def pipeInfoString(self, i, start_x, start_y, end_x, end_y):
-        import math
         from ezdxf.enums import TextEntityAlignment
         text_x=(start_x+end_x)/2
         text_y=(start_y+end_y)/2
         diameter=df_Pipes.at[i, 'Diameter']
         length=df_Pipes.at[i, 'Length']
         text_up=f'{diameter}-{length}'
-        rotation=math.atan2(end_y-start_y, end_x-start_x)
-        rotation=rotation*180/math.pi
-        if rotation >90 and rotation<180:
-            rotation=rotation-180
-        elif rotation <-90 and rotation>-180:
-            rotation=rotation+180    
-        msp.add_text(text_up, height=config.text_size, rotation=rotation).set_placement((text_x, text_y), align=TextEntityAlignment.BOTTOM_CENTER)
+        rotation_text = self.rotation_text(start_x, start_y, end_x, end_y)
+        msp.add_text(text_up, height=config.text_size, rotation=rotation_text).set_placement((text_x, text_y), align=TextEntityAlignment.BOTTOM_CENTER)
 
     def flowString(self, id, start_x, start_y, end_x, end_y):
-        import math
         from ezdxf.enums import TextEntityAlignment
         text_x=(start_x+end_x)/2
         text_y=(start_y+end_y)/2
@@ -444,22 +470,43 @@ class MainWindow(QMainWindow):
         link_row=df_LinkResults.index[df_LinkResults['ID']==id].tolist()[0]
 
         flow=float(df_LinkResults.at[link_row, 'Flow'])
+        rotation_text = self.rotation_text(start_x, start_y, end_x, end_y)
 
-        if float(flow) >=0:
-            dirction='--->'
+        import math
+        rotation=math.atan2(end_y-start_y, end_x-start_x)
+        rotation=math.degrees(rotation)
+        if rotation<0:
+            rotation+=360
+
+        if 90<rotation<270:
+            direction = '<---' if flow >=0 else '--->'
         else:
-            dirction='<---'
-            flow=flow*-1
+            direction = '--->' if flow >=0 else '<---'
+
+        flow = flow if flow>=0 else -1*flow
+
+        # if float(flow) >=0:
+        #     dirction='--->'
+        # else:
+        #     dirction='<---'
+        #     flow=flow*-1
 
         headloss=df_LinkResults.at[link_row, 'Headloss']
-        text_up=f'{flow} ({headloss}) {dirction}'
+        text_up=f'{flow} ({headloss}) {direction}'
+
+        msp.add_text(text_up, height=config.text_size, rotation=rotation_text).set_placement((text_x, text_y), align=TextEntityAlignment.TOP_CENTER)
+
+    def rotation_text(self, start_x, start_y, end_x, end_y):
+        import math
         rotation=math.atan2(end_y-start_y, end_x-start_x)
-        rotation=rotation*180/math.pi
-        if rotation >90 and rotation<180:
-            rotation=rotation-180
-        elif rotation <-90 and rotation>-180:
-            rotation=rotation+180    
-        msp.add_text(text_up, height=config.text_size, rotation=rotation).set_placement((text_x, text_y), align=TextEntityAlignment.TOP_CENTER)
+        rotation=math.degrees(rotation)
+        if rotation<0:
+            rotation+=360
+        if 90<rotation<270:
+            rotation_text=rotation-180
+        else:
+            rotation_text=rotation
+        return rotation_text
 
     def drawPipes(self):
         for i in range(0, len(df_Pipes)):
@@ -651,13 +698,13 @@ class MainWindow(QMainWindow):
     def readJunctions(self, inpFile):
         start, end=self.lineStartEnd(inpFile, '[JUNCTIONS]', '[RESERVOIRS]',2,2)
         lines = open(inpFile).readlines()
-        df=pd.DataFrame(columns=['ID', 'Elev', 'Demand', 'x', 'y'])
+        df=pd.DataFrame(columns=['ID', 'Elev', 'BaseDemand', 'x', 'y'])
         for l in range (start-1, end):
             d=self.line2dict(lines, l)
             data={
                 'ID':d[1],
                 'Elev':d[2],
-                'Demand':d[3]
+                'BaseDemand':d[3]
                 }
             if df.empty:
                 df.loc[0]=data
@@ -887,7 +934,7 @@ class MainWindow(QMainWindow):
 
         return output
 
-    def export(self, doc, path):
+    def exportSVG(self, doc, path):
         from ezdxf.addons.drawing import Frontend, RenderContext, svg, layout, config
         msp = doc.modelspace()
         context = RenderContext(doc)
@@ -905,26 +952,7 @@ class MainWindow(QMainWindow):
         path=path.replace('.dxf', '.svg')
         with open(path, "wt", encoding="utf8") as fp:
             fp.write(svg_string)
-        self.MainWindow.browser_log.append('.svg saved')
-
-        # backend = pymupdf.PyMuPdfBackend()
-        # # 3. create the frontend
-        # frontend = Frontend(context, backend, config=cfg)
-        # # 4. draw the modelspace
-        # frontend.draw_layout(msp)
-        # # 5. create an A4 page layout
-        # page = layout.Page(210, 297, layout.Units.mm, margins=layout.Margins.all(20))
-        # # 6. get the PDF rendering as bytes
-        # pdf_bytes = backend.get_pdf_bytes(page)
-        # with open("pdf_dark_bg.pdf", "wb") as fp:
-        #     fp.write(pdf_bytes)
-        # self.MainWindow.browser_log.append('.pdf saved')
-
-        # # 6. get the PNG rendering as bytes
-        # png_bytes = backend.get_pixmap_bytes(page, fmt="png", dpi=200)
-        # with open("png_white_bg.png", "wb") as fp:
-        #     fp.write(png_bytes)
-        # self.MainWindow.browser_log.append('.png saved')
+        return path
 
 if __name__ == '__main__':
     QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)   # Enable high DPI
