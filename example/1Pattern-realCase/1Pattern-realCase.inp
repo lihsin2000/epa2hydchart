@@ -200,14 +200,16 @@
 
 [CURVES]
 ;ID              	X-Value     	Y-Value
-;PUMP: 
+;PUMP: PUMP: 
  1               	250         	70          
-;PUMP: 
+;PUMP: PUMP: 
  2               	1000        	70          
 
 [CONTROLS]
 
+
 [RULES]
+
 
 [ENERGY]
  Global Efficiency  	75
@@ -241,14 +243,14 @@
 
 [TIMES]
  Duration           	0
- Hydraulic Timestep 	1:00
- Quality Timestep   	0:05
- Pattern Timestep   	1:00
- Pattern Start      	0:00
- Report Timestep    	1:00
- Report Start       	0:00
+ Hydraulic Timestep 	1:00 
+ Quality Timestep   	0:05 
+ Pattern Timestep   	1:00 
+ Pattern Start      	0:00 
+ Report Timestep    	1:00 
+ Report Start       	0:00 
  Start ClockTime    	12 am
- Statistic          	None
+ Statistic          	NONE
 
 [REPORT]
  Status             	No

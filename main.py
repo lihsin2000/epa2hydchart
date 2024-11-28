@@ -18,7 +18,7 @@ class MainWindow(QMainWindow):
         self.MainWindow.b_browser_rpt.clicked.connect(self.loadrpt)
         self.MainWindow.b_reset.clicked.connect(self.reset)
         self.MainWindow.b_draw.clicked.connect(self.draw)
-        self.MainWindow.l_block_scale.setText(str(str(config.block_scale)))
+        self.MainWindow.l_block_scale.setText(str(config.block_scale))
         self.MainWindow.l_block_scale.setValidator(QDoubleValidator())
         self.MainWindow.l_joint_scale.setText(str(config.joint_scale))
         self.MainWindow.l_joint_scale.setValidator(QDoubleValidator())
@@ -38,7 +38,7 @@ class MainWindow(QMainWindow):
         if inpFile != '' and rptFile != '':
             # try:
             rptFile2=self.rptProces(rptFile)
-            self.MainWindow.browser_log.append('rpt preprocess finish')
+            self.MainWindow.browser_log.append('.rpt pre-process finish.')
 
             hr_list=self.multiHr(rptFile2)
             if hr_list==[]:
@@ -62,7 +62,7 @@ class MainWindow(QMainWindow):
                     self.MainWindow.browser_log.append(f'Both input match')
                     self.create_dxf_export()
                 else:
-                    self.MainWindow.browser_log.append(f'Both input NOT match, please check input files')
+                    self.MainWindow.browser_log.append(f'Both input NOT match, please check input files.')
                     self.MainWindow.browser_log.append(f'---------------------')
 
             elif multiPattern==True:   # with patteren
@@ -96,7 +96,7 @@ class MainWindow(QMainWindow):
 
         tankerLeaderColor=210
         reservoirLeaderColor=210
-        elevLeaderColor=headPressureLeaderColor=210
+        elevLeaderColor=headPressureLeaderColor=pumpAnnotaionColor=210
         demandColor=74
 
         junctionBlock=cad.blocks.new(name='arrow')
@@ -111,6 +111,7 @@ class MainWindow(QMainWindow):
         self.headPressureLeader(headPressureLeaderColor)
         self.reservoirsLeader(reservoirLeaderColor)
         self.tankLeader(tankerLeaderColor)
+        self.pumpAnnotation(pumpAnnotaionColor)
 
         # cad.saveas("new_name.dxf")
         dxfPath, _= QFileDialog.getSaveFileName(self, "儲存", "", filter='dxf (*.dxf)')
@@ -234,10 +235,10 @@ class MainWindow(QMainWindow):
         config.rptFile=file
 
     def reset(self):
-        self.MainWindow.l_block_scale.setText(str(str(config.block_scale)))
-        self.MainWindow.l_joint_scale.setText(str(config.joint_scale))
-        self.MainWindow.l_text_size.setText(str(config.text_size))
-        self.MainWindow.l_leader_distance.setText(str(config.leader_distance))
+        self.MainWindow.l_block_scale.setText(str(config.block_scale_default))
+        self.MainWindow.l_joint_scale.setText(str(config.joint_scale_default))
+        self.MainWindow.l_text_size.setText(str(config.text_size_default))
+        self.MainWindow.l_leader_distance.setText(str(config.leader_distance_default))
         
         self.MainWindow.l_inp_path.setText('')
         self.MainWindow.l_rpt_path.setText('')
@@ -280,8 +281,8 @@ class MainWindow(QMainWindow):
                 leader_up_end_x=leader_up_start_x+config.leader_distance
                 leader_up_end_y=leader_up_start_y+config.leader_distance
 
-                msp.add_text(Head, height=config.text_size, dxfattribs={'color': color_head}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y+5+2*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
-                msp.add_text(Pressure, height=config.text_size, dxfattribs={'color': color_pressure}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y+5-1.0*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
+                msp.add_text(Head, height=config.text_size, dxfattribs={'color': color_head}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y+2*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
+                msp.add_text(Pressure, height=config.text_size, dxfattribs={'color': color_pressure}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y-0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
                 self.MainWindow.browser_log.append(f'Node {id} pressure created')
         except:
             # print(i)
@@ -330,7 +331,7 @@ class MainWindow(QMainWindow):
             msp.add_polyline2d([(leader_up_start_x,leader_up_start_y),
                                 (leader_up_end_x,leader_up_end_y),
                                 (leader_up_end_x+6*config.text_size,leader_up_end_y)], dxfattribs={'color': color})
-            msp.add_text(elev, height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y+5+0.5*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
+            msp.add_text(elev, height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y+0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
             self.MainWindow.browser_log.append(f'Node {id} elev info created')
 
     def demandLeader(self, color):
@@ -376,10 +377,28 @@ class MainWindow(QMainWindow):
             msp.add_polyline2d([(leader_up_start_x,leader_up_start_y),
                                 (leader_up_end_x,leader_up_end_y),
                                 (leader_up_end_x+6*config.text_size,leader_up_end_y)], dxfattribs={'color': color})
-            msp.add_text(head, height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y+5+2.0*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
-            msp.add_text('ELEV', height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y+5+0.5*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
-            msp.add_text('Pressure', height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y+5-1.0*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
+            msp.add_text(head, height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y+2*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
+            msp.add_text('ELEV', height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y+0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
+            msp.add_text('Pressure', height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y-0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
             self.MainWindow.browser_log.append(f'Reservoir {id} info created')
+
+    def pumpAnnotation(self, color):
+        from ezdxf.enums import TextEntityAlignment
+        for i in range(0, len(df_Pumps)):
+            QCoreApplication.processEvents()
+            id=df_Pumps.at[i,'ID']
+            x=float(df_Pumps.at[i,'x'])
+            y=float(df_Pumps.at[i,'y'])
+
+            Q=float(df_Pumps.at[i,'Q'])
+            H=float(df_Pumps.at[i,'H'])
+
+            offset=[config.block_scale*100+0.75*config.text_size,
+                    config.block_scale*100+2*config.text_size]
+
+            msp.add_text(f'Q:{Q}', height=config.text_size, dxfattribs={'color': color}).set_placement((x,y-offset[0]), align=TextEntityAlignment.MIDDLE_RIGHT)
+            msp.add_text(f'H:{H}', height=config.text_size, dxfattribs={'color': color}).set_placement((x,y-offset[1]), align=TextEntityAlignment.MIDDLE_RIGHT)
+            self.MainWindow.browser_log.append(f'Pump {id} info created')
 
     def tankLeader(self, color):
         from ezdxf.enums import TextEntityAlignment
@@ -407,10 +426,10 @@ class MainWindow(QMainWindow):
             msp.add_polyline2d([(leader_up_start_x,leader_up_start_y),
                                 (leader_up_end_x,leader_up_end_y),
                                 (leader_up_end_x+10*config.text_size,leader_up_end_y)], dxfattribs={'color': 210})
-            msp.add_text(f'___T', height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+10*config.text_size,leader_up_end_y+5+3.5*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
-            msp.add_text(f'Hwl:{maxElev}', height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+10*config.text_size,leader_up_end_y+5+2.0*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
-            msp.add_text(f'Mwl:{minElev}', height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+10*config.text_size,leader_up_end_y+5+0.5*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
-            msp.add_text(f'Elev:{elev}', height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+10*config.text_size,leader_up_end_y+5-1.0*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
+            msp.add_text(f'___T', height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+10*config.text_size,leader_up_end_y+3.25*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
+            msp.add_text(f'Hwl:{maxElev}', height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+10*config.text_size,leader_up_end_y+2*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
+            msp.add_text(f'Mwl:{minElev}', height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+10*config.text_size,leader_up_end_y+0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
+            msp.add_text(f'Elev:{elev}', height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+10*config.text_size,leader_up_end_y-0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
             self.MainWindow.browser_log.append(f'Tank {id} info created')
 
     def pipeInfo(self):
@@ -484,12 +503,6 @@ class MainWindow(QMainWindow):
             direction = '--->' if flow >=0 else '<---'
 
         flow = flow if flow>=0 else -1*flow
-
-        # if float(flow) >=0:
-        #     dirction='--->'
-        # else:
-        #     dirction='<---'
-        #     flow=flow*-1
 
         headloss=df_LinkResults.at[link_row, 'Headloss']
         text_up=f'{flow} ({headloss}) {direction}'
@@ -614,6 +627,7 @@ class MainWindow(QMainWindow):
 
     def line2dict(self, lines, l):
         text=lines[l].replace('\n','')
+        # text=text.replace('-', ' -')
         text=re.sub(r'\s+', ',', text)
         text=text[:len(text)-1]
         d=text.split(',')
@@ -648,32 +662,35 @@ class MainWindow(QMainWindow):
         return df
 
     def readPipes(self, inpFile):
-        start, end=self.lineStartEnd(inpFile, '[PIPES]', '[PUMPS]',2,2)
-        lines = open(inpFile).readlines()
-        df=pd.DataFrame(columns=['ID','Node1','Node2', 'Length', 'Diameter', 'Node1_x', 'Node1_y', 'Node2_x', 'Node2_y'])
-        for l in range (start-1, end):
-            d=self.line2dict(lines, l)
-            data={
-                'ID':[d[1]],
-                'Node1':[d[2]],
-                'Node2':[d[3]],
-                'Length':[d[4]],
-                'Diameter':[d[5]]
-                }
-            new_df=pd.DataFrame.from_dict(data)
-            df=pd.concat([df,new_df])
-        df=df.reset_index(drop=True)
+        try:
+            start, end=self.lineStartEnd(inpFile, '[PIPES]', '[PUMPS]',2,2)
+            lines = open(inpFile).readlines()
+            df=pd.DataFrame(columns=['ID','Node1','Node2', 'Length', 'Diameter', 'Node1_x', 'Node1_y', 'Node2_x', 'Node2_y'])
+            for l in range (start-1, end):
+                d=self.line2dict(lines, l)
+                data={
+                    'ID':[d[1]],
+                    'Node1':[d[2]],
+                    'Node2':[d[3]],
+                    'Length':[d[4]],
+                    'Diameter':[d[5]]
+                    }
+                new_df=pd.DataFrame.from_dict(data)
+                df=pd.concat([df,new_df])
+            df=df.reset_index(drop=True)
 
-        for i in range (0, len(df)):
-            Node1=df.at[i,'Node1']
-            row=df_Coords.index[df_Coords['ID']==str(Node1)].tolist()[0]
-            df.at[i, 'Node1_x']=df_Coords.at[row, 'x']
-            df.at[i, 'Node1_y']=df_Coords.at[row, 'y']
+            for i in range (0, len(df)):
+                Node1=df.at[i,'Node1']
+                row=df_Coords.index[df_Coords['ID']==str(Node1)].tolist()[0]
+                df.at[i, 'Node1_x']=df_Coords.at[row, 'x']
+                df.at[i, 'Node1_y']=df_Coords.at[row, 'y']
 
-            Node2=df.at[i,'Node2']
-            row=df_Coords.index[df_Coords['ID']==str(Node2)].tolist()[0]
-            df.at[i, 'Node2_x']=df_Coords.at[row, 'x']
-            df.at[i, 'Node2_y']=df_Coords.at[row, 'y']
+                Node2=df.at[i,'Node2']
+                row=df_Coords.index[df_Coords['ID']==str(Node2)].tolist()[0]
+                df.at[i, 'Node2_x']=df_Coords.at[row, 'x']
+                df.at[i, 'Node2_y']=df_Coords.at[row, 'y']
+        except:
+            print([d[1]])
         return df
 
     def readCoords(self, inpFile):
@@ -793,9 +810,33 @@ class MainWindow(QMainWindow):
         return df
 
     def readPumps(self, inpFile):
-        start, end=self.lineStartEnd(inpFile, '[PUMPS]', '[VALVES]',2,2)
         lines = open(inpFile).readlines()
-        df=pd.DataFrame(columns=['ID', 'Node1', 'Node2', 'Node1_x', 'Node1_y', 'Node2_x', 'Node2_y', 'x', 'y'])
+
+        start_curve, end_curve=self.lineStartEnd(inpFile, '[CURVES]', '[CONTROLS]',2,1)
+        df_pumpCurves=pd.DataFrame(columns=['ID', 'Q', 'H'])
+        for l in range (start_curve-1, end_curve):
+            if 'PUMP' in lines[l]:
+                continue
+            elif '\n' == lines[l]:
+                continue
+            else:
+                d=self.line2dict(lines, l)
+                ID=d[1]
+                Q=d[2]
+                H=d[3]
+            data_curve={
+                'ID':ID,
+                'Q':Q,
+                'H':H
+                }
+            if df_pumpCurves.empty:
+                df_pumpCurves.loc[0]=data_curve
+            else:
+                df_pumpCurves.loc[len(df_pumpCurves)]=data_curve
+        df_pumpCurves=df_pumpCurves.reset_index(drop=True)
+
+        start, end=self.lineStartEnd(inpFile, '[PUMPS]', '[VALVES]',2,2)
+        df=pd.DataFrame(columns=['ID', 'Node1', 'Node2', 'Node1_x', 'Node1_y', 'Node2_x', 'Node2_y', 'x', 'y', 'Q', 'H'])
         for l in range (start-1, end):
             d=self.line2dict(lines, l)
             ID=[d[1]][0]
@@ -809,6 +850,12 @@ class MainWindow(QMainWindow):
             Node2_y=df_Coords.at[coords2_row,'y']
             x=0.5*(float(Node1_x)+float(Node2_x))
             y=0.5*(float(Node1_y)+float(Node2_y))
+
+            curveID=d[5]
+            i=int(df_pumpCurves.index[df_pumpCurves['ID']==curveID][0])
+            Q=df_pumpCurves.at[i,'Q']
+            H=df_pumpCurves.at[i,'H']
+            
             data={
                 'ID':ID,
                 'Node1':Node1,
@@ -818,13 +865,16 @@ class MainWindow(QMainWindow):
                 'Node2_x':Node2_x,
                 'Node2_y':Node2_y,
                 'x':x,
-                'y':y
+                'y':y,
+                'Q':Q,
+                'H':H
                 }
             if df.empty:
                 df.loc[0]=data
             else:
                 df.loc[len(df)]=data
         df=df.reset_index(drop=True)
+
         # df=getCoords(df)
         return df
 
@@ -840,26 +890,26 @@ class MainWindow(QMainWindow):
         df=pd.DataFrame(columns=['ID', 'Demand', 'Head', 'Pressure'])
         for l in range (start-1, end):
             d=self.line2dict(lines, l)
-            # try:
-            id=d[1]
-            demand=d[2]
-            head=d[3]
-            pressure=d[4]
-            
-            data={
-                'ID':id,
-                'Demand':demand,
-                'Head':head,
-                'Pressure':pressure,
-                }
-            if df.empty:
-                df.loc[0]=data
-            else:
-                df.loc[len(df)]=data
-            # except:
-            #     print(f'error id:{id}')
-            #     # break
-        df=df.reset_index(drop=True)
+            try:
+                id=d[1]
+                demand=d[2]
+                head=d[3]
+                pressure=d[4]
+                
+                data={
+                    'ID':id,
+                    'Demand':demand,
+                    'Head':head,
+                    'Pressure':pressure,
+                    }
+                if df.empty:
+                    df.loc[0]=data
+                else:
+                    df.loc[len(df)]=data
+            except:
+                self.MainWindow.browser_log.append(f'Node {id} error, please manual fix .rpt file.')
+                # print(f'error id:{id}')                 
+            df=df.reset_index(drop=True)
         return df
 
     def readLinkResults(self, hr1, hr2, rptFile):

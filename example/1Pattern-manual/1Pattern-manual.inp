@@ -43,12 +43,14 @@
 
 [CURVES]
 ;ID              	X-Value     	Y-Value
-;PUMP: 
+;PUMP: PUMP: 
  1               	60          	60          
 
 [CONTROLS]
 
+
 [RULES]
+
 
 [ENERGY]
  Global Efficiency  	75
@@ -81,15 +83,15 @@
 ;Tank            	Model
 
 [TIMES]
- Duration           	0
- Hydraulic Timestep 	1:00
- Quality Timestep   	0:05
- Pattern Timestep   	1:00
- Pattern Start      	0:00
- Report Timestep    	1:00
- Report Start       	0:00
+ Duration           	0:00 
+ Hydraulic Timestep 	1:00 
+ Quality Timestep   	0:05 
+ Pattern Timestep   	1:00 
+ Pattern Start      	0:00 
+ Report Timestep    	1:00 
+ Report Start       	0:00 
  Start ClockTime    	12 am
- Statistic          	None
+ Statistic          	NONE
 
 [REPORT]
  Status             	No
@@ -116,12 +118,12 @@
 
 [COORDINATES]
 ;Node            	X-Coord           	Y-Coord
-1               	233.912           	5930.000          
-2               	473.331           	5931.577          
-3               	704.398           	6218.323          
-4               	857.515           	5764.541          
-6               	133.779           	5930.000          
-5               	963.304           	6182.132          
+1               	-3907.543         	6000.000          
+2               	-3001.606         	6000.000          
+3               	-2957.553         	6800.406          
+4               	-2531.708         	5566.926          
+6               	-4161.664         	6000.000          
+5               	-4029.506         	6903.196          
 
 [VERTICES]
 ;Link            	X-Coord           	Y-Coord
