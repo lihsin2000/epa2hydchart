@@ -875,7 +875,6 @@ class MainWindow(QMainWindow):
                 df.loc[len(df)]=data
         df=df.reset_index(drop=True)
 
-        # df=getCoords(df)
         return df
 
     def readNodeResults(self, hr1, rptFile):
