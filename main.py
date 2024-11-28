@@ -38,7 +38,7 @@ class MainWindow(QMainWindow):
         if inpFile != '' and rptFile != '':
             # try:
             rptFile2=self.rptProces(rptFile)
-            self.MainWindow.browser_log.append('.rpt pre-process finish.')
+            self.MainWindow.browser_log.append('.rpt前處理完成')
 
             hr_list=self.multiHr(rptFile2)
             if hr_list==[]:
@@ -50,42 +50,42 @@ class MainWindow(QMainWindow):
 
             if multiPattern==False: # without patteren
                 df_NodeResults=self.readNodeResults('', rptFile2)
-                print('NodeResults')
-                print(df_NodeResults)
+                # print('NodeResults')
+                # print(df_NodeResults)
 
                 df_LinkResults=self.readLinkResults('', '', rptFile2)
-                print('LinkResults')
-                print(df_LinkResults)
+                # print('LinkResults')
+                # print(df_LinkResults)
 
                 matchLink, matchNode = self.inp_rpt_match()
                 if matchLink and matchNode:
-                    self.MainWindow.browser_log.append(f'Both input match')
+                    self.MainWindow.browser_log.append(f'.rpt及inp內容相符')
                     self.create_dxf_export()
                 else:
-                    self.MainWindow.browser_log.append(f'Both input NOT match, please check input files.')
+                    self.MainWindow.browser_log.append(f'.rpt及.inp內容不符，請確認')
                     self.MainWindow.browser_log.append(f'---------------------')
 
             elif multiPattern==True:   # with patteren
                 for hr in hr_list:
                     i=hr_list.index(hr)
                     df_NodeResults=self.readNodeResults(hr, rptFile2)
-                    print(f'NodeResults at {hr}')
-                    print(df_NodeResults)
+                    # print(f'NodeResults at {hr}')
+                    # print(df_NodeResults)
 
                     if i==len(hr_list)-1:
                         df_LinkResults=self.readLinkResults(hr, '', rptFile2)   # with patteren and last hour
                     else:
                         hr2=hr_list[i+1]
                         df_LinkResults=self.readLinkResults(hr, hr2, rptFile2)
-                    print(f'LinkResults at {hr}')
-                    print(df_LinkResults)
+                    # print(f'LinkResults at {hr}')
+                    # print(df_LinkResults)
 
                     matchLink, matchNode = self.inp_rpt_match()
                     if matchLink and matchNode:
-                        self.MainWindow.browser_log.append(f'{hr} Both input match')
+                        self.MainWindow.browser_log.append(f'{hr} .rpt及.inp內容相符')
                         self.create_dxf_export()
                     else:
-                        self.MainWindow.browser_log.append(f'{hr} Both input NOT match, please check input files')
+                        self.MainWindow.browser_log.append(f'{hr} .rpt及.inp內容不符，請確認')
                         self.MainWindow.browser_log.append(f'---------------------')
 
     def create_dxf_export(self, *args, **kwargs):
@@ -131,9 +131,9 @@ class MainWindow(QMainWindow):
                     if msg_box.clickedButton() == retry_button:
                         continue
 
-            self.MainWindow.browser_log.append('.dxf saved')
+            self.MainWindow.browser_log.append('.dxf 已存檔')
             svgPath=self.exportSVG(cad, dxfPath)
-            self.MainWindow.browser_log.append('.svg saved')
+            self.MainWindow.browser_log.append('.svg 已存檔')
 
             pngPath=svgPath.replace('.svg', '.png')
 
@@ -148,9 +148,9 @@ class MainWindow(QMainWindow):
                 output_width=10000,
                 dpi=600
                 )
-            self.MainWindow.browser_log.append('.png saved')
+            self.MainWindow.browser_log.append('.png 已存檔')
 
-            self.MainWindow.browser_log.append('All done')
+            self.MainWindow.browser_log.append('完成!')
             self.MainWindow.browser_log.append(f'---------------------')
         else:
             self.MainWindow.browser_log.append(f'---------------------')
@@ -174,36 +174,36 @@ class MainWindow(QMainWindow):
     def readinpdf(self, inpFile):
         global df_Reservoirs, df_Tanks, df_Coords, df_Junctions, df_Pumps, df_Pipes, df_Vertices, df_Valves
         df_Coords=self.readCoords(inpFile)
-        print('Coords')
-        print(df_Coords)
+        # print('Coords')
+        # print(df_Coords)
 
         df_Junctions=self.readJunctions(inpFile)
-        print('Junctions')
-        print(df_Junctions)
+        # print('Junctions')
+        # print(df_Junctions)
 
         df_Reservoirs=self.readReservoirs(inpFile)
-        print('Reservoirs')
-        print(df_Reservoirs)
+        # print('Reservoirs')
+        # print(df_Reservoirs)
             
         df_Tanks=self.readTanks(inpFile)
-        print('Tanks')
-        print(df_Tanks)
+        # print('Tanks')
+        # print(df_Tanks)
 
         df_Pumps=self.readPumps(inpFile)
-        print('Pumps')
-        print(df_Pumps)
+        # print('Pumps')
+        # print(df_Pumps)
 
         df_Valves=self.readValves(inpFile)
-        print('Valves')
-        print(df_Valves)
+        # print('Valves')
+        # print(df_Valves)
 
         df_Pipes=self.readPipes(inpFile)
-        print('Pipes')
-        print(df_Pipes)
+        # print('Pipes')
+        # print(df_Pipes)
 
         df_Vertices=self.readVertices(inpFile)
-        print('Vertices')
-        print(df_Vertices)
+        # print('Vertices')
+        # print(df_Vertices)
 
     def multiHr(self, rptFile2):
         rptFile2_lines=open(rptFile2).readlines()
@@ -283,7 +283,7 @@ class MainWindow(QMainWindow):
 
                 msp.add_text(Head, height=config.text_size, dxfattribs={'color': color_head}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y+2*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
                 msp.add_text(Pressure, height=config.text_size, dxfattribs={'color': color_pressure}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y-0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
-                self.MainWindow.browser_log.append(f'Node {id} pressure created')
+                self.MainWindow.browser_log.append(f'節點 {id} 壓力引線已完成繪圖')
         except:
             # print(i)
             pass
@@ -332,7 +332,7 @@ class MainWindow(QMainWindow):
                                 (leader_up_end_x,leader_up_end_y),
                                 (leader_up_end_x+6*config.text_size,leader_up_end_y)], dxfattribs={'color': color})
             msp.add_text(elev, height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y+0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
-            self.MainWindow.browser_log.append(f'Node {id} elev info created')
+            self.MainWindow.browser_log.append(f'節點 {id} 高程引線已完成繪圖')
 
     def demandLeader(self, color):
         from ezdxf.enums import TextEntityAlignment
@@ -356,7 +356,7 @@ class MainWindow(QMainWindow):
                 msp.add_blockref('arrow', [leader_down_end_x,leader_down_end_y], dxfattribs={'xscale':config.block_scale, 'yscale':config.block_scale, 'rotation':225})
                 msp.add_polyline2d([(leader_down_start_x,leader_down_start_y),(leader_down_end_x,leader_down_end_y)], dxfattribs={'color': color})
                 msp.add_text(demand, height=config.text_size, dxfattribs={'color': color}).set_placement((leader_down_end_x+0.5*config.text_size, leader_down_end_y-0.5*config.text_size), align=TextEntityAlignment.TOP_LEFT)
-                self.MainWindow.browser_log.append(f'Node {id} demand info created')
+                self.MainWindow.browser_log.append(f'節點 {id} 水量引線已完成繪圖')
 
     def reservoirsLeader(self, color):
         from ezdxf.enums import TextEntityAlignment
@@ -380,7 +380,7 @@ class MainWindow(QMainWindow):
             msp.add_text(head, height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y+2*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
             msp.add_text('ELEV', height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y+0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
             msp.add_text('Pressure', height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y-0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
-            self.MainWindow.browser_log.append(f'Reservoir {id} info created')
+            self.MainWindow.browser_log.append(f'接水點 {id} 引線已完成繪圖')
 
     def pumpAnnotation(self, color):
         from ezdxf.enums import TextEntityAlignment
@@ -398,7 +398,7 @@ class MainWindow(QMainWindow):
 
             msp.add_text(f'Q:{Q}', height=config.text_size, dxfattribs={'color': color}).set_placement((x,y-offset[0]), align=TextEntityAlignment.MIDDLE_RIGHT)
             msp.add_text(f'H:{H}', height=config.text_size, dxfattribs={'color': color}).set_placement((x,y-offset[1]), align=TextEntityAlignment.MIDDLE_RIGHT)
-            self.MainWindow.browser_log.append(f'Pump {id} info created')
+            self.MainWindow.browser_log.append(f'抽水機 {id} 已完成繪圖')
 
     def tankLeader(self, color):
         from ezdxf.enums import TextEntityAlignment
@@ -430,7 +430,7 @@ class MainWindow(QMainWindow):
             msp.add_text(f'Hwl:{maxElev}', height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+10*config.text_size,leader_up_end_y+2*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
             msp.add_text(f'Mwl:{minElev}', height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+10*config.text_size,leader_up_end_y+0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
             msp.add_text(f'Elev:{elev}', height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+10*config.text_size,leader_up_end_y-0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
-            self.MainWindow.browser_log.append(f'Tank {id} info created')
+            self.MainWindow.browser_log.append(f'水池 {id} 已完成繪圖')
 
     def pipeInfo(self):
         for i in range(0, len(df_Pipes)):
@@ -546,7 +546,7 @@ class MainWindow(QMainWindow):
                 lastVert_x=float(df_Vertices.at[rows[len(rows)-1],'x'])
                 lastVert_y=float(df_Vertices.at[rows[len(rows)-1],'y'])
                 msp.add_polyline2d([(lastVert_x,lastVert_y), (end_x,end_y)])
-                self.MainWindow.browser_log.append(f'Pipe {link_id} spline created')
+                self.MainWindow.browser_log.append(f'管線 {link_id} 已完成繪圖')
             
             else:
                 msp.add_polyline2d([(end_x,end_y), (start_x,start_y)])
@@ -561,7 +561,7 @@ class MainWindow(QMainWindow):
                     x=float(df.at[i,'x'])
                     y=float(df.at[i,'y'])
                     msp.add_blockref(item, [x,y], dxfattribs={'xscale':config.block_scale, 'yscale':config.block_scale})
-                    self.MainWindow.browser_log.append(f'Tank {id} created')
+                    self.MainWindow.browser_log.append(f'水池 {id} 圖塊已插入')
 
             if item == 'reservoir':
                 df=df_Reservoirs
@@ -571,7 +571,7 @@ class MainWindow(QMainWindow):
                     x=float(df.at[i,'x'])
                     y=float(df.at[i,'y'])
                     msp.add_blockref(item, [x,y], dxfattribs={'xscale':config.block_scale, 'yscale':config.block_scale})
-                    self.MainWindow.browser_log.append(f'Reservoir {id} created')
+                    self.MainWindow.browser_log.append(f'接水點 {id} 圖塊已插入')
 
             if item == 'pump':
                 df=df_Pumps
@@ -581,7 +581,7 @@ class MainWindow(QMainWindow):
                     x=float(df.at[i,'x'])
                     y=float(df.at[i,'y'])
                     msp.add_blockref(item, [x,y], dxfattribs={'xscale':config.block_scale, 'yscale':config.block_scale})
-                    self.MainWindow.browser_log.append(f'Pump {id} created')
+                    self.MainWindow.browser_log.append(f'抽水機 {id} 圖塊已插入')
 
             if item == 'valve':
                 import math
@@ -602,7 +602,7 @@ class MainWindow(QMainWindow):
 
                     msp.add_blockref(item, [x,y], dxfattribs={'xscale':config.block_scale, 'yscale':config.block_scale, 'rotation':rotation})
                     msp.add_polyline2d([(x1,y1), (x2,y2)])
-                    self.MainWindow.browser_log.append(f'Valve {id} created')
+                    self.MainWindow.browser_log.append(f'閥件 {id} 圖塊已插入')
 
             if item == 'junction':
                 df=df_Junctions
@@ -612,7 +612,7 @@ class MainWindow(QMainWindow):
                     x=float(df.at[i,'x'])
                     y=float(df.at[i,'y'])
                     msp.add_blockref(item, [x,y], dxfattribs={'xscale':config.joint_scale, 'yscale':config.joint_scale})
-                    self.MainWindow.browser_log.append(f'Node {id} created')
+                    self.MainWindow.browser_log.append(f'節點 {id} 圖塊已插入')
                 
     def lineStartEnd(self, input, startStr, endStr, start_offset, end_offset):
         index = 0
@@ -690,7 +690,8 @@ class MainWindow(QMainWindow):
                 df.at[i, 'Node2_x']=df_Coords.at[row, 'x']
                 df.at[i, 'Node2_y']=df_Coords.at[row, 'y']
         except:
-            print([d[1]])
+            # print([d[1]])
+            pass
         return df
 
     def readCoords(self, inpFile):
@@ -906,7 +907,7 @@ class MainWindow(QMainWindow):
                 else:
                     df.loc[len(df)]=data
             except:
-                self.MainWindow.browser_log.append(f'Node {id} error, please manual fix .rpt file.')
+                self.MainWindow.browser_log.append(f'節點 {id} 錯誤，請手動修正.rpt檔內容')
                 # print(f'error id:{id}')                 
             df=df.reset_index(drop=True)
         return df
