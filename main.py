@@ -424,11 +424,11 @@ class MainWindow(QMainWindow):
             Type=df_Valves.at[i,'Type']
             Setting=df_Valves.at[i,'Setting']
 
-            offset=[config.block_scale*100+0.75*config.text_size,
-                    config.block_scale*100+2*config.text_size]
+            offset=[config.block_scale*50+0.75*config.text_size,
+                    config.block_scale*50+2*config.text_size]
 
-            msp.add_text(f'{Type}', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((x+2*config.text_size,y-offset[0]), align=TextEntityAlignment.MIDDLE_RIGHT)
-            msp.add_text(f'{Setting}', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((x+2*config.text_size,y-offset[1]), align=TextEntityAlignment.MIDDLE_RIGHT)
+            msp.add_text(f'{Type}', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((x,y-offset[0]), align=TextEntityAlignment.MIDDLE_CENTER)
+            msp.add_text(f'{Setting}', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((x,y-offset[1]), align=TextEntityAlignment.MIDDLE_CENTER)
             self.MainWindow.browser_log.append(f'閥件 {id} 已完成繪圖')
 
     def tankLeader(self, color):
