@@ -99,8 +99,9 @@ class MainWindow(QMainWindow):
         elevLeaderColor=headPressureLeaderColor=pumpAnnotaionColor=valveAnnotaionColor=210
         demandColor=74
 
-        junctionBlock=cad.blocks.new(name='arrow')
-        junctionBlock.add_hatch(color=demandColor).paths.add_polyline_path([(0,0), (30,-50), (-30,-50)], is_closed=True)
+        arrowBlock=cad.blocks.new(name='arrow')
+        arrowBlock.add_polyline2d([(0,0), (30,-50), (-30,-50)], close=True,dxfattribs={'color': demandColor})
+        arrowBlock.add_hatch(color=demandColor).paths.add_polyline_path([(0,0), (30,-50), (-30,-50)], is_closed=True)
 
         self.createBlocks(cad)
         self.insertBlocks()
@@ -290,21 +291,23 @@ class MainWindow(QMainWindow):
             pass
     
     def createBlocks(self, cad):
-        reservoirBlock=cad.blocks.new(name='tank')
-        reservoirBlock.add_hatch().paths.add_polyline_path([(100,0), (100,100), (-100,100), (-100,0)], is_closed=True)
-        reservoirBlock.add_hatch().paths.add_polyline_path([(50,0), (50,-100), (-50,-100), (-50,0)], is_closed=True)
+        tankBlock=cad.blocks.new(name='tank')
+        tankBlock.add_polyline2d([(100,0), (100,100), (-100,100), (-100,0), (-50,0), (-50,-100), (50,-100), (50,0)], close=True)
+        tankBlock.add_hatch().paths.add_polyline_path([(100,0), (100,100), (-100,100), (-100,0), (-50,0), (-50,-100), (50,-100), (50,0)], is_closed=True)
 
-        tankBlock=cad.blocks.new(name='reservoir')
-        tankBlock.add_hatch().paths.add_polyline_path([(100,-50), (100,50), (-100,50), (-100,-50)], is_closed=True)
-        tankBlock.add_hatch().paths.add_polyline_path([(100, 50), (100,100), (85,100), (85,50)], is_closed=True)
-        tankBlock.add_hatch().paths.add_polyline_path([(-100, 50), (-100,100), (-85,100), (-85,50)], is_closed=True)
+        reservoirBlock=cad.blocks.new(name='reservoir')
+        reservoirBlock.add_polyline2d([(100,-50), (100,100), (85,100), (85,50), (-85,50), (-85,100), (-100,100), (-100,-50)], close=True)
+        reservoirBlock.add_hatch().paths.add_polyline_path([(100,-50), (100,100), (85,100), (85,50), (-85,50), (-85,100), (-100,100), (-100,-50)], is_closed=True)
 
         junctionBlock=cad.blocks.new(name='junction')
+        junctionBlock.add_ellipse((0,0), major_axis=(0,50), ratio=1)
         junctionBlock.add_hatch().paths.add_edge_path().add_ellipse((0,0), major_axis=(0,50), ratio=1)
 
-        junctionBlock=cad.blocks.new(name='valve')
-        junctionBlock.add_hatch().paths.add_polyline_path([(0,0), (50,30), (50,-30)], is_closed=True)
-        junctionBlock.add_hatch().paths.add_polyline_path([(0,0), (-50,30), (-50,-30)], is_closed=True)
+        valveBlock=cad.blocks.new(name='valve')
+        valveBlock.add_polyline2d([(0,0), (50,30), (50,-30)], close=True)
+        valveBlock.add_polyline2d([(0,0), (-50,30), (-50,-30)], close=True)
+        valveBlock.add_hatch().paths.add_polyline_path([(0,0), (50,30), (50,-30)], is_closed=True)
+        valveBlock.add_hatch().paths.add_polyline_path([(0,0), (-50,30), (-50,-30)], is_closed=True)
 
         from ezdxf.enums import TextEntityAlignment
         from ezdxf.math import Vec2
@@ -536,7 +539,7 @@ class MainWindow(QMainWindow):
 
             msp.add_text(text_up, height=config.text_size, rotation=rotation_text).set_placement((text_x, text_y), align=TextEntityAlignment.TOP_CENTER)
         except:
-            self.MainWindow.browser_log.append(f'管線 {id} 錯誤，請檢查後再試')
+            self.MainWindow.browser_log.append(f'管線 {id} 錯誤，請重新匯出inp及rpt檔後重試')
 
     def rotation_text(self, start_x, start_y, end_x, end_y):
         import math
@@ -669,6 +672,8 @@ class MainWindow(QMainWindow):
         for i in range (0, len(df)):
             ID=df.at[i,'ID']
             row=df_Coords.index[df_Coords['ID']==str(ID)].tolist()[0]
+            df_Coords['x'] = df_Coords['x'].astype(float)
+            df_Coords['y'] = df_Coords['y'].astype(float)
             df.at[i, 'x']=df_Coords.at[row, 'x']
             df.at[i, 'y']=df_Coords.at[row, 'y']
             pass
