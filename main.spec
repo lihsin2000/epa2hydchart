@@ -1,11 +1,10 @@
 # -*- mode: python ; coding: utf-8 -*-
 
-
 a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[('temp', 'temp'),('icon.ico', '.'),('example','example')],
+    datas=[('temp', 'temp'),('icon.ico', '.'),('example','example')('version.txt','.')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
