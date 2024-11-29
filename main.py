@@ -96,7 +96,7 @@ class MainWindow(QMainWindow):
 
         tankerLeaderColor=210
         reservoirLeaderColor=210
-        elevLeaderColor=headPressureLeaderColor=pumpAnnotaionColor=210
+        elevLeaderColor=headPressureLeaderColor=pumpAnnotaionColor=valveAnnotaionColor=210
         demandColor=74
 
         junctionBlock=cad.blocks.new(name='arrow')
@@ -112,6 +112,7 @@ class MainWindow(QMainWindow):
         self.reservoirsLeader(reservoirLeaderColor)
         self.tankLeader(tankerLeaderColor)
         self.pumpAnnotation(pumpAnnotaionColor)
+        self.valveAnnotation(valveAnnotaionColor)
 
         # cad.saveas("new_name.dxf")
         dxfPath, _= QFileDialog.getSaveFileName(self, "儲存", "", filter='dxf (*.dxf)')
@@ -396,9 +397,34 @@ class MainWindow(QMainWindow):
             offset=[config.block_scale*100+0.75*config.text_size,
                     config.block_scale*100+2*config.text_size]
 
-            msp.add_text(f'Q:{Q}', height=config.text_size, dxfattribs={'color': color}).set_placement((x,y-offset[0]), align=TextEntityAlignment.MIDDLE_RIGHT)
-            msp.add_text(f'H:{H}', height=config.text_size, dxfattribs={'color': color}).set_placement((x,y-offset[1]), align=TextEntityAlignment.MIDDLE_RIGHT)
+            msp.add_text(f'Q:{Q}', height=config.text_size, dxfattribs={'color': color}).set_placement((x+2*config.text_size,y-offset[0]), align=TextEntityAlignment.MIDDLE_RIGHT)
+            msp.add_text(f'H:{H}', height=config.text_size, dxfattribs={'color': color}).set_placement((x+2*config.text_size,y-offset[1]), align=TextEntityAlignment.MIDDLE_RIGHT)
             self.MainWindow.browser_log.append(f'抽水機 {id} 已完成繪圖')
+
+    def valveAnnotation(self, color):
+        from ezdxf.enums import TextEntityAlignment
+        for i in range(0, len(df_Valves)):
+            QCoreApplication.processEvents()
+            id=df_Valves.at[i,'ID']
+
+            x1=float(df_Valves.at[i,'Node1_x'])
+            y1=float(df_Valves.at[i,'Node1_y'])
+
+            x2=float(df_Valves.at[i,'Node2_x'])
+            y2=float(df_Valves.at[i,'Node2_y'])
+
+            x=0.5*(x1+x2)
+            y=0.5*(y1+y2)
+
+            Type=df_Valves.at[i,'Type']
+            Setting=df_Valves.at[i,'Setting']
+
+            offset=[config.block_scale*100+0.75*config.text_size,
+                    config.block_scale*100+2*config.text_size]
+
+            msp.add_text(f'{Type}', height=config.text_size, dxfattribs={'color': color}).set_placement((x+2*config.text_size,y-offset[0]), align=TextEntityAlignment.MIDDLE_RIGHT)
+            msp.add_text(f'{Setting}', height=config.text_size, dxfattribs={'color': color}).set_placement((x+2*config.text_size,y-offset[1]), align=TextEntityAlignment.MIDDLE_RIGHT)
+            self.MainWindow.browser_log.append(f'閥件 {id} 已完成繪圖')
 
     def tankLeader(self, color):
         from ezdxf.enums import TextEntityAlignment
@@ -483,31 +509,34 @@ class MainWindow(QMainWindow):
 
     def flowString(self, id, start_x, start_y, end_x, end_y):
         from ezdxf.enums import TextEntityAlignment
-        text_x=(start_x+end_x)/2
-        text_y=(start_y+end_y)/2
+        try:
+            text_x=(start_x+end_x)/2
+            text_y=(start_y+end_y)/2
 
-        link_row=df_LinkResults.index[df_LinkResults['ID']==id].tolist()[0]
+            link_row=df_LinkResults.index[df_LinkResults['ID']==id].tolist()[0]
 
-        flow=float(df_LinkResults.at[link_row, 'Flow'])
-        rotation_text = self.rotation_text(start_x, start_y, end_x, end_y)
+            flow=float(df_LinkResults.at[link_row, 'Flow'])
+            rotation_text = self.rotation_text(start_x, start_y, end_x, end_y)
 
-        import math
-        rotation=math.atan2(end_y-start_y, end_x-start_x)
-        rotation=math.degrees(rotation)
-        if rotation<0:
-            rotation+=360
+            import math
+            rotation=math.atan2(end_y-start_y, end_x-start_x)
+            rotation=math.degrees(rotation)
+            if rotation<0:
+                rotation+=360
 
-        if 90<rotation<270:
-            direction = '<---' if flow >=0 else '--->'
-        else:
-            direction = '--->' if flow >=0 else '<---'
+            if 90<rotation<270:
+                direction = '<---' if flow >=0 else '--->'
+            else:
+                direction = '--->' if flow >=0 else '<---'
 
-        flow = flow if flow>=0 else -1*flow
+            flow = flow if flow>=0 else -1*flow
 
-        headloss=df_LinkResults.at[link_row, 'Headloss']
-        text_up=f'{flow} ({headloss}) {direction}'
+            headloss=df_LinkResults.at[link_row, 'Headloss']
+            text_up=f'{flow} ({headloss}) {direction}'
 
-        msp.add_text(text_up, height=config.text_size, rotation=rotation_text).set_placement((text_x, text_y), align=TextEntityAlignment.TOP_CENTER)
+            msp.add_text(text_up, height=config.text_size, rotation=rotation_text).set_placement((text_x, text_y), align=TextEntityAlignment.TOP_CENTER)
+        except:
+            self.MainWindow.browser_log.append(f'管線 {id} 錯誤，請檢查後再試')
 
     def rotation_text(self, start_x, start_y, end_x, end_y):
         import math
@@ -780,13 +809,15 @@ class MainWindow(QMainWindow):
     def readValves(self, inpFile):
         start, end=self.lineStartEnd(inpFile, '[VALVES]', '[TAGS]',2,2)
         lines = open(inpFile).readlines()
-        df=pd.DataFrame(columns=['ID', 'Node1', 'Node2', 'Node1_x', 'Node1_y', 'Node2_x', 'Node2_y'])
+        df=pd.DataFrame(columns=['ID', 'Node1', 'Node2', 'Node1_x', 'Node1_y', 'Node2_x', 'Node2_y', 'Type', 'Setting'])
         for l in range (start-1, end):
             d=self.line2dict(lines, l)
 
             id=d[1]
             Node1=d[2]
             Node2=d[3]
+            Type=d[5]
+            Setting=d[6]
             coords1_row=df_Coords.index[df_Coords['ID']==Node1].tolist()[0]
             coords2_row=df_Coords.index[df_Coords['ID']==Node2].tolist()[0]
             Node1_x=df_Coords.at[coords1_row,'x']
@@ -802,6 +833,8 @@ class MainWindow(QMainWindow):
                 'Node1_y':Node1_y,
                 'Node2_x':Node2_x,
                 'Node2_y':Node2_y,
+                'Type':Type,
+                'Setting':Setting
                 }
             if df.empty:
                 df.loc[0]=data

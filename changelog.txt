@@ -12,6 +12,6 @@ Fix: 修正圖塊不同比例下，引線及文字位置錯誤問題
 Add: 增加檢查.rpt檔內junction格式欄位錯誤問題
 Add: 增加version.txt及changelog.txt
 Add: 增加讀取及繪製Pump參數內Q、H功能
-Change: 變更demand引線顏色
+Change: 變更demand引線顏色，提高可讀性
 Change: log文字改為中文
 Change: log顯示邏輯優化
