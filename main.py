@@ -94,6 +94,8 @@ class MainWindow(QMainWindow):
         cad = ezdxf.new()
         msp = cad.modelspace()
 
+        cad.styles.new("epa2HydChart", dxfattribs={"font" : "Microsoft JhengHei"})
+
         tankerLeaderColor=210
         reservoirLeaderColor=210
         elevLeaderColor=headPressureLeaderColor=pumpAnnotaionColor=valveAnnotaionColor=210
@@ -283,8 +285,8 @@ class MainWindow(QMainWindow):
                 leader_up_end_x=leader_up_start_x+config.leader_distance
                 leader_up_end_y=leader_up_start_y+config.leader_distance
 
-                msp.add_text(Head, height=config.text_size, dxfattribs={'color': color_head}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y+2*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
-                msp.add_text(Pressure, height=config.text_size, dxfattribs={'color': color_pressure}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y-0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
+                msp.add_text(Head, height=config.text_size, dxfattribs={'color': color_head, "style": "epa2HydChart"}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y+2*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
+                msp.add_text(Pressure, height=config.text_size, dxfattribs={'color': color_pressure, "style": "epa2HydChart"}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y-0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
                 self.MainWindow.browser_log.append(f'節點 {id} 壓力引線已完成繪圖')
         except:
             # print(i)
@@ -313,7 +315,7 @@ class MainWindow(QMainWindow):
         from ezdxf.math import Vec2
         pumpBlock=cad.blocks.new(name='pump')
         pumpBlock.add_circle(Vec2(0,0), 100.0)
-        pumpBlock.add_text("P", height=100).set_placement((0,0), align=TextEntityAlignment.MIDDLE_CENTER)
+        pumpBlock.add_text("P", height=100, dxfattribs={"style": "epa2HydChart"}).set_placement((0,0), align=TextEntityAlignment.MIDDLE_CENTER)
 
     def elevLeader(self, color):
         from ezdxf.enums import TextEntityAlignment
@@ -335,7 +337,7 @@ class MainWindow(QMainWindow):
             msp.add_polyline2d([(leader_up_start_x,leader_up_start_y),
                                 (leader_up_end_x,leader_up_end_y),
                                 (leader_up_end_x+6*config.text_size,leader_up_end_y)], dxfattribs={'color': color})
-            msp.add_text(elev, height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y+0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
+            msp.add_text(elev, height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y+0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
             self.MainWindow.browser_log.append(f'節點 {id} 高程引線已完成繪圖')
 
     def demandLeader(self, color):
@@ -359,7 +361,7 @@ class MainWindow(QMainWindow):
                 
                 msp.add_blockref('arrow', [leader_down_end_x,leader_down_end_y], dxfattribs={'xscale':config.block_scale, 'yscale':config.block_scale, 'rotation':225})
                 msp.add_polyline2d([(leader_down_start_x,leader_down_start_y),(leader_down_end_x,leader_down_end_y)], dxfattribs={'color': color})
-                msp.add_text(demand, height=config.text_size, dxfattribs={'color': color}).set_placement((leader_down_end_x+0.5*config.text_size, leader_down_end_y-0.5*config.text_size), align=TextEntityAlignment.TOP_LEFT)
+                msp.add_text(demand, height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((leader_down_end_x+0.5*config.text_size, leader_down_end_y-0.5*config.text_size), align=TextEntityAlignment.TOP_LEFT)
                 self.MainWindow.browser_log.append(f'節點 {id} 水量引線已完成繪圖')
 
     def reservoirsLeader(self, color):
@@ -381,9 +383,9 @@ class MainWindow(QMainWindow):
             msp.add_polyline2d([(leader_up_start_x,leader_up_start_y),
                                 (leader_up_end_x,leader_up_end_y),
                                 (leader_up_end_x+6*config.text_size,leader_up_end_y)], dxfattribs={'color': color})
-            msp.add_text(head, height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y+2*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
-            msp.add_text('ELEV', height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y+0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
-            msp.add_text('Pressure', height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y-0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
+            msp.add_text(head, height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y+2*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
+            msp.add_text('ELEV', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y+0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
+            msp.add_text('Pressure', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y-0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
             self.MainWindow.browser_log.append(f'接水點 {id} 引線已完成繪圖')
 
     def pumpAnnotation(self, color):
@@ -400,8 +402,8 @@ class MainWindow(QMainWindow):
             offset=[config.block_scale*100+0.75*config.text_size,
                     config.block_scale*100+2*config.text_size]
 
-            msp.add_text(f'Q:{Q}', height=config.text_size, dxfattribs={'color': color}).set_placement((x+2*config.text_size,y-offset[0]), align=TextEntityAlignment.MIDDLE_RIGHT)
-            msp.add_text(f'H:{H}', height=config.text_size, dxfattribs={'color': color}).set_placement((x+2*config.text_size,y-offset[1]), align=TextEntityAlignment.MIDDLE_RIGHT)
+            msp.add_text(f'Q:{Q}', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((x+2*config.text_size,y-offset[0]), align=TextEntityAlignment.MIDDLE_RIGHT)
+            msp.add_text(f'H:{H}', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((x+2*config.text_size,y-offset[1]), align=TextEntityAlignment.MIDDLE_RIGHT)
             self.MainWindow.browser_log.append(f'抽水機 {id} 已完成繪圖')
 
     def valveAnnotation(self, color):
@@ -425,8 +427,8 @@ class MainWindow(QMainWindow):
             offset=[config.block_scale*100+0.75*config.text_size,
                     config.block_scale*100+2*config.text_size]
 
-            msp.add_text(f'{Type}', height=config.text_size, dxfattribs={'color': color}).set_placement((x+2*config.text_size,y-offset[0]), align=TextEntityAlignment.MIDDLE_RIGHT)
-            msp.add_text(f'{Setting}', height=config.text_size, dxfattribs={'color': color}).set_placement((x+2*config.text_size,y-offset[1]), align=TextEntityAlignment.MIDDLE_RIGHT)
+            msp.add_text(f'{Type}', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((x+2*config.text_size,y-offset[0]), align=TextEntityAlignment.MIDDLE_RIGHT)
+            msp.add_text(f'{Setting}', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((x+2*config.text_size,y-offset[1]), align=TextEntityAlignment.MIDDLE_RIGHT)
             self.MainWindow.browser_log.append(f'閥件 {id} 已完成繪圖')
 
     def tankLeader(self, color):
@@ -455,10 +457,10 @@ class MainWindow(QMainWindow):
             msp.add_polyline2d([(leader_up_start_x,leader_up_start_y),
                                 (leader_up_end_x,leader_up_end_y),
                                 (leader_up_end_x+10*config.text_size,leader_up_end_y)], dxfattribs={'color': 210})
-            msp.add_text(f'___T', height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+10*config.text_size,leader_up_end_y+3.25*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
-            msp.add_text(f'Hwl:{maxElev}', height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+10*config.text_size,leader_up_end_y+2*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
-            msp.add_text(f'Mwl:{minElev}', height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+10*config.text_size,leader_up_end_y+0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
-            msp.add_text(f'Elev:{elev}', height=config.text_size, dxfattribs={'color': color}).set_placement((leader_up_end_x+10*config.text_size,leader_up_end_y-0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
+            msp.add_text(f'___T', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((leader_up_end_x+10*config.text_size,leader_up_end_y+3.25*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
+            msp.add_text(f'Hwl:{maxElev}', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((leader_up_end_x+10*config.text_size,leader_up_end_y+2*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
+            msp.add_text(f'Mwl:{minElev}', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((leader_up_end_x+10*config.text_size,leader_up_end_y+0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
+            msp.add_text(f'Elev:{elev}', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((leader_up_end_x+10*config.text_size,leader_up_end_y-0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
             self.MainWindow.browser_log.append(f'水池 {id} 已完成繪圖')
 
     def pipeInfo(self):
@@ -508,7 +510,7 @@ class MainWindow(QMainWindow):
         length=df_Pipes.at[i, 'Length']
         text_up=f'{diameter}-{length}'
         rotation_text = self.rotation_text(start_x, start_y, end_x, end_y)
-        msp.add_text(text_up, height=config.text_size, rotation=rotation_text).set_placement((text_x, text_y), align=TextEntityAlignment.BOTTOM_CENTER)
+        msp.add_text(text_up, height=config.text_size, rotation=rotation_text, dxfattribs={"style": "epa2HydChart"}).set_placement((text_x, text_y), align=TextEntityAlignment.BOTTOM_CENTER)
 
     def flowString(self, id, start_x, start_y, end_x, end_y):
         from ezdxf.enums import TextEntityAlignment
@@ -537,7 +539,7 @@ class MainWindow(QMainWindow):
             headloss=df_LinkResults.at[link_row, 'Headloss']
             text_up=f'{flow} ({headloss}) {direction}'
 
-            msp.add_text(text_up, height=config.text_size, rotation=rotation_text).set_placement((text_x, text_y), align=TextEntityAlignment.TOP_CENTER)
+            msp.add_text(text_up, height=config.text_size, rotation=rotation_text, dxfattribs={"style": "epa2HydChart"}).set_placement((text_x, text_y), align=TextEntityAlignment.TOP_CENTER)
         except:
             self.MainWindow.browser_log.append(f'管線 {id} 錯誤，請重新匯出inp及rpt檔後重試')
 

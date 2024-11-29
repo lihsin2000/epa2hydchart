@@ -8,10 +8,13 @@ Fix: 修正流量方向箭頭錯誤問題
 Fix: 修正pattern狀況下節點demand讀取錯誤問題
 
 [a2-0.1.0]
-Fix: 修正圖塊不同比例情況下下，引線及文字位置錯誤問題
+Fix: 修正圖塊不同比例情況下，引線及文字位置錯誤問題
+Fix: 修正dataframe欄位格式不同的問題
 Add: 增加檢查.rpt檔內junction欄位格式錯誤問題
 Add: 增加讀取及繪製Pump內流量及揚程參數功能
-Add: 增加讀取及繪製Valve內型式及設定參數功能
+Add: 增加讀取及繪製Valve型式及壓力參數功能
 Change: 變更demand引線顏色，提高可讀性
 Change: log文字改為中文
 Change: log顯示邏輯優化
+Change: 圖塊Hatch增加邊界
+Change: 標示文字改為微軟正黑體粗體，提高可讀性

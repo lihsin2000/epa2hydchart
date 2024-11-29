@@ -3,10 +3,10 @@
 
 [JUNCTIONS]
 ;ID              	Elev        	Demand      	Pattern         
- 1               	0           	0           	                	;
+ 1               	30          	0           	                	;
  2               	60          	10          	                	;
  3               	30          	10          	                	;
- 4               	30          	20          	                	;
+ 4               	60          	20          	                	;
  7               	10          	0           	                	;
 
 [RESERVOIRS]
@@ -19,10 +19,10 @@
 
 [PIPES]
 ;ID              	Node1           	Node2           	Length      	Diameter    	Roughness   	MinorLoss   	Status
- 2               	1               	2               	1000        	12          	100         	0           	Open  	;
- 3               	2               	3               	1000        	12          	100         	0           	Open  	;
- 4               	3               	5               	1000        	12          	100         	0           	Open  	;
- 7               	2               	4               	1000        	12          	100         	0           	Open  	;
+ 2               	1               	2               	1000        	100         	100         	0           	Open  	;
+ 3               	2               	3               	1000        	100         	100         	0           	Open  	;
+ 4               	3               	5               	1000        	100         	100         	0           	Open  	;
+ 7               	2               	4               	1000        	100         	100         	0           	Open  	;
 
 [PUMPS]
 ;ID              	Node1           	Node2           	Parameters
@@ -45,14 +45,16 @@
 
 [CURVES]
 ;ID              	X-Value     	Y-Value
-;PUMP: PUMP: PUMP: 
+;PUMP: 
  1               	60          	60          
 
 [CONTROLS]
 
 
 
+
 [RULES]
+
 
 
 
@@ -103,7 +105,7 @@
  Page               	0
 
 [OPTIONS]
- Units              	GPM
+ Units              	CMD
  Headloss           	H-W
  Specific Gravity   	1
  Viscosity          	1
