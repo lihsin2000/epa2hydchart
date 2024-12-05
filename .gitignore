@@ -3,4 +3,6 @@
 __pycache__
 build
 dist
-old_release
+main.build
+main.dist
+release

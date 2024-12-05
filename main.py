@@ -208,6 +208,7 @@ class MainWindow(QMainWindow):
         df_Vertices=self.readVertices(inpFile)
         # print('Vertices')
         # print(df_Vertices)
+        pass
 
     def multiHr(self, rptFile2):
         rptFile2_lines=open(rptFile2).readlines()
@@ -546,13 +547,14 @@ class MainWindow(QMainWindow):
 
             flow = flow if flow>=0 else -1*flow
 
-            unitHeadloss=float(df_LinkResults.at[link_row, 'unitHeadloss'])
+            headloss=float(df_LinkResults.at[link_row, 'Headloss'])
+            # unitHeadloss=float(df_LinkResults.at[link_row, 'unitHeadloss'])
 
-            pipe_row=df_Pipes.index[df_Pipes['ID']==id].tolist()[0]
-            length=float(df_Pipes.at[pipe_row, 'Length'])
-            headloss=length*unitHeadloss/1000
-            headloss=f'{headloss:.2f}'
-            text_up=f'{flow} ({headloss}) {direction}'
+            # pipe_row=df_Pipes.index[df_Pipes['ID']==id].tolist()[0]
+            # length=float(df_Pipes.at[pipe_row, 'Length'])
+            # headloss=length*unitHeadloss/1000
+            # headloss=f'{headloss:.2f}'
+            text_up=f'{flow} ({headloss:.2f}) {direction}'
 
             msp.add_text(text_up, height=config.text_size, rotation=rotation_text, dxfattribs={"style": "epa2HydChart"}).set_placement((text_x, text_y), align=TextEntityAlignment.TOP_CENTER)
         except:
@@ -982,15 +984,38 @@ class MainWindow(QMainWindow):
         df=pd.DataFrame(columns=['ID', 'Flow', 'unitHeadloss', 'Headloss'])
         for l in range (start-1, end):
             d=self.line2dict(lines, l)
+            id=d[1]
+            flow=d[2]
+            unitHeadloss=d[4]
+
+            # calculate headloss number:
+            if id in df_Pipes['ID'].tolist():   # 2 side in link are node:
+                pipe_index=df_Pipes.index[df_Pipes['ID']==id].tolist()[0]
+                node1=df_Pipes.at[pipe_index, 'Node1']
+                i1=df_NodeResults.index[df_NodeResults['ID']==node1].tolist()[0]
+                node2=df_Pipes.at[pipe_index, 'Node2']
+                i2=df_NodeResults.index[df_NodeResults['ID']==node2].tolist()[0]
+
+                from decimal import Decimal
+                node1_head=Decimal(df_NodeResults.at[i1, 'Head'])
+                node2_head=Decimal(df_NodeResults.at[i2, 'Head'])
+
+                Headloss=float(abs(node2_head-node1_head))
+            else:
+                pass
+
             data={
-                'ID':d[1],
-                'Flow':d[2],
-                'unitHeadloss':d[4],
+                'ID':id,
+                'Flow':flow,
+                'unitHeadloss':unitHeadloss,
+                'Headloss':Headloss
                 }
             if df.empty:
                 df.loc[0]=data
             else:
                 df.loc[len(df)]=data
+
+                pass
         df=df.reset_index(drop=True)
         return df
 
