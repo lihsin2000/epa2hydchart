@@ -230,12 +230,22 @@ class MainWindow(QMainWindow):
 
     def loadinp(self):
         file, type=QFileDialog.getOpenFileName(self, '開啟inp檔',filter='inp (*.inp)')
-        self.MainWindow.l_inp_path.setText(file)
+        if self.MainWindow.l_inp_path.text() =='':
+            self.MainWindow.l_inp_path.setText(file)
+        elif self.MainWindow.l_inp_path.text() !='' and file=='':
+            file=self.MainWindow.l_inp_path.text()
+        else:
+            self.MainWindow.l_inp_path.setText(file)
         config.inpFile=file
 
     def loadrpt(self):
         file, type=QFileDialog.getOpenFileName(self, '開啟rpt檔',filter='rpt (*.rpt)')
-        self.MainWindow.l_rpt_path.setText(file)
+        if self.MainWindow.l_rpt_path.text() =='':
+            self.MainWindow.l_rpt_path.setText(file)
+        elif self.MainWindow.l_rpt_path.text() !='' and file=='':
+            file=self.MainWindow.l_rpt_path.text()
+        else:
+            self.MainWindow.l_rpt_path.setText(file)
         config.rptFile=file
 
     def reset(self):
@@ -536,7 +546,12 @@ class MainWindow(QMainWindow):
 
             flow = flow if flow>=0 else -1*flow
 
-            headloss=df_LinkResults.at[link_row, 'Headloss']
+            unitHeadloss=float(df_LinkResults.at[link_row, 'unitHeadloss'])
+
+            pipe_row=df_Pipes.index[df_Pipes['ID']==id].tolist()[0]
+            length=float(df_Pipes.at[pipe_row, 'Length'])
+            headloss=length*unitHeadloss/1000
+            headloss=f'{headloss:.2f}'
             text_up=f'{flow} ({headloss}) {direction}'
 
             msp.add_text(text_up, height=config.text_size, rotation=rotation_text, dxfattribs={"style": "epa2HydChart"}).set_placement((text_x, text_y), align=TextEntityAlignment.TOP_CENTER)
@@ -964,13 +979,13 @@ class MainWindow(QMainWindow):
             end_str=f'Node Results at {hr2} Hrs:'
         start, end=self.lineStartEnd(rptFile, start_str, end_str,5,2)
         lines = open(rptFile).readlines()
-        df=pd.DataFrame(columns=['ID', 'Flow', 'Headloss'])
+        df=pd.DataFrame(columns=['ID', 'Flow', 'unitHeadloss', 'Headloss'])
         for l in range (start-1, end):
             d=self.line2dict(lines, l)
             data={
                 'ID':d[1],
                 'Flow':d[2],
-                'Headloss':d[3],
+                'unitHeadloss':d[4],
                 }
             if df.empty:
                 df.loc[0]=data
