@@ -32,7 +32,8 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
     icon='icon.ico',
-    contents_directory='.'
+    contents_directory='.',
+    version="version_info.txt"
 )
 coll = COLLECT(
     exe,
@@ -41,5 +42,5 @@ coll = COLLECT(
     strip=False,
     upx=True,
     upx_exclude=[],
-    name='epa2HydChart2',
+    name='epa2HydChart',
 )
