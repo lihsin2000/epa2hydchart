@@ -9,5 +9,6 @@ joint_scale_default=0.2
 text_size_default=25.0
 leader_distance_default=50.0
 
-inpFile=''
-rptFile=''
+inpFile=None
+rptFile=None
+projName=None

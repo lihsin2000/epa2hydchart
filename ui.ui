@@ -33,15 +33,21 @@
    <widget class="QWidget" name="gridLayoutWidget">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>70</y>
-      <width>181</width>
-      <height>111</height>
+      <x>560</x>
+      <y>110</y>
+      <width>221</width>
+      <height>151</height>
      </rect>
     </property>
-    <layout class="QGridLayout" name="gridLayout_2">
-     <item row="0" column="1">
-      <widget class="QLineEdit" name="l_joint_scale">
+    <layout class="QGridLayout" name="gridLayout_2" rowstretch="0,0,0,0,0" columnstretch="0,0">
+     <property name="sizeConstraint">
+      <enum>QLayout::SetDefaultConstraint</enum>
+     </property>
+     <property name="spacing">
+      <number>10</number>
+     </property>
+     <item row="1" column="1">
+      <widget class="QLineEdit" name="l_block_scale">
        <property name="text">
         <string/>
        </property>
@@ -49,6 +55,20 @@
      </item>
      <item row="2" column="1">
       <widget class="QLineEdit" name="l_text_size">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="label_7">
+       <property name="text">
+        <string>引線偏移</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1">
+      <widget class="QLabel" name="l_times">
        <property name="text">
         <string/>
        </property>
@@ -68,31 +88,31 @@
        </property>
       </widget>
      </item>
-     <item row="3" column="1">
-      <widget class="QLineEdit" name="l_leader_distance">
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="label_7">
-       <property name="text">
-        <string>引線偏移</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QLineEdit" name="l_block_scale">
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
      <item row="1" column="0">
       <widget class="QLabel" name="label_8">
        <property name="text">
         <string>其他圖塊比例</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0">
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>多重時段</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="l_joint_scale">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QLineEdit" name="l_leader_distance">
+       <property name="text">
+        <string/>
        </property>
       </widget>
      </item>
@@ -104,10 +124,13 @@
       <x>20</x>
       <y>0</y>
       <width>761</width>
-      <height>65</height>
+      <height>100</height>
      </rect>
     </property>
-    <layout class="QGridLayout" name="gridLayout_3" columnstretch="0,0,1,0">
+    <layout class="QGridLayout" name="gridLayout_3" columnstretch="0,2,0">
+     <property name="spacing">
+      <number>10</number>
+     </property>
      <item row="0" column="0">
       <widget class="QLabel" name="label">
        <property name="text">
@@ -118,28 +141,28 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="3">
-      <widget class="QPushButton" name="b_browser_inp">
-       <property name="text">
-        <string>瀏覽</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="2">
-      <widget class="QLabel" name="l_inp_path">
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="3">
+     <item row="1" column="2">
       <widget class="QPushButton" name="b_browser_rpt">
        <property name="text">
         <string>瀏覽</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="2">
+     <item row="0" column="1">
+      <widget class="QLabel" name="l_inp_path">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <widget class="QPushButton" name="b_browser_inp">
+       <property name="text">
+        <string>瀏覽</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
       <widget class="QLabel" name="l_rpt_path">
        <property name="text">
         <string/>
@@ -156,42 +179,39 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+     <item row="2" column="0">
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>工程名稱</string>
        </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QLineEdit" name="l_projName"/>
      </item>
     </layout>
    </widget>
    <widget class="QWidget" name="horizontalLayoutWidget">
     <property name="geometry">
      <rect>
-      <x>680</x>
-      <y>90</y>
-      <width>91</width>
-      <height>65</height>
+      <x>560</x>
+      <y>310</y>
+      <width>221</width>
+      <height>30</height>
      </rect>
     </property>
-    <layout class="QVBoxLayout" name="verticalLayout">
-     <item>
-      <widget class="QPushButton" name="b_draw">
-       <property name="text">
-        <string>開始處理</string>
-       </property>
-      </widget>
-     </item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QPushButton" name="b_reset">
        <property name="text">
         <string>重設</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="b_draw">
+       <property name="text">
+        <string>開始處理</string>
        </property>
       </widget>
      </item>
@@ -201,9 +221,9 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>190</y>
-      <width>761</width>
-      <height>181</height>
+      <y>110</y>
+      <width>531</width>
+      <height>241</height>
      </rect>
     </property>
     <property name="html">
@@ -214,6 +234,10 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
    </widget>
+   <zorder>browser_log</zorder>
+   <zorder>gridLayoutWidget</zorder>
+   <zorder>gridLayoutWidget_2</zorder>
+   <zorder>horizontalLayoutWidget</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -234,7 +258,6 @@ p, li { white-space: pre-wrap; }
   <tabstop>l_text_size</tabstop>
   <tabstop>l_leader_distance</tabstop>
   <tabstop>b_draw</tabstop>
-  <tabstop>b_reset</tabstop>
  </tabstops>
  <resources/>
  <connections/>

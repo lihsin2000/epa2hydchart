@@ -29,66 +29,100 @@ class MainWindow(QMainWindow):
 
     def main(self):
         global df_NodeResults, df_LinkResults
-        
+        QCoreApplication.processEvents()
         # inpFile='test2.inp'
         # rptFile='test2.rpt'
 
         inpFile=config.inpFile
         rptFile=config.rptFile
-        if inpFile != '' and rptFile != '':
-            # try:
+
+        import os
+        if inpFile and rptFile:
             rptFile2=self.rptProces(rptFile)
             self.MainWindow.browser_log.append('.rpt前處理完成')
 
             hr_list=self.multiHr(rptFile2)
+
             if hr_list==[]:
-                multiPattern=False
+                hr_list=['']
+                self.MainWindow.l_times.setText('單一時段')
             else:
-                multiPattern=True
+                n_pattern=len(hr_list)
+                self.MainWindow.l_times.setText(f'檢測到{n_pattern}個時段')
 
-            self.readinpdf(inpFile)
+            dxfPath, _= QFileDialog.getSaveFileName(self, "儲存", "", filter='dxf (*.dxf)')
+            dictionary=os.path.dirname(dxfPath)
+            file_name = os.path.basename(dxfPath)
+            file=os.path.splitext(os.path.basename(dxfPath))[0]
 
-            if multiPattern==False: # without patteren
-                df_NodeResults=self.readNodeResults('', rptFile2)
-                # print('NodeResults')
-                # print(df_NodeResults)
+            self.read_inp_to_df(inpFile)
 
-                df_LinkResults=self.readLinkResults('', '', rptFile2)
-                # print('LinkResults')
-                # print(df_LinkResults)
+            for h in hr_list:
+                try:
+                    if len(hr_list)==1:
+                        df_NodeResults=self.readNodeResults(hr=None, input=rptFile2)
+                        # print('NodeResults')
+                        # print(df_NodeResults)
+
+                        df_LinkResults=self.readLinkResults(hr1=None, input=rptFile2)
+                        # print('LinkResults')
+                        # print(df_LinkResults)
+
+                        hr_str=''
+                    else:
+                        df_NodeResults=self.readNodeResults(hr=h, input=rptFile2)
+                        i_hr1=hr_list.index(h)
+                        i_hr2=i_hr1+1
+
+                        if 1<=i_hr2<=len(hr_list)-1:
+                            hr2=hr_list[i_hr2]
+                            df_LinkResults=self.readLinkResults(hr1=h, hr2=hr2, input=rptFile2)
+                            hr_str=h
+                        elif i_hr2==len(hr_list):
+                            df_LinkResults=self.readLinkResults(hr1=h, hr2='', input=rptFile2)
+                            hr_str=h
+                            # print(f'{h}-{hr2}')
+                        else:
+                            self.MainWindow.browser_log.append(f'[Error]匯出中止')
+                            self.MainWindow.browser_log.append(f'---------------------')
+                            break
+                except:
+                    self.MainWindow.browser_log.append(f'[Error]輸入檔有誤，匯出中止')
+                    self.MainWindow.browser_log.append(f'---------------------')
+                    break
 
                 matchLink, matchNode = self.inp_rpt_match()
                 if matchLink and matchNode:
-                    self.MainWindow.browser_log.append(f'.rpt及inp內容相符')
-                    self.create_dxf_export()
+                    self.MainWindow.browser_log.append(f'{hr_str} .rpt及.inp內容相符')
+                    cad, msp=self.create_modelspace()
+
+                    if dxfPath:
+                        hr_str=hr_str.replace(':','-')
+                        if len(hr_list)>=2:
+                            dxfPath=f'{dictionary}/{file}_{hr_str}.dxf'
+                            pass
+
+                        self.save_dxf(cad=cad, path=dxfPath)
+                        self.MainWindow.browser_log.append(f'{h} .dxf 已存檔')
+
+                        svg_path=dxfPath.replace('.dxf', '.svg')
+                        self.save_svg(msp=msp, cad=cad, path=svg_path)
+                        self.MainWindow.browser_log.append(f'{h} .svg 已存檔')
+
+                        png_path=dxfPath.replace('.dxf', '.png')
+                        self.save_png(msp=msp, cad=cad, pngPath=png_path, svgPath=svg_path)
+                        self.MainWindow.browser_log.append(f'{h} .png 已存檔')
+
+                        self.MainWindow.browser_log.append('完成!')
+                        self.MainWindow.browser_log.append(f'---------------------')
+                    else:
+                        break
+                    
                 else:
-                    self.MainWindow.browser_log.append(f'.rpt及.inp內容不符，請確認')
+                    self.MainWindow.browser_log.append(f'[Error].rpt及.inp內容不符，請確認')
                     self.MainWindow.browser_log.append(f'---------------------')
 
-            elif multiPattern==True:   # with patteren
-                for hr in hr_list:
-                    i=hr_list.index(hr)
-                    df_NodeResults=self.readNodeResults(hr, rptFile2)
-                    # print(f'NodeResults at {hr}')
-                    # print(df_NodeResults)
-
-                    if i==len(hr_list)-1:
-                        df_LinkResults=self.readLinkResults(hr, '', rptFile2)   # with patteren and last hour
-                    else:
-                        hr2=hr_list[i+1]
-                        df_LinkResults=self.readLinkResults(hr, hr2, rptFile2)
-                    # print(f'LinkResults at {hr}')
-                    # print(df_LinkResults)
-
-                    matchLink, matchNode = self.inp_rpt_match()
-                    if matchLink and matchNode:
-                        self.MainWindow.browser_log.append(f'{hr} .rpt及.inp內容相符')
-                        self.create_dxf_export()
-                    else:
-                        self.MainWindow.browser_log.append(f'{hr} .rpt及.inp內容不符，請確認')
-                        self.MainWindow.browser_log.append(f'---------------------')
-
-    def create_dxf_export(self, *args, **kwargs):
+    def create_modelspace(self, *args, **kwargs):
         global msp
 
         cad = ezdxf.new()
@@ -117,8 +151,11 @@ class MainWindow(QMainWindow):
         self.pumpAnnotation(pumpAnnotaionColor)
         self.valveAnnotation(valveAnnotaionColor)
 
-        # cad.saveas("new_name.dxf")
-        dxfPath, _= QFileDialog.getSaveFileName(self, "儲存", "", filter='dxf (*.dxf)')
+        return cad, msp
+
+    def save_dxf(self, *args, **kwargs):
+        cad=kwargs.get('cad')
+        dxfPath=kwargs.get('path')
         if dxfPath:
             while True:
                 try:
@@ -135,29 +172,23 @@ class MainWindow(QMainWindow):
                     if msg_box.clickedButton() == retry_button:
                         continue
 
-            self.MainWindow.browser_log.append('.dxf 已存檔')
-            svgPath=self.exportSVG(cad, dxfPath)
-            self.MainWindow.browser_log.append('.svg 已存檔')
+    def save_png(self, *args, **kwargs):
+        msp=kwargs.get('msp')
+        cad=kwargs.get('cad')
+        pngPath=kwargs.get('pngPath')
+        svgPath=kwargs.get('svgPath')
 
-            pngPath=svgPath.replace('.svg', '.png')
+        import cairosvg
+        # lib: GTK+ for Windows Runtime Environment Installer
+        # https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer
+        # https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/releases/download/2022-01-04/gtk3-runtime-3.24.31-2022-01-04-ts-win64.exe
 
-            import cairosvg
-            # lib: GTK+ for Windows Runtime Environment Installer
-            # https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer
-            # https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/releases/download/2022-01-04/gtk3-runtime-3.24.31-2022-01-04-ts-win64.exe
-
-            cairosvg.svg2png(
-                url=svgPath,
-                write_to=pngPath,
-                output_width=10000,
-                dpi=600
-                )
-            self.MainWindow.browser_log.append('.png 已存檔')
-
-            self.MainWindow.browser_log.append('完成!')
-            self.MainWindow.browser_log.append(f'---------------------')
-        else:
-            self.MainWindow.browser_log.append(f'---------------------')
+        cairosvg.svg2png(
+            url=svgPath,
+            write_to=pngPath,
+            output_width=10000,
+            dpi=600
+            )
 
     def inp_rpt_match(self):
         inputAllLink=pd.concat([df_Pipes['ID'], df_Valves['ID'], df_Pumps['ID']])
@@ -175,7 +206,7 @@ class MainWindow(QMainWindow):
         matchNode=outputAllNode.equals(inputAllNode)
         return matchLink,matchNode
 
-    def readinpdf(self, inpFile):
+    def read_inp_to_df(self, inpFile):
         global df_Reservoirs, df_Tanks, df_Coords, df_Junctions, df_Pumps, df_Pipes, df_Vertices, df_Valves
         df_Coords=self.readCoords(inpFile)
         # print('Coords')
@@ -230,6 +261,8 @@ class MainWindow(QMainWindow):
         return hr_list
 
     def loadinp(self):
+        import os
+        
         file, type=QFileDialog.getOpenFileName(self, '開啟inp檔',filter='inp (*.inp)')
         if self.MainWindow.l_inp_path.text() =='':
             self.MainWindow.l_inp_path.setText(file)
@@ -238,6 +271,9 @@ class MainWindow(QMainWindow):
         else:
             self.MainWindow.l_inp_path.setText(file)
         config.inpFile=file
+
+        config.projName=os.path.splitext(os.path.basename(file))[0]
+        self.MainWindow.l_projName.setText(config.projName)
 
     def loadrpt(self):
         file, type=QFileDialog.getOpenFileName(self, '開啟rpt檔',filter='rpt (*.rpt)')
@@ -257,8 +293,11 @@ class MainWindow(QMainWindow):
         
         self.MainWindow.l_inp_path.setText('')
         self.MainWindow.l_rpt_path.setText('')
-        config.inpFile=''
-        config.rptFile=''
+        self.MainWindow.l_times.setText('')
+        self.MainWindow.l_projName.setText('')
+        config.inpFile=None
+        config.rptFile=None
+        config.projName=None
 
     def draw(self):
         config.block_scale=float(self.MainWindow.l_block_scale.text())
@@ -558,7 +597,7 @@ class MainWindow(QMainWindow):
 
             msp.add_text(text_up, height=config.text_size, rotation=rotation_text, dxfattribs={"style": "epa2HydChart"}).set_placement((text_x, text_y), align=TextEntityAlignment.TOP_CENTER)
         except:
-            self.MainWindow.browser_log.append(f'管線 {id} 錯誤，請重新匯出inp及rpt檔後重試')
+            self.MainWindow.browser_log.append(f'[Error]管線 {id} 錯誤，請重新匯出inp及rpt檔後重試')
 
     def rotation_text(self, start_x, start_y, end_x, end_y):
         import math
@@ -932,16 +971,18 @@ class MainWindow(QMainWindow):
             else:
                 df.loc[len(df)]=data
         df=df.reset_index(drop=True)
-
         return df
 
-    def readNodeResults(self, hr1, rptFile):
-        if hr1=='':
+    def readNodeResults(self, *args, **kwargs):
+        hr = kwargs.get('hr')
+        rptFile = kwargs.get('input')
+
+        if hr==None:
             start_str='Node Results:'
             end_str='Link Results:'
         else:
-            start_str=f'Node Results at {hr1} Hrs:'
-            end_str=f'Link Results at {hr1} Hrs:'
+            start_str=f'Node Results at {hr} Hrs:'
+            end_str=f'Link Results at {hr} Hrs:'
         start, end=self.lineStartEnd(rptFile, start_str, end_str,5,2)
         lines = open(rptFile).readlines()
         df=pd.DataFrame(columns=['ID', 'Demand', 'Head', 'Pressure'])
@@ -959,18 +1000,30 @@ class MainWindow(QMainWindow):
                     'Head':head,
                     'Pressure':pressure,
                     }
-                if df.empty:
-                    df.loc[0]=data
-                else:
-                    df.loc[len(df)]=data
+
             except:
-                self.MainWindow.browser_log.append(f'節點 {id} 錯誤，請手動修正.rpt檔內容')
+                self.MainWindow.browser_log.append(f'[Error]節點 {id} 錯誤，請手動修正.rpt檔內容')
+                data={
+                    'ID':id,
+                    'Demand':None,
+                    'Head':None,
+                    'Pressure':None,
+                    }
                 # print(f'error id:{id}')                 
-            df=df.reset_index(drop=True)
+                
+            if df.empty:
+                df.loc[0]=data
+            else:
+                df.loc[len(df)]=data
+        df=df.reset_index(drop=True)
         return df
 
-    def readLinkResults(self, hr1, hr2, rptFile):
-        if hr1=='':     # without patteren
+    def readLinkResults(self, *args, **kwargs):
+        hr1=kwargs.get('hr1')
+        hr2=kwargs.get('hr2')
+        rptFile=kwargs.get('input')
+        
+        if hr1==None:     # without patteren
             start_str='Link Results:'
             end_str='[END]'
         elif hr2=='':    # with patteren and last hour
@@ -984,28 +1037,29 @@ class MainWindow(QMainWindow):
         df=pd.DataFrame(columns=['ID', 'Flow', 'unitHeadloss', 'Headloss'])
         for l in range (start-1, end):
             d=self.line2dict(lines, l)
-            id=d[1]
+            pipe_id=d[1]
             flow=d[2]
             unitHeadloss=d[4]
 
             # calculate headloss number:
-            if id in df_Pipes['ID'].tolist():   # 2 side in link are node:
-                pipe_index=df_Pipes.index[df_Pipes['ID']==id].tolist()[0]
+            if pipe_id in df_Pipes['ID'].tolist():   # 2 side in link are node:
+                pipe_index=df_Pipes.index[df_Pipes['ID']==pipe_id].tolist()[0]
                 node1=df_Pipes.at[pipe_index, 'Node1']
                 i1=df_NodeResults.index[df_NodeResults['ID']==node1].tolist()[0]
                 node2=df_Pipes.at[pipe_index, 'Node2']
                 i2=df_NodeResults.index[df_NodeResults['ID']==node2].tolist()[0]
 
                 from decimal import Decimal
-                node1_head=Decimal(df_NodeResults.at[i1, 'Head'])
-                node2_head=Decimal(df_NodeResults.at[i2, 'Head'])
+                try:
+                    node1_head=Decimal(df_NodeResults.at[i1, 'Head'])
+                    node2_head=Decimal(df_NodeResults.at[i2, 'Head'])
 
-                Headloss=float(abs(node2_head-node1_head))
-            else:
-                pass
+                    Headloss=float(abs(node2_head-node1_head))
+                except:
+                    Headloss=0
 
             data={
-                'ID':id,
+                'ID':pipe_id,
                 'Flow':flow,
                 'unitHeadloss':unitHeadloss,
                 'Headloss':Headloss
@@ -1015,7 +1069,6 @@ class MainWindow(QMainWindow):
             else:
                 df.loc[len(df)]=data
 
-                pass
         df=df.reset_index(drop=True)
         return df
 
@@ -1064,25 +1117,26 @@ class MainWindow(QMainWindow):
 
         return output
 
-    def exportSVG(self, doc, path):
+    def save_svg(self, *args, **kwargs):
+        msp=kwargs.get('msp')
+        cad=kwargs.get('cad')
+        svgPath=kwargs.get('path')
         from ezdxf.addons.drawing import Frontend, RenderContext, svg, layout, config
-        msp = doc.modelspace()
-        context = RenderContext(doc)
+        msp = cad.modelspace()
+        context = RenderContext(cad)
         backend = svg.SVGBackend()
         cfg = config.Configuration(
             background_policy=config.BackgroundPolicy.WHITE,
         )
         frontend = Frontend(context, backend, config=cfg)
         frontend.draw_layout(msp)
-        page = layout.Page(0, 0, layout.Units.mm, margins=layout.Margins.all(2))
+        page = layout.Page(0, 0, layout.Units.mm, margins=layout.Margins.all(10))
         svg_string = backend.get_string(
             page, settings=layout.Settings(scale=1, fit_page=False)
         )
 
-        path=path.replace('.dxf', '.svg')
-        with open(path, "wt", encoding="utf8") as fp:
+        with open(svgPath, "wt", encoding="utf8") as fp:
             fp.write(svg_string)
-        return path
 
 if __name__ == '__main__':
     QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)   # Enable high DPI
