@@ -96,6 +96,28 @@ class MainWindow(QMainWindow):
                     self.MainWindow.browser_log.append(f'{hr_str} .rpt及.inp內容相符')
                     cad, msp=self.create_modelspace()
 
+                    tankerLeaderColor=210
+                    reservoirLeaderColor=210
+                    elevLeaderColor=headPressureLeaderColor=pumpAnnotaionColor=valveAnnotaionColor=210
+                    demandColor=74
+
+                    arrowBlock=cad.blocks.new(name='arrow')
+                    arrowBlock.add_polyline2d([(0,0), (30,-50), (-30,-50)], close=True,dxfattribs={'color': demandColor})
+                    arrowBlock.add_hatch(color=demandColor).paths.add_polyline_path([(0,0), (30,-50), (-30,-50)], is_closed=True)
+
+                    self.createBlocks(cad)
+                    self.insertBlocks()
+                    self.drawPipes()
+                    self.pipeInfo()
+                    self.demandLeader(demandColor)
+                    self.elevLeader(elevLeaderColor)
+                    self.headPressureLeader(headPressureLeaderColor)
+                    self.reservoirsLeader(reservoirLeaderColor)
+                    self.tankLeader(tankerLeaderColor)
+                    self.pumpAnnotation(pumpAnnotaionColor)
+                    self.valveAnnotation(valveAnnotaionColor)
+                    self.addTitle(hr_str=hr_str)
+
                     if dxfPath:
                         hr_str=hr_str.replace(':','-')
                         if len(hr_list)>=2:
@@ -128,31 +150,36 @@ class MainWindow(QMainWindow):
 
         cad = ezdxf.new()
         msp = cad.modelspace()
-
         cad.styles.new("epa2HydChart", dxfattribs={"font" : "Microsoft JhengHei"})
 
-        tankerLeaderColor=210
-        reservoirLeaderColor=210
-        elevLeaderColor=headPressureLeaderColor=pumpAnnotaionColor=valveAnnotaionColor=210
-        demandColor=74
-
-        arrowBlock=cad.blocks.new(name='arrow')
-        arrowBlock.add_polyline2d([(0,0), (30,-50), (-30,-50)], close=True,dxfattribs={'color': demandColor})
-        arrowBlock.add_hatch(color=demandColor).paths.add_polyline_path([(0,0), (30,-50), (-30,-50)], is_closed=True)
-
-        self.createBlocks(cad)
-        self.insertBlocks()
-        self.drawPipes()
-        self.pipeInfo()
-        self.demandLeader(demandColor)
-        self.elevLeader(elevLeaderColor)
-        self.headPressureLeader(headPressureLeaderColor)
-        self.reservoirsLeader(reservoirLeaderColor)
-        self.tankLeader(tankerLeaderColor)
-        self.pumpAnnotation(pumpAnnotaionColor)
-        self.valveAnnotation(valveAnnotaionColor)
-
         return cad, msp
+
+    def addTitle(self, *args, **kwargs):
+        hr=kwargs.get('hr_str')
+
+        xs=df_Coords['x'].tolist()+df_Vertices['x'].tolist()
+        x_min=min(xs)
+
+        ys=df_Coords['y'].tolist()+df_Vertices['y'].tolist()
+        y_max=max(ys)
+
+        projName=self.MainWindow.l_projName.text()
+
+        from decimal import Decimal
+        Q=0
+        for i in range(0, len(df_Junctions)):
+            id=df_Junctions.at[i,'ID']
+            row=df_NodeResults.index[df_NodeResults['ID']==id].tolist()[0]
+            Q=Q+Decimal(df_NodeResults.at[row, 'Demand'])
+
+        from ezdxf.enums import TextEntityAlignment
+        msp.add_text(projName, height=2*config.text_size, dxfattribs={"style": "epa2HydChart"}).set_placement((x_min,y_max+13*config.text_size), align=TextEntityAlignment.TOP_LEFT)
+        
+        if hr=='':
+            msp.add_text(f'Q={Q} CMD', height=2*config.text_size, dxfattribs={"style": "epa2HydChart"}).set_placement((x_min,y_max+10*config.text_size), align=TextEntityAlignment.TOP_LEFT)
+        else:
+            msp.add_text(f'{hr} Q={Q} CMD', height=2*config.text_size, dxfattribs={"style": "epa2HydChart"}).set_placement((x_min,y_max+10*config.text_size), align=TextEntityAlignment.TOP_LEFT)
+        pass
 
     def save_dxf(self, *args, **kwargs):
         cad=kwargs.get('cad')
@@ -746,8 +773,8 @@ class MainWindow(QMainWindow):
             d=self.line2dict(lines, l)
             data={
                 'LINK':[d[0]],
-                'x':[d[1]],
-                'y':[d[2]],
+                'x':[float(d[1])],
+                'y':[float(d[2])],
                 }
             new_df=pd.DataFrame.from_dict(data)
             df=pd.concat([df,new_df])
