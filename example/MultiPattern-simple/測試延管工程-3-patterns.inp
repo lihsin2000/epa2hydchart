@@ -20,7 +20,7 @@
 [PIPES]
 ;ID              	Node1           	Node2           	Length      	Diameter    	Roughness   	MinorLoss   	Status
  2               	1               	2               	268         	100         	100         	0           	Open  	;
- 3               	2               	3               	314         	100         	100         	0           	Open  	;
+ 3               	2               	3               	314         	100         	110         	0           	Open  	;
  4               	3               	5               	513         	100         	100         	0           	Open  	;
  5               	2               	4               	357         	100         	100         	0           	Open  	;
 
@@ -47,7 +47,7 @@
 
 [CURVES]
 ;ID              	X-Value     	Y-Value
-;PUMP: PUMP: PUMP: 
+;PUMP: PUMP: PUMP: PUMP: 
  1               	60          	60          
 
 [CONTROLS]
@@ -57,7 +57,9 @@
 
 
 
+
 [RULES]
+
 
 
 

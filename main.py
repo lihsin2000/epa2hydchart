@@ -157,6 +157,7 @@ class MainWindow(QMainWindow):
     def addTitle(self, *args, **kwargs):
         hr=kwargs.get('hr_str')
 
+        # 計算左上角座標
         xs=df_Coords['x'].tolist()+df_Vertices['x'].tolist()
         x_min=min(xs)
 
@@ -165,6 +166,7 @@ class MainWindow(QMainWindow):
 
         projName=self.MainWindow.l_projName.text()
 
+        # 計算Q值
         from decimal import Decimal
         Q=0
         for i in range(0, len(df_Junctions)):
@@ -172,14 +174,23 @@ class MainWindow(QMainWindow):
             row=df_NodeResults.index[df_NodeResults['ID']==id].tolist()[0]
             Q=Q+Decimal(df_NodeResults.at[row, 'Demand'])
 
+        # 匯整C值
+        C_str=''
+        Cs=df_Pipes['Roughness'].unique()
+        for c in Cs:
+            C_str=C_str+f'{c},'
+        C_str=C_str[:len(C_str)-1]
+
+        # 加入文字
         from ezdxf.enums import TextEntityAlignment
-        msp.add_text(projName, height=2*config.text_size, dxfattribs={"style": "epa2HydChart"}).set_placement((x_min,y_max+13*config.text_size), align=TextEntityAlignment.TOP_LEFT)
+        msp.add_text(projName, height=2*config.text_size, dxfattribs={"style": "epa2HydChart"}).set_placement((x_min,y_max+16*config.text_size), align=TextEntityAlignment.TOP_LEFT)
         
         if hr=='':
-            msp.add_text(f'Q={Q} CMD', height=2*config.text_size, dxfattribs={"style": "epa2HydChart"}).set_placement((x_min,y_max+10*config.text_size), align=TextEntityAlignment.TOP_LEFT)
+            msp.add_text(f'Q={Q} CMD', height=2*config.text_size, dxfattribs={"style": "epa2HydChart"}).set_placement((x_min,y_max+13*config.text_size), align=TextEntityAlignment.TOP_LEFT)
         else:
-            msp.add_text(f'{hr} Q={Q} CMD', height=2*config.text_size, dxfattribs={"style": "epa2HydChart"}).set_placement((x_min,y_max+10*config.text_size), align=TextEntityAlignment.TOP_LEFT)
-        pass
+            msp.add_text(f'{hr} Q={Q} CMD', height=2*config.text_size, dxfattribs={"style": "epa2HydChart"}).set_placement((x_min,y_max+13*config.text_size), align=TextEntityAlignment.TOP_LEFT)
+        
+        msp.add_text(f'C={C_str}', height=2*config.text_size, dxfattribs={"style": "epa2HydChart"}).set_placement((x_min,y_max+10*config.text_size), align=TextEntityAlignment.TOP_LEFT)
 
     def save_dxf(self, *args, **kwargs):
         cad=kwargs.get('cad')
@@ -785,7 +796,7 @@ class MainWindow(QMainWindow):
         try:
             start, end=self.lineStartEnd(inpFile, '[PIPES]', '[PUMPS]',2,2)
             lines = open(inpFile).readlines()
-            df=pd.DataFrame(columns=['ID','Node1','Node2', 'Length', 'Diameter', 'Node1_x', 'Node1_y', 'Node2_x', 'Node2_y'])
+            df=pd.DataFrame(columns=['ID','Node1','Node2', 'Length', 'Diameter', 'Node1_x', 'Node1_y', 'Node2_x', 'Node2_y', 'Roughness'])
             for l in range (start-1, end):
                 d=self.line2dict(lines, l)
                 data={
@@ -793,7 +804,8 @@ class MainWindow(QMainWindow):
                     'Node1':[d[2]],
                     'Node2':[d[3]],
                     'Length':[d[4]],
-                    'Diameter':[d[5]]
+                    'Diameter':[d[5]],
+                    'Roughness':[d[6]]
                     }
                 new_df=pd.DataFrame.from_dict(data)
                 df=pd.concat([df,new_df])
