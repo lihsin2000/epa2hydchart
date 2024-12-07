@@ -83,11 +83,11 @@ class MainWindow(QMainWindow):
                             hr_str=h
                             # print(f'{h}-{hr2}')
                         else:
-                            self.MainWindow.browser_log.append(f'[Error]匯出中止')
+                            self.MainWindow.browser_log.append(f'[Error]中止匯出')
                             self.MainWindow.browser_log.append(f'---------------------')
                             break
                 except:
-                    self.MainWindow.browser_log.append(f'[Error]輸入檔有誤，匯出中止')
+                    self.MainWindow.browser_log.append(f'[Error].rpt及.inp內容不符，中止匯出')
                     self.MainWindow.browser_log.append(f'---------------------')
                     break
 
@@ -119,8 +119,9 @@ class MainWindow(QMainWindow):
                         break
                     
                 else:
-                    self.MainWindow.browser_log.append(f'[Error].rpt及.inp內容不符，請確認')
+                    self.MainWindow.browser_log.append(f'[Error].rpt及.inp內容不符，中止匯出')
                     self.MainWindow.browser_log.append(f'---------------------')
+                    break
 
     def create_modelspace(self, *args, **kwargs):
         global msp
@@ -1003,6 +1004,8 @@ class MainWindow(QMainWindow):
 
             except:
                 self.MainWindow.browser_log.append(f'[Error]節點 {id} 錯誤，請手動修正.rpt檔內容')
+                QMessageBox.warning(None, '警告', f'節點{id}資料錯誤，請手動修正.rpt檔內容')
+
                 data={
                     'ID':id,
                     'Demand':None,
