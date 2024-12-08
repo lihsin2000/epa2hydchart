@@ -17,7 +17,7 @@ class MainWindow(QMainWindow):
         self.MainWindow.b_browser_inp.clicked.connect(self.loadinp)
         self.MainWindow.b_browser_rpt.clicked.connect(self.loadrpt)
         self.MainWindow.b_reset.clicked.connect(self.reset)
-        self.MainWindow.b_draw.clicked.connect(self.draw)
+        self.MainWindow.b_draw.clicked.connect(self.proceed)
         self.MainWindow.l_block_scale.setText(str(config.block_scale))
         self.MainWindow.l_block_scale.setValidator(QDoubleValidator())
         self.MainWindow.l_joint_scale.setText(str(config.joint_scale))
@@ -30,46 +30,36 @@ class MainWindow(QMainWindow):
     def main(self):
         global df_NodeResults, df_LinkResults
         QCoreApplication.processEvents()
-        # inpFile='test2.inp'
-        # rptFile='test2.rpt'
 
         inpFile=config.inpFile
         rptFile=config.rptFile
 
         import os
         if inpFile and rptFile:
-            rptFile2=self.rptProces(rptFile)
-            self.MainWindow.browser_log.append('.rpt前處理完成')
-
-            hr_list=self.multiHr(rptFile2)
-
-            if hr_list==[]:
-                hr_list=['']
-                self.MainWindow.l_times.setText('單一時段')
-            else:
-                n_pattern=len(hr_list)
-                self.MainWindow.l_times.setText(f'檢測到{n_pattern}個時段')
 
             dxfPath, _= QFileDialog.getSaveFileName(self, "儲存", "", filter='dxf (*.dxf)')
-            dictionary=os.path.dirname(dxfPath)
             file_name = os.path.basename(dxfPath)
-            file=os.path.splitext(os.path.basename(dxfPath))[0]
+            
+            self.inp_to_df(inpFile)
 
-            self.read_inp_to_df(inpFile)
-
-            for h in hr_list:
+            if hr_list==[]: # 單一時間結果
                 try:
-                    if len(hr_list)==1:
-                        df_NodeResults=self.readNodeResults(hr=None, input=rptFile2)
-                        # print('NodeResults')
-                        # print(df_NodeResults)
-
-                        df_LinkResults=self.readLinkResults(hr1=None, input=rptFile2)
-                        # print('LinkResults')
-                        # print(df_LinkResults)
-
-                        hr_str=''
-                    else:
+                    df_NodeResults=self.readNodeResults(hr=None, input=rptFile2)
+                    df_LinkResults=self.readLinkResults(hr1=None, input=rptFile2)
+                    matchLink, matchNode = self.inp_rpt_match()
+                    self.process2(matchLink=matchLink, matchNode=matchNode, dxfPath=dxfPath, hr='')
+                except Exception as e:
+                    print(e)
+                    self.MainWindow.browser_log.append(f'[Error]不明錯誤，中止匯出')
+                    self.MainWindow.browser_log.append(f'---------------------')
+            else:   # 多時段結果
+                hr_list_select=[]
+                items=self.MainWindow.list_hrs.selectedItems()
+                for item in items:
+                    hr_list_select.append(item.text())
+                
+                for h in hr_list_select:
+                    try:
                         df_NodeResults=self.readNodeResults(hr=h, input=rptFile2)
                         i_hr1=hr_list.index(h)
                         i_hr2=i_hr1+1
@@ -77,73 +67,85 @@ class MainWindow(QMainWindow):
                         if 1<=i_hr2<=len(hr_list)-1:
                             hr2=hr_list[i_hr2]
                             df_LinkResults=self.readLinkResults(hr1=h, hr2=hr2, input=rptFile2)
-                            hr_str=h
                         elif i_hr2==len(hr_list):
                             df_LinkResults=self.readLinkResults(hr1=h, hr2='', input=rptFile2)
-                            hr_str=h
-                            # print(f'{h}-{hr2}')
                         else:
-                            self.MainWindow.browser_log.append(f'[Error]中止匯出')
+                            self.MainWindow.browser_log.append(f'[Error]不明錯誤，中止匯出')
                             self.MainWindow.browser_log.append(f'---------------------')
                             break
-                except:
-                    self.MainWindow.browser_log.append(f'[Error].rpt及.inp內容不符，中止匯出')
-                    self.MainWindow.browser_log.append(f'---------------------')
-                    break
+                        
+                        matchLink, matchNode = self.inp_rpt_match()
+                        self.process2(matchLink=matchLink, matchNode=matchNode, dxfPath=dxfPath, hr=h)
 
-                matchLink, matchNode = self.inp_rpt_match()
-                if matchLink and matchNode:
-                    self.MainWindow.browser_log.append(f'{hr_str} .rpt及.inp內容相符')
-                    cad, msp=self.create_modelspace()
-
-                    tankerLeaderColor=210
-                    reservoirLeaderColor=210
-                    elevLeaderColor=headPressureLeaderColor=pumpAnnotaionColor=valveAnnotaionColor=210
-                    demandColor=74
-
-                    arrowBlock=cad.blocks.new(name='arrow')
-                    arrowBlock.add_polyline2d([(0,0), (30,-50), (-30,-50)], close=True,dxfattribs={'color': demandColor})
-                    arrowBlock.add_hatch(color=demandColor).paths.add_polyline_path([(0,0), (30,-50), (-30,-50)], is_closed=True)
-
-                    self.createBlocks(cad)
-                    self.insertBlocks()
-                    self.drawPipes()
-                    self.pipeInfo()
-                    self.demandLeader(demandColor)
-                    self.elevLeader(elevLeaderColor)
-                    self.headPressureLeader(headPressureLeaderColor)
-                    self.reservoirsLeader(reservoirLeaderColor)
-                    self.tankLeader(tankerLeaderColor)
-                    self.pumpAnnotation(pumpAnnotaionColor)
-                    self.valveAnnotation(valveAnnotaionColor)
-                    self.addTitle(hr_str=hr_str)
-
-                    if dxfPath:
-                        hr_str=hr_str.replace(':','-')
-                        if len(hr_list)>=2:
-                            dxfPath=f'{dictionary}/{file}_{hr_str}.dxf'
-                            pass
-
-                        self.save_dxf(cad=cad, path=dxfPath)
-                        self.MainWindow.browser_log.append(f'{h} .dxf 已存檔')
-
-                        svg_path=dxfPath.replace('.dxf', '.svg')
-                        self.save_svg(msp=msp, cad=cad, path=svg_path)
-                        self.MainWindow.browser_log.append(f'{h} .svg 已存檔')
-
-                        png_path=dxfPath.replace('.dxf', '.png')
-                        self.save_png(msp=msp, cad=cad, pngPath=png_path, svgPath=svg_path)
-                        self.MainWindow.browser_log.append(f'{h} .png 已存檔')
-
-                        self.MainWindow.browser_log.append('完成!')
+                    except Exception as e:
+                        print(e)
+                        self.MainWindow.browser_log.append(f'[Error]不明錯誤，中止匯出')
                         self.MainWindow.browser_log.append(f'---------------------')
-                    else:
                         break
-                    
-                else:
-                    self.MainWindow.browser_log.append(f'[Error].rpt及.inp內容不符，中止匯出')
-                    self.MainWindow.browser_log.append(f'---------------------')
-                    break
+
+    def process2(self, *args, **kwargs):
+        import os
+        matchLink=kwargs.get('matchLink')
+        matchNode=kwargs.get('matchNode')
+        dxfPath=kwargs.get('dxfPath')
+        h=kwargs.get('hr')
+
+        if h=='':
+            hr_str=''
+        else:
+            hr_str=h
+
+        dictionary=os.path.dirname(dxfPath)
+        file=os.path.splitext(os.path.basename(dxfPath))[0]
+
+        if matchLink and matchNode:
+            self.MainWindow.browser_log.append(f'{hr_str} .rpt及.inp內容相符')
+            cad, msp=self.create_modelspace()
+
+            tankerLeaderColor=210
+            reservoirLeaderColor=210
+            elevLeaderColor=headPressureLeaderColor=pumpAnnotaionColor=valveAnnotaionColor=210
+            demandColor=74
+
+            arrowBlock=cad.blocks.new(name='arrow')
+            arrowBlock.add_polyline2d([(0,0), (30,-50), (-30,-50)], close=True,dxfattribs={'color': demandColor})
+            arrowBlock.add_hatch(color=demandColor).paths.add_polyline_path([(0,0), (30,-50), (-30,-50)], is_closed=True)
+
+            self.createBlocks(cad)
+            self.insertBlocks()
+            self.drawPipes()
+            self.pipeInfo()
+            self.demandLeader(demandColor)
+            self.elevLeader(elevLeaderColor)
+            self.headPressureLeader(headPressureLeaderColor)
+            self.reservoirsLeader(reservoirLeaderColor)
+            self.tankLeader(tankerLeaderColor)
+            self.pumpAnnotation(pumpAnnotaionColor)
+            self.valveAnnotation(valveAnnotaionColor)
+            self.addTitle(hr_str=hr_str)
+
+            if dxfPath:
+                hr_str=hr_str.replace(':','-')
+                if len(hr_list)>=2:
+                    dxfPath=f'{dictionary}/{file}_{hr_str}.dxf'
+
+                self.save_dxf(cad=cad, path=dxfPath)
+                self.MainWindow.browser_log.append(f'{h} .dxf 已存檔')
+
+                svg_path=dxfPath.replace('.dxf', '.svg')
+                self.save_svg(msp=msp, cad=cad, path=svg_path)
+                self.MainWindow.browser_log.append(f'{h} .svg 已存檔')
+
+                png_path=dxfPath.replace('.dxf', '.png')
+                self.save_png(msp=msp, cad=cad, pngPath=png_path, svgPath=svg_path)
+                self.MainWindow.browser_log.append(f'{h} .png 已存檔')
+
+                self.MainWindow.browser_log.append('完成!')
+                self.MainWindow.browser_log.append(f'---------------------')
+            
+        else:
+            self.MainWindow.browser_log.append(f'[Error]{h}.rpt及.inp內容不符，中止匯出')
+            self.MainWindow.browser_log.append(f'---------------------')
 
     def create_modelspace(self, *args, **kwargs):
         global msp
@@ -172,7 +174,10 @@ class MainWindow(QMainWindow):
         for i in range(0, len(df_Junctions)):
             id=df_Junctions.at[i,'ID']
             row=df_NodeResults.index[df_NodeResults['ID']==id].tolist()[0]
-            Q=Q+Decimal(df_NodeResults.at[row, 'Demand'])
+            if df_NodeResults.at[row, 'Demand'] != None:
+                Q=Q+Decimal(df_NodeResults.at[row, 'Demand'])
+            else:
+                self.MainWindow.browser_log.append(f'[Error]節點 {id} Demand數值錯誤，Q值總計可能有誤')
 
         # 匯整C值
         C_str=''
@@ -245,7 +250,7 @@ class MainWindow(QMainWindow):
         matchNode=outputAllNode.equals(inputAllNode)
         return matchLink,matchNode
 
-    def read_inp_to_df(self, inpFile):
+    def inp_to_df(self, inpFile):
         global df_Reservoirs, df_Tanks, df_Coords, df_Junctions, df_Pumps, df_Pipes, df_Vertices, df_Valves
         df_Coords=self.readCoords(inpFile)
         # print('Coords')
@@ -281,6 +286,7 @@ class MainWindow(QMainWindow):
         pass
 
     def multiHr(self, rptFile2):
+        global hr_list
         rptFile2_lines=open(rptFile2).readlines()
 
         i=0
@@ -315,13 +321,28 @@ class MainWindow(QMainWindow):
         self.MainWindow.l_projName.setText(config.projName)
 
     def loadrpt(self):
+        global rptFile2
         file, type=QFileDialog.getOpenFileName(self, '開啟rpt檔',filter='rpt (*.rpt)')
-        if self.MainWindow.l_rpt_path.text() =='':
-            self.MainWindow.l_rpt_path.setText(file)
-        elif self.MainWindow.l_rpt_path.text() !='' and file=='':
+
+        if self.MainWindow.l_rpt_path.text() !='' and file=='':
             file=self.MainWindow.l_rpt_path.text()
         else:
+            self.MainWindow.list_hrs.clear()
             self.MainWindow.l_rpt_path.setText(file)
+
+            rptFile2=self.rptProces(file)
+            self.MainWindow.browser_log.append('.rpt前處理完成')
+
+            hr_list=self.multiHr(rptFile2)
+
+            if hr_list==[]:
+                hr_list=['']
+                self.MainWindow.list_hrs.addItems(['單一時段'])
+                self.MainWindow.list_hrs.selectAll()
+            else:
+                self.MainWindow.list_hrs.addItems(hr_list)
+                self.MainWindow.list_hrs.selectAll()
+
         config.rptFile=file
 
     def reset(self):
@@ -332,13 +353,13 @@ class MainWindow(QMainWindow):
         
         self.MainWindow.l_inp_path.setText('')
         self.MainWindow.l_rpt_path.setText('')
-        self.MainWindow.l_times.setText('')
         self.MainWindow.l_projName.setText('')
+        self.MainWindow.list_hrs.clear()
         config.inpFile=None
         config.rptFile=None
         config.projName=None
 
-    def draw(self):
+    def proceed(self):
         config.block_scale=float(self.MainWindow.l_block_scale.text())
         config.joint_scale=float(self.MainWindow.l_joint_scale.text())
         config.text_size=float(self.MainWindow.l_text_size.text())
@@ -1051,7 +1072,7 @@ class MainWindow(QMainWindow):
                     'Head':None,
                     'Pressure':None,
                     }
-                # print(f'error id:{id}')                 
+                # print(f'error id:{id}')
                 
             if df.empty:
                 df.loc[0]=data
@@ -1180,11 +1201,8 @@ class MainWindow(QMainWindow):
         with open(svgPath, "wt", encoding="utf8") as fp:
             fp.write(svg_string)
 
-if __name__ == '__main__':
-    QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)   # Enable high DPI
-    app = QApplication(sys.argv)
-    window = MainWindow()
-    window.show()
-    sys.exit(app.exec())
-
-    # main()
+QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)   # Enable high DPI
+app = QApplication(sys.argv)
+window = MainWindow()
+window.show()
+sys.exit(app.exec())
