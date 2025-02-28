@@ -1,7 +1,7 @@
 import re
 import pandas as pd
 import ezdxf
-import sys
+import sys, warnings
 
 from Ui_ui import Ui_MainWindow
 from PyQt5.QtCore import *
@@ -14,22 +14,22 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__()
         self.MainWindow = Ui_MainWindow()
         self.MainWindow.setupUi(self)
-        self.MainWindow.b_browser_inp.clicked.connect(self.loadinp)
-        self.MainWindow.b_browser_rpt.clicked.connect(self.loadrpt)
-        self.MainWindow.b_reset.clicked.connect(self.reset)
-        self.MainWindow.b_draw.clicked.connect(self.proceed)
-        self.MainWindow.l_block_scale.setText(str(config.block_scale))
-        self.MainWindow.l_block_scale.setValidator(QDoubleValidator())
-        self.MainWindow.l_joint_scale.setText(str(config.joint_scale))
-        self.MainWindow.l_joint_scale.setValidator(QDoubleValidator())
-        self.MainWindow.l_text_size.setText(str(config.text_size))
+        self.MainWindow.b_browser_inp.clicked.connect(self.loadinpButton)
+        self.MainWindow.b_browser_rpt.clicked.connect(self.loadrptButton)
+        self.MainWindow.b_reset.clicked.connect(self.resetButton)
+        self.MainWindow.b_draw.clicked.connect(self.processButton)
+        self.MainWindow.l_block_size.setText(str(config.block_scale_default))
+        self.MainWindow.l_block_size.setValidator(QDoubleValidator())
+        self.MainWindow.l_joint_size.setText(str(config.joint_scale_default))
+        self.MainWindow.l_joint_size.setValidator(QDoubleValidator())
+        self.MainWindow.l_text_size.setText(str(config.text_size_default))
         self.MainWindow.l_text_size.setValidator(QDoubleValidator())
-        self.MainWindow.l_leader_distance.setText(str(config.leader_distance))
+        self.MainWindow.l_leader_distance.setText(str(config.leader_distance_default))
         self.MainWindow.l_leader_distance.setValidator(QIntValidator())
+        self.MainWindow.b_auto_block_size.clicked.connect(self.autoBlockSizeButton)
 
-    def main(self):
+    def process1(self):
         global df_NodeResults, df_LinkResults
-        QCoreApplication.processEvents()
 
         inpFile=config.inpFile
         rptFile=config.rptFile
@@ -42,46 +42,103 @@ class MainWindow(QMainWindow):
             
             self.inp_to_df(inpFile)
 
-            if hr_list==[]: # 單一時間結果
-                try:
-                    df_NodeResults=self.readNodeResults(hr=None, input=rptFile2)
-                    df_LinkResults=self.readLinkResults(hr1=None, input=rptFile2)
-                    matchLink, matchNode = self.inp_rpt_match()
-                    self.process2(matchLink=matchLink, matchNode=matchNode, dxfPath=dxfPath, hr='')
-                except Exception as e:
-                    print(e)
-                    self.MainWindow.browser_log.append(f'[Error]不明錯誤，中止匯出')
-                    self.MainWindow.browser_log.append(f'---------------------')
-            else:   # 多時段結果
-                hr_list_select=[]
-                items=self.MainWindow.list_hrs.selectedItems()
-                for item in items:
-                    hr_list_select.append(item.text())
-                
-                for h in hr_list_select:
+            if dxfPath!='':
+                if hr_list==[]: # 單一時間結果
                     try:
-                        df_NodeResults=self.readNodeResults(hr=h, input=rptFile2)
-                        i_hr1=hr_list.index(h)
-                        i_hr2=i_hr1+1
-
-                        if 1<=i_hr2<=len(hr_list)-1:
-                            hr2=hr_list[i_hr2]
-                            df_LinkResults=self.readLinkResults(hr1=h, hr2=hr2, input=rptFile2)
-                        elif i_hr2==len(hr_list):
-                            df_LinkResults=self.readLinkResults(hr1=h, hr2='', input=rptFile2)
-                        else:
-                            self.MainWindow.browser_log.append(f'[Error]不明錯誤，中止匯出')
-                            self.MainWindow.browser_log.append(f'---------------------')
-                            break
-                        
+                        df_NodeResults=self.readNodeResults(hr=None, input=rptFile2)
+                        df_LinkResults=self.readLinkResults(hr1=None, input=rptFile2)
                         matchLink, matchNode = self.inp_rpt_match()
-                        self.process2(matchLink=matchLink, matchNode=matchNode, dxfPath=dxfPath, hr=h)
-
+                        self.process2(matchLink=matchLink, matchNode=matchNode, dxfPath=dxfPath, hr='')
                     except Exception as e:
                         print(e)
                         self.MainWindow.browser_log.append(f'[Error]不明錯誤，中止匯出')
                         self.MainWindow.browser_log.append(f'---------------------')
-                        break
+                        self.setLogToButton()
+                else:   # 多時段結果
+                    hr_list_select=[]
+                    items=self.MainWindow.list_hrs.selectedItems()
+                    for item in items:
+                        hr_list_select.append(item.text())
+                    
+                    for h in hr_list_select:
+                        try:
+                            df_NodeResults=self.readNodeResults(hr=h, input=rptFile2)
+                            i_hr1=hr_list.index(h)
+                            i_hr2=i_hr1+1
+
+                            if 1<=i_hr2<=len(hr_list)-1:
+                                hr2=hr_list[i_hr2]
+                                df_LinkResults=self.readLinkResults(hr1=h, hr2=hr2, input=rptFile2)
+                            elif i_hr2==len(hr_list):
+                                df_LinkResults=self.readLinkResults(hr1=h, hr2='', input=rptFile2)
+                            else:
+                                self.MainWindow.browser_log.append(f'[Error]不明錯誤，中止匯出')
+                                self.MainWindow.browser_log.append(f'---------------------')
+                                self.setLogToButton()
+                                break
+                            
+                            matchLink, matchNode = self.inp_rpt_match()
+                            self.process2(matchLink=matchLink, matchNode=matchNode, dxfPath=dxfPath, hr=h)
+
+                        except Exception as e:
+                            print(e)
+                            self.MainWindow.browser_log.append(f'[Error]不明錯誤，中止匯出')
+                            self.MainWindow.browser_log.append(f'---------------------')
+                            self.setLogToButton()
+                            break
+
+
+    def autoBlockSizeButton(self):
+        if config.inpFile:
+            self.inp_to_df(config.inpFile)
+            df_coordsFromEverydf=pd.DataFrame()
+            try:
+                coords=df_Coords[['x','y']]
+            except:
+                coords=pd.DataFrame()
+
+            try:
+                junctions=df_Junctions[['x','y']]
+            except:
+                junctions=pd.DataFrame()
+
+            try:
+                reservoirs=df_Reservoirs[['x','y']]
+            except:
+                reservoirs=pd.DataFrame()
+
+            try:
+                tanks=df_Tanks[['x','y']]
+            except:
+                tanks=pd.DataFrame()
+
+            try:
+                pumps=df_Pumps[['x','y']]
+            except:
+                pumps=pd.DataFrame()
+
+            try:
+                valves=df_Valves[['x','y']]
+            except:
+                valves=pd.DataFrame()
+
+            try:
+                vertices=df_Vertices[['x','y']]
+            except:
+                vertices=pd.DataFrame()
+                
+            df_coordsFromEverydf=pd.concat([coords,junctions,reservoirs,tanks,pumps,valves,vertices], ignore_index=True)
+
+            x_min=min(df_coordsFromEverydf['x'])
+            x_max=max(df_coordsFromEverydf['x'])
+            blockSizeEstimate=float(int((x_max-x_min)/1000)*10)
+            if blockSizeEstimate == 0:
+                blockSizeEstimate=10
+            
+            self.MainWindow.l_block_size.setText(str(blockSizeEstimate))
+            self.MainWindow.l_joint_size.setText(str(blockSizeEstimate/4))
+            self.MainWindow.l_text_size.setText(str(blockSizeEstimate/4))
+            self.MainWindow.l_leader_distance.setText(str(blockSizeEstimate/2))
 
     def process2(self, *args, **kwargs):
         import os
@@ -100,6 +157,7 @@ class MainWindow(QMainWindow):
 
         if matchLink and matchNode:
             self.MainWindow.browser_log.append(f'{hr_str} .rpt及.inp內容相符')
+            self.setLogToButton()
             cad, msp=self.create_modelspace()
 
             tankerLeaderColor=210
@@ -108,8 +166,8 @@ class MainWindow(QMainWindow):
             demandColor=74
 
             arrowBlock=cad.blocks.new(name='arrow')
-            arrowBlock.add_polyline2d([(0,0), (30,-50), (-30,-50)], close=True,dxfattribs={'color': demandColor})
-            arrowBlock.add_hatch(color=demandColor).paths.add_polyline_path([(0,0), (30,-50), (-30,-50)], is_closed=True)
+            arrowBlock.add_polyline2d([(0,0), (0.15,-0.25), (-0.15,-0.25)], close=True,dxfattribs={'color': demandColor})
+            arrowBlock.add_hatch(color=demandColor).paths.add_polyline_path([(0,0), (0.15,-0.25), (-0.15,-0.25)], is_closed=True)
 
             self.createBlocks(cad)
             self.insertBlocks()
@@ -128,24 +186,33 @@ class MainWindow(QMainWindow):
                 hr_str=hr_str.replace(':','-')
                 if len(hr_list)>=2:
                     dxfPath=f'{dictionary}/{file}_{hr_str}.dxf'
-
+                    
+                dxfPathWithoutExtension=dxfPath.replace('.dxf','')
                 self.save_dxf(cad=cad, path=dxfPath)
-                self.MainWindow.browser_log.append(f'{h} .dxf 已存檔')
+                self.MainWindow.browser_log.append(f'{dxfPathWithoutExtension}.dxf 已存檔')
+                self.setLogToButton()
 
                 svg_path=dxfPath.replace('.dxf', '.svg')
                 self.save_svg(msp=msp, cad=cad, path=svg_path)
-                self.MainWindow.browser_log.append(f'{h} .svg 已存檔')
+                self.MainWindow.browser_log.append(f'{dxfPathWithoutExtension}.svg 已存檔')
+                self.setLogToButton()
 
                 png_path=dxfPath.replace('.dxf', '.png')
                 self.save_png(msp=msp, cad=cad, pngPath=png_path, svgPath=svg_path)
-                self.MainWindow.browser_log.append(f'{h} .png 已存檔')
+                self.MainWindow.browser_log.append(f'{dxfPathWithoutExtension}.png 已存檔')
+                self.setLogToButton()
 
                 self.MainWindow.browser_log.append('完成!')
                 self.MainWindow.browser_log.append(f'---------------------')
+                self.setLogToButton()
             
         else:
             self.MainWindow.browser_log.append(f'[Error]{h}.rpt及.inp內容不符，中止匯出')
             self.MainWindow.browser_log.append(f'---------------------')
+            self.setLogToButton()
+
+    def setLogToButton(self):
+        self.MainWindow.browser_log.verticalScrollBar().setValue(self.MainWindow.browser_log.verticalScrollBar().maximum())
 
     def create_modelspace(self, *args, **kwargs):
         global msp
@@ -178,6 +245,7 @@ class MainWindow(QMainWindow):
                 Q=Q+Decimal(df_NodeResults.at[row, 'Demand'])
             else:
                 self.MainWindow.browser_log.append(f'[Error]節點 {id} Demand數值錯誤，Q值總計可能有誤')
+                self.setLogToButton()
 
         # 匯整C值
         C_str=''
@@ -252,38 +320,15 @@ class MainWindow(QMainWindow):
 
     def inp_to_df(self, inpFile):
         global df_Reservoirs, df_Tanks, df_Coords, df_Junctions, df_Pumps, df_Pipes, df_Vertices, df_Valves
+        
         df_Coords=self.readCoords(inpFile)
-        # print('Coords')
-        # print(df_Coords)
-
         df_Junctions=self.readJunctions(inpFile)
-        # print('Junctions')
-        # print(df_Junctions)
-
         df_Reservoirs=self.readReservoirs(inpFile)
-        # print('Reservoirs')
-        # print(df_Reservoirs)
-            
         df_Tanks=self.readTanks(inpFile)
-        # print('Tanks')
-        # print(df_Tanks)
-
         df_Pumps=self.readPumps(inpFile)
-        # print('Pumps')
-        # print(df_Pumps)
-
         df_Valves=self.readValves(inpFile)
-        # print('Valves')
-        # print(df_Valves)
-
         df_Pipes=self.readPipes(inpFile)
-        # print('Pipes')
-        # print(df_Pipes)
-
         df_Vertices=self.readVertices(inpFile)
-        # print('Vertices')
-        # print(df_Vertices)
-        pass
 
     def multiHr(self, rptFile2):
         global hr_list
@@ -305,7 +350,7 @@ class MainWindow(QMainWindow):
 
         return hr_list
 
-    def loadinp(self):
+    def loadinpButton(self):
         import os
         
         file, type=QFileDialog.getOpenFileName(self, '開啟inp檔',filter='inp (*.inp)')
@@ -320,7 +365,7 @@ class MainWindow(QMainWindow):
         config.projName=os.path.splitext(os.path.basename(file))[0]
         self.MainWindow.l_projName.setText(config.projName)
 
-    def loadrpt(self):
+    def loadrptButton(self):
         global rptFile2
         file, type=QFileDialog.getOpenFileName(self, '開啟rpt檔',filter='rpt (*.rpt)')
 
@@ -332,6 +377,7 @@ class MainWindow(QMainWindow):
 
             rptFile2=self.rptProces(file)
             self.MainWindow.browser_log.append('.rpt前處理完成')
+            self.setLogToButton()
 
             hr_list=self.multiHr(rptFile2)
 
@@ -341,13 +387,14 @@ class MainWindow(QMainWindow):
                 self.MainWindow.list_hrs.selectAll()
             else:
                 self.MainWindow.list_hrs.addItems(hr_list)
-                self.MainWindow.list_hrs.selectAll()
+                # self.MainWindow.list_hrs.selectAll()
+                self.MainWindow.list_hrs.item(0).setSelected(True)
 
         config.rptFile=file
 
-    def reset(self):
-        self.MainWindow.l_block_scale.setText(str(config.block_scale_default))
-        self.MainWindow.l_joint_scale.setText(str(config.joint_scale_default))
+    def resetButton(self):
+        self.MainWindow.l_block_size.setText(str(config.block_scale_default))
+        self.MainWindow.l_joint_size.setText(str(config.joint_scale_default))
         self.MainWindow.l_text_size.setText(str(config.text_size_default))
         self.MainWindow.l_leader_distance.setText(str(config.leader_distance_default))
         
@@ -359,19 +406,18 @@ class MainWindow(QMainWindow):
         config.rptFile=None
         config.projName=None
 
-    def proceed(self):
-        config.block_scale=float(self.MainWindow.l_block_scale.text())
-        config.joint_scale=float(self.MainWindow.l_joint_scale.text())
+    def processButton(self):
+        config.block_scale=float(self.MainWindow.l_block_size.text())
+        config.joint_scale=float(self.MainWindow.l_joint_size.text())
         config.text_size=float(self.MainWindow.l_text_size.text())
         config.leader_distance=float(self.MainWindow.l_leader_distance.text())
         
-        self.main()
+        self.process1()
 
     def headPressureLeader(self, color):
         from ezdxf.enums import TextEntityAlignment
         try:
             for i in range(0, len(df_Junctions)):
-                QCoreApplication.processEvents()
                 id=df_Junctions.at[i,'ID']
                 x=float(df_Junctions.at[i,'x'])
                 y=float(df_Junctions.at[i,'y'])
@@ -398,40 +444,41 @@ class MainWindow(QMainWindow):
                 msp.add_text(Head, height=config.text_size, dxfattribs={'color': color_head, "style": "epa2HydChart"}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y+2*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
                 msp.add_text(Pressure, height=config.text_size, dxfattribs={'color': color_pressure, "style": "epa2HydChart"}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y-0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
                 self.MainWindow.browser_log.append(f'節點 {id} 壓力引線已完成繪圖')
+                self.setLogToButton()
+                QCoreApplication.processEvents()
         except:
             # print(i)
             pass
     
     def createBlocks(self, cad):
         tankBlock=cad.blocks.new(name='tank')
-        tankBlock.add_polyline2d([(100,0), (100,100), (-100,100), (-100,0), (-50,0), (-50,-100), (50,-100), (50,0)], close=True)
-        tankBlock.add_hatch().paths.add_polyline_path([(100,0), (100,100), (-100,100), (-100,0), (-50,0), (-50,-100), (50,-100), (50,0)], is_closed=True)
+        tankBlock.add_polyline2d([(0.5,0), (0.5,0.5), (-0.5,0.5), (-0.5,0), (-0.25,0), (-0.25,-0.5), (0.25,-0.5), (0.25,0)], close=True)
+        tankBlock.add_hatch().paths.add_polyline_path([(0.5,0), (0.5,0.5), (-0.5,0.5), (-0.5,0), (-0.25,0), (-0.25,-0.5), (0.25,-0.5), (0.25,0)], is_closed=True)
 
         reservoirBlock=cad.blocks.new(name='reservoir')
-        reservoirBlock.add_polyline2d([(100,-50), (100,100), (85,100), (85,50), (-85,50), (-85,100), (-100,100), (-100,-50)], close=True)
-        reservoirBlock.add_hatch().paths.add_polyline_path([(100,-50), (100,100), (85,100), (85,50), (-85,50), (-85,100), (-100,100), (-100,-50)], is_closed=True)
+        reservoirBlock.add_polyline2d([(0.5,-0.25), (0.5,0.5), (0.4,0.5), (0.4,0.25), (-0.4,0.25), (-0.4,0.5), (-0.5,0.5), (-0.5,-0.25)], close=True)
+        reservoirBlock.add_hatch().paths.add_polyline_path([(0.5,-0.25), (0.5,0.5), (0.4,0.5), (0.4,0.25), (-0.4,0.25), (-0.4,0.5), (-0.5,0.5), (-0.5,-0.25)], is_closed=True)
 
         junctionBlock=cad.blocks.new(name='junction')
-        junctionBlock.add_ellipse((0,0), major_axis=(0,50), ratio=1)
-        junctionBlock.add_hatch().paths.add_edge_path().add_ellipse((0,0), major_axis=(0,50), ratio=1)
+        junctionBlock.add_ellipse((0,0), major_axis=(0,0.5), ratio=1)
+        junctionBlock.add_hatch().paths.add_edge_path().add_ellipse((0,0), major_axis=(0,0.5), ratio=1)
 
         valveBlock=cad.blocks.new(name='valve')
-        valveBlock.add_polyline2d([(0,0), (50,30), (50,-30)], close=True)
-        valveBlock.add_polyline2d([(0,0), (-50,30), (-50,-30)], close=True)
-        valveBlock.add_hatch().paths.add_polyline_path([(0,0), (50,30), (50,-30)], is_closed=True)
-        valveBlock.add_hatch().paths.add_polyline_path([(0,0), (-50,30), (-50,-30)], is_closed=True)
+        valveBlock.add_polyline2d([(0,0), (0.5,0.3), (0.5,-0.3)], close=True)
+        valveBlock.add_polyline2d([(0,0), (-0.5,0.3), (-0.5,-0.3)], close=True)
+        valveBlock.add_hatch().paths.add_polyline_path([(0,0), (0.5,0.3), (0.5,-0.3)], is_closed=True)
+        valveBlock.add_hatch().paths.add_polyline_path([(0,0), (-0.5,0.3), (-0.5,-0.3)], is_closed=True)
 
         from ezdxf.enums import TextEntityAlignment
         from ezdxf.math import Vec2
         pumpBlock=cad.blocks.new(name='pump')
-        pumpBlock.add_circle(Vec2(0,0), 100.0)
-        pumpBlock.add_text("P", height=100, dxfattribs={"style": "epa2HydChart"}).set_placement((0,0), align=TextEntityAlignment.MIDDLE_CENTER)
+        pumpBlock.add_circle(Vec2(0,0), 0.5)
+        pumpBlock.add_text("P", height=0.8, dxfattribs={"style": "epa2HydChart"}).set_placement((0,0), align=TextEntityAlignment.MIDDLE_CENTER)
 
     def elevLeader(self, color):
         from ezdxf.enums import TextEntityAlignment
 
         for i in range(0, len(df_Junctions)):
-            QCoreApplication.processEvents()
             id=df_Junctions.at[i,'ID']
             x=float(df_Junctions.at[i,'x'])
             y=float(df_Junctions.at[i,'y'])
@@ -449,12 +496,13 @@ class MainWindow(QMainWindow):
                                 (leader_up_end_x+6*config.text_size,leader_up_end_y)], dxfattribs={'color': color})
             msp.add_text(elev, height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y+0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
             self.MainWindow.browser_log.append(f'節點 {id} 高程引線已完成繪圖')
+            self.setLogToButton()
+            QCoreApplication.processEvents()
 
     def demandLeader(self, color):
         from ezdxf.enums import TextEntityAlignment
 
         for i in range(0, len(df_Junctions)):
-            QCoreApplication.processEvents()
             id=df_Junctions.at[i,'ID']
             x=float(df_Junctions.at[i,'x'])
             y=float(df_Junctions.at[i,'y'])
@@ -473,11 +521,12 @@ class MainWindow(QMainWindow):
                 msp.add_polyline2d([(leader_down_start_x,leader_down_start_y),(leader_down_end_x,leader_down_end_y)], dxfattribs={'color': color})
                 msp.add_text(demand, height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((leader_down_end_x+0.5*config.text_size, leader_down_end_y-0.5*config.text_size), align=TextEntityAlignment.TOP_LEFT)
                 self.MainWindow.browser_log.append(f'節點 {id} 水量引線已完成繪圖')
+                self.setLogToButton()
+            QCoreApplication.processEvents()
 
     def reservoirsLeader(self, color):
         from ezdxf.enums import TextEntityAlignment
         for i in range(0, len(df_Reservoirs)):
-            QCoreApplication.processEvents()
             id=df_Reservoirs.at[i,'ID']
             x=float(df_Reservoirs.at[i,'x'])
             y=float(df_Reservoirs.at[i,'y'])
@@ -497,11 +546,12 @@ class MainWindow(QMainWindow):
             msp.add_text('ELEV', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y+0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
             msp.add_text('Pressure', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y-0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
             self.MainWindow.browser_log.append(f'接水點 {id} 引線已完成繪圖')
+            self.setLogToButton()
+            QCoreApplication.processEvents()
 
     def pumpAnnotation(self, color):
         from ezdxf.enums import TextEntityAlignment
         for i in range(0, len(df_Pumps)):
-            QCoreApplication.processEvents()
             id=df_Pumps.at[i,'ID']
             x=float(df_Pumps.at[i,'x'])
             y=float(df_Pumps.at[i,'y'])
@@ -509,17 +559,18 @@ class MainWindow(QMainWindow):
             Q=float(df_Pumps.at[i,'Q'])
             H=float(df_Pumps.at[i,'H'])
 
-            offset=[config.block_scale*100+0.75*config.text_size,
-                    config.block_scale*100+2*config.text_size]
+            offset=[config.block_scale+0.75*config.text_size,
+                    config.block_scale+2*config.text_size]
 
             msp.add_text(f'Q:{Q}', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((x+2*config.text_size,y-offset[0]), align=TextEntityAlignment.MIDDLE_RIGHT)
             msp.add_text(f'H:{H}', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((x+2*config.text_size,y-offset[1]), align=TextEntityAlignment.MIDDLE_RIGHT)
             self.MainWindow.browser_log.append(f'抽水機 {id} 已完成繪圖')
+            self.setLogToButton()
+            QCoreApplication.processEvents()
 
     def valveAnnotation(self, color):
         from ezdxf.enums import TextEntityAlignment
         for i in range(0, len(df_Valves)):
-            QCoreApplication.processEvents()
             id=df_Valves.at[i,'ID']
 
             x1=float(df_Valves.at[i,'Node1_x'])
@@ -540,11 +591,12 @@ class MainWindow(QMainWindow):
             msp.add_text(f'{Type}', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((x,y-offset[0]), align=TextEntityAlignment.MIDDLE_CENTER)
             msp.add_text(f'{Setting}', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((x,y-offset[1]), align=TextEntityAlignment.MIDDLE_CENTER)
             self.MainWindow.browser_log.append(f'閥件 {id} 已完成繪圖')
+            self.setLogToButton()
+            QCoreApplication.processEvents()
 
     def tankLeader(self, color):
         from ezdxf.enums import TextEntityAlignment
         for i in range(0, len(df_Tanks)):
-            QCoreApplication.processEvents()
             id=df_Tanks.at[i,'ID']
             x=float(df_Tanks.at[i,'x'])
             y=float(df_Tanks.at[i,'y'])
@@ -572,6 +624,8 @@ class MainWindow(QMainWindow):
             msp.add_text(f'Mwl:{minElev}', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((leader_up_end_x+10*config.text_size,leader_up_end_y+0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
             msp.add_text(f'Elev:{elev}', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((leader_up_end_x+10*config.text_size,leader_up_end_y-0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
             self.MainWindow.browser_log.append(f'水池 {id} 已完成繪圖')
+            self.setLogToButton()
+            QCoreApplication.processEvents()
 
     def pipeInfo(self):
         for i in range(0, len(df_Pipes)):
@@ -658,6 +712,7 @@ class MainWindow(QMainWindow):
             msp.add_text(text_up, height=config.text_size, rotation=rotation_text, dxfattribs={"style": "epa2HydChart"}).set_placement((text_x, text_y), align=TextEntityAlignment.TOP_CENTER)
         except:
             self.MainWindow.browser_log.append(f'[Error]管線 {id} 錯誤，請重新匯出inp及rpt檔後重試')
+            self.setLogToButton()
 
     def rotation_text(self, start_x, start_y, end_x, end_y):
         import math
@@ -673,7 +728,6 @@ class MainWindow(QMainWindow):
 
     def drawPipes(self):
         for i in range(0, len(df_Pipes)):
-            QCoreApplication.processEvents()
             start_x=float(df_Pipes.at[i, 'Node1_x'])
             start_y=float(df_Pipes.at[i, 'Node1_y'])
             end_x=float(df_Pipes.at[i, 'Node2_x'])
@@ -697,47 +751,52 @@ class MainWindow(QMainWindow):
                 lastVert_y=float(df_Vertices.at[rows[len(rows)-1],'y'])
                 msp.add_polyline2d([(lastVert_x,lastVert_y), (end_x,end_y)])
                 self.MainWindow.browser_log.append(f'管線 {link_id} 已完成繪圖')
+                self.setLogToButton()
             
             else:
                 msp.add_polyline2d([(end_x,end_y), (start_x,start_y)])
+
+            QCoreApplication.processEvents()
 
     def insertBlocks(self):
         for item in ['tank', 'reservoir', 'junction', 'pump', 'valve']:
             if item == 'tank':
                 df=df_Tanks
                 for i in range (0, len(df)):
-                    QCoreApplication.processEvents()
                     id=df.at[i,'ID']
                     x=float(df.at[i,'x'])
                     y=float(df.at[i,'y'])
                     msp.add_blockref(item, [x,y], dxfattribs={'xscale':config.block_scale, 'yscale':config.block_scale})
                     self.MainWindow.browser_log.append(f'水池 {id} 圖塊已插入')
+                    self.setLogToButton()
+                    QCoreApplication.processEvents()
 
             if item == 'reservoir':
                 df=df_Reservoirs
                 for i in range (0, len(df)):
-                    QCoreApplication.processEvents()
                     id=df.at[i,'ID']
                     x=float(df.at[i,'x'])
                     y=float(df.at[i,'y'])
                     msp.add_blockref(item, [x,y], dxfattribs={'xscale':config.block_scale, 'yscale':config.block_scale})
                     self.MainWindow.browser_log.append(f'接水點 {id} 圖塊已插入')
+                    self.setLogToButton()
+                    QCoreApplication.processEvents()
 
             if item == 'pump':
                 df=df_Pumps
                 for i in range (0, len(df)):
-                    QCoreApplication.processEvents()
                     id=df.at[i,'ID']
                     x=float(df.at[i,'x'])
                     y=float(df.at[i,'y'])
                     msp.add_blockref(item, [x,y], dxfattribs={'xscale':config.block_scale, 'yscale':config.block_scale})
                     self.MainWindow.browser_log.append(f'抽水機 {id} 圖塊已插入')
+                    self.setLogToButton()
+                    QCoreApplication.processEvents()
 
             if item == 'valve':
                 import math
                 df=df_Valves
                 for i in range (0, len(df)):
-                    QCoreApplication.processEvents()
                     id=df.at[i,'ID']
                     x1=float(df.at[i,'Node1_x'])
                     y1=float(df.at[i,'Node1_y'])
@@ -753,16 +812,19 @@ class MainWindow(QMainWindow):
                     msp.add_blockref(item, [x,y], dxfattribs={'xscale':config.block_scale, 'yscale':config.block_scale, 'rotation':rotation})
                     msp.add_polyline2d([(x1,y1), (x2,y2)])
                     self.MainWindow.browser_log.append(f'閥件 {id} 圖塊已插入')
+                    self.setLogToButton()
+                    QCoreApplication.processEvents()
 
             if item == 'junction':
                 df=df_Junctions
                 for i in range (0, len(df)):
-                    QCoreApplication.processEvents()
                     id=df.at[i,'ID']
                     x=float(df.at[i,'x'])
                     y=float(df.at[i,'y'])
                     msp.add_blockref(item, [x,y], dxfattribs={'xscale':config.joint_scale, 'yscale':config.joint_scale})
                     self.MainWindow.browser_log.append(f'節點 {id} 圖塊已插入')
+                    self.setLogToButton()
+                    QCoreApplication.processEvents()
                 
     def lineStartEnd(self, input, startStr, endStr, start_offset, end_offset):
         index = 0
@@ -1064,6 +1126,7 @@ class MainWindow(QMainWindow):
 
             except:
                 self.MainWindow.browser_log.append(f'[Error]節點 {id} 錯誤，請手動修正.rpt檔內容')
+                self.setLogToButton()
                 QMessageBox.warning(None, '警告', f'節點{id}資料錯誤，請手動修正.rpt檔內容')
 
                 data={
@@ -1201,6 +1264,7 @@ class MainWindow(QMainWindow):
         with open(svgPath, "wt", encoding="utf8") as fp:
             fp.write(svg_string)
 
+warnings.simplefilter(action='ignore', category=FutureWarning)
 QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)   # Enable high DPI
 app = QApplication(sys.argv)
 window = MainWindow()
