@@ -166,16 +166,16 @@ class MainWindow(QMainWindow):
             demandColor=74
 
             arrowBlock=cad.blocks.new(name='arrow')
-            arrowBlock.add_polyline2d([(0,0), (0.15,-0.25), (-0.15,-0.25)], close=True,dxfattribs={'color': demandColor})
-            arrowBlock.add_hatch(color=demandColor).paths.add_polyline_path([(0,0), (0.15,-0.25), (-0.15,-0.25)], is_closed=True)
+            arrowBlock.add_polyline2d([(0,0), (0.1,-0.25), (-0.1,-0.25)], close=True,dxfattribs={'color': demandColor})
+            arrowBlock.add_hatch(color=demandColor).paths.add_polyline_path([(0,0), (0.1,-0.25), (-0.1,-0.25)], is_closed=True)
 
             self.createBlocks(cad)
             self.insertBlocks()
-            self.drawPipes()
-            self.pipeInfo()
+            self.pipeLines()
+            self.pipeAnnotation()
             self.demandLeader(demandColor)
-            self.elevLeader(elevLeaderColor)
-            self.headPressureLeader(headPressureLeaderColor)
+            self.elevAnnotation(elevLeaderColor)
+            self.headPressureLeader(color=headPressureLeaderColor)
             self.reservoirsLeader(reservoirLeaderColor)
             self.tankLeader(tankerLeaderColor)
             self.pumpAnnotation(pumpAnnotaionColor)
@@ -320,7 +320,7 @@ class MainWindow(QMainWindow):
 
     def inp_to_df(self, inpFile):
         global df_Reservoirs, df_Tanks, df_Coords, df_Junctions, df_Pumps, df_Pipes, df_Vertices, df_Valves
-        
+
         df_Coords=self.readCoords(inpFile)
         df_Junctions=self.readJunctions(inpFile)
         df_Reservoirs=self.readReservoirs(inpFile)
@@ -414,13 +414,17 @@ class MainWindow(QMainWindow):
         
         self.process1()
 
-    def headPressureLeader(self, color):
+    def headPressureLeader(self, *args, **kwargs):
         from ezdxf.enums import TextEntityAlignment
+        color=kwargs.get('color')
+        align_vertical=kwargs.get('align_vertical')
+        align_horizontal=kwargs.get('align_horizontal')
+
         try:
             for i in range(0, len(df_Junctions)):
                 id=df_Junctions.at[i,'ID']
-                x=float(df_Junctions.at[i,'x'])
-                y=float(df_Junctions.at[i,'y'])
+                start_x=float(df_Junctions.at[i,'x'])
+                start_y=float(df_Junctions.at[i,'y'])
                 result_row=df_NodeResults.index[df_NodeResults['ID']==str(id)].tolist()[0]
                 Head=df_NodeResults.at[result_row,'Head']
                 Pressure=df_NodeResults.at[result_row,'Pressure']
@@ -435,8 +439,8 @@ class MainWindow(QMainWindow):
                 else:
                     color_head=color
 
-                leader_up_start_x=x+config.text_size
-                leader_up_start_y=y+config.text_size
+                leader_up_start_x=start_x+config.text_size
+                leader_up_start_y=start_y+config.text_size
 
                 leader_up_end_x=leader_up_start_x+config.leader_distance
                 leader_up_end_y=leader_up_start_y+config.leader_distance
@@ -446,9 +450,8 @@ class MainWindow(QMainWindow):
                 self.MainWindow.browser_log.append(f'節點 {id} 壓力引線已完成繪圖')
                 self.setLogToButton()
                 QCoreApplication.processEvents()
-        except:
-            # print(i)
-            pass
+        except Exception as e:
+            print(e)
     
     def createBlocks(self, cad):
         tankBlock=cad.blocks.new(name='tank')
@@ -475,7 +478,7 @@ class MainWindow(QMainWindow):
         pumpBlock.add_circle(Vec2(0,0), 0.5)
         pumpBlock.add_text("P", height=0.8, dxfattribs={"style": "epa2HydChart"}).set_placement((0,0), align=TextEntityAlignment.MIDDLE_CENTER)
 
-    def elevLeader(self, color):
+    def elevAnnotation(self, color):
         from ezdxf.enums import TextEntityAlignment
 
         for i in range(0, len(df_Junctions)):
@@ -585,8 +588,8 @@ class MainWindow(QMainWindow):
             Type=df_Valves.at[i,'Type']
             Setting=df_Valves.at[i,'Setting']
 
-            offset=[config.block_scale*50+0.75*config.text_size,
-                    config.block_scale*50+2*config.text_size]
+            offset=[config.block_scale+0.75*config.text_size,
+                    config.block_scale+2*config.text_size]
 
             msp.add_text(f'{Type}', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((x,y-offset[0]), align=TextEntityAlignment.MIDDLE_CENTER)
             msp.add_text(f'{Setting}', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((x,y-offset[1]), align=TextEntityAlignment.MIDDLE_CENTER)
@@ -627,7 +630,7 @@ class MainWindow(QMainWindow):
             self.setLogToButton()
             QCoreApplication.processEvents()
 
-    def pipeInfo(self):
+    def pipeAnnotation(self):
         for i in range(0, len(df_Pipes)):
             link_id=df_Pipes.at[i, 'ID']
             if link_id in df_Vertices['LINK'].tolist():
@@ -639,7 +642,6 @@ class MainWindow(QMainWindow):
                     end_y=float(df_Vertices.at[rows[0], 'y'])
                     self.pipeInfoString(i, start_x, start_y, end_x, end_y)
                     self.flowString(link_id, start_x, start_y, end_x, end_y)
-                    pass
                 elif len(rows)>=1 and (len(rows) % 2) == 0:   #偶數端點
                     row=len(rows)/2
                     start_x=float(df_Vertices.at[rows[0]+row-1, 'x'])
@@ -648,7 +650,6 @@ class MainWindow(QMainWindow):
                     end_y=float(df_Vertices.at[rows[0]+row, 'y'])
                     self.pipeInfoString(i, start_x, start_y, end_x, end_y)
                     self.flowString(link_id, start_x, start_y, end_x, end_y)
-                    pass
                 elif len(rows)>=1 and (len(rows) % 2) == 1: #寄數端點
                     row=rows[0]+int(len(rows)/2)
                     start_x=float(df_Vertices.at[row-1, 'x'])
@@ -664,7 +665,6 @@ class MainWindow(QMainWindow):
                 end_y=float(df_Pipes.at[i, 'Node2_y'])
                 self.pipeInfoString(i, start_x, start_y, end_x, end_y)
                 self.flowString(link_id, start_x, start_y, end_x, end_y)
-                pass
 
     def pipeInfoString(self, i, start_x, start_y, end_x, end_y):
         from ezdxf.enums import TextEntityAlignment
@@ -701,12 +701,6 @@ class MainWindow(QMainWindow):
             flow = flow if flow>=0 else -1*flow
 
             headloss=float(df_LinkResults.at[link_row, 'Headloss'])
-            # unitHeadloss=float(df_LinkResults.at[link_row, 'unitHeadloss'])
-
-            # pipe_row=df_Pipes.index[df_Pipes['ID']==id].tolist()[0]
-            # length=float(df_Pipes.at[pipe_row, 'Length'])
-            # headloss=length*unitHeadloss/1000
-            # headloss=f'{headloss:.2f}'
             text_up=f'{flow} ({headloss:.2f}) {direction}'
 
             msp.add_text(text_up, height=config.text_size, rotation=rotation_text, dxfattribs={"style": "epa2HydChart"}).set_placement((text_x, text_y), align=TextEntityAlignment.TOP_CENTER)
@@ -726,7 +720,7 @@ class MainWindow(QMainWindow):
             rotation_text=rotation
         return rotation_text
 
-    def drawPipes(self):
+    def pipeLines(self):
         for i in range(0, len(df_Pipes)):
             start_x=float(df_Pipes.at[i, 'Node1_x'])
             start_y=float(df_Pipes.at[i, 'Node1_y'])
@@ -745,7 +739,6 @@ class MainWindow(QMainWindow):
                     x2=float(df_Vertices.at[j+1,'x'])
                     y2=float(df_Vertices.at[j+1,'y'])
                     msp.add_polyline2d([(x1,y1), (x2,y2)])
-                    pass
             
                 lastVert_x=float(df_Vertices.at[rows[len(rows)-1],'x'])
                 lastVert_y=float(df_Vertices.at[rows[len(rows)-1],'y'])
@@ -856,7 +849,6 @@ class MainWindow(QMainWindow):
             df_Coords['y'] = df_Coords['y'].astype(float)
             df.at[i, 'x']=df_Coords.at[row, 'x']
             df.at[i, 'y']=df_Coords.at[row, 'y']
-            pass
         return df
 
     def readVertices(self, inpFile):
@@ -904,9 +896,8 @@ class MainWindow(QMainWindow):
                 row=df_Coords.index[df_Coords['ID']==str(Node2)].tolist()[0]
                 df.at[i, 'Node2_x']=df_Coords.at[row, 'x']
                 df.at[i, 'Node2_y']=df_Coords.at[row, 'y']
-        except:
-            # print([d[1]])
-            pass
+        except Exception as e:
+            print(e)
         return df
 
     def readCoords(self, inpFile):
