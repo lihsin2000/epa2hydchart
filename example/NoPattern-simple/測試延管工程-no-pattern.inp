@@ -8,6 +8,7 @@
  3               	30          	10          	                	;
  4               	60          	20          	                	;
  7               	10          	0           	                	;
+ 8               	0           	20          	                	;
 
 [RESERVOIRS]
 ;ID              	Head        	Pattern         
@@ -23,6 +24,7 @@
  3               	2               	3               	314         	100         	110         	0           	Open  	;
  4               	3               	5               	513         	100         	100         	0           	Open  	;
  5               	2               	4               	357         	100         	100         	0           	Open  	;
+ 7               	3               	8               	234         	100         	100         	0           	Open  	;
 
 [PUMPS]
 ;ID              	Node1           	Node2           	Parameters
@@ -45,7 +47,7 @@
 
 [CURVES]
 ;ID              	X-Value     	Y-Value
-;PUMP: PUMP: PUMP: PUMP: 
+;PUMP: PUMP: PUMP: PUMP: PUMP: 
  1               	60          	60          
 
 [CONTROLS]
@@ -56,7 +58,9 @@
 
 
 
+
 [RULES]
+
 
 
 
@@ -135,8 +139,9 @@
 3               	-2525.698         	7063.142          
 4               	-1395.007         	5976.505          
 7               	-1395.007         	7371.512          
+8               	-3984.654         	7501.796          
 6               	-4111.601         	5594.000          
-5               	-4029.506         	6903.196          
+5               	-4013.981         	6592.673          
 
 [VERTICES]
 ;Link            	X-Coord           	Y-Coord

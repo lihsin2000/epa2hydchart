@@ -1,4 +1,5 @@
 .venv
+.venv-pyqt6
 .vscode
 __pycache__
 build
