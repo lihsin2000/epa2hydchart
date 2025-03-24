@@ -39,7 +39,7 @@
       <height>361</height>
      </rect>
     </property>
-    <layout class="QGridLayout" name="gridLayout" columnstretch="1,10,1,1,1,1,1">
+    <layout class="QGridLayout" name="gridLayout" columnstretch="1,10,1,1,1,1">
      <property name="leftMargin">
       <number>5</number>
      </property>
@@ -55,40 +55,17 @@
      <property name="spacing">
       <number>5</number>
      </property>
-     <item row="0" column="5">
-      <widget class="QLineEdit" name="l_joint_size">
-       <property name="mouseTracking">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="6" rowspan="3">
-      <widget class="QPushButton" name="b_auto_block_size">
-       <property name="maximumSize">
-        <size>
-         <width>20</width>
-         <height>16777215</height>
-        </size>
-       </property>
+     <item row="1" column="1">
+      <widget class="QLabel" name="l_rpt_path">
        <property name="text">
-        <string>A</string>
+        <string/>
        </property>
       </widget>
      </item>
-     <item row="5" column="5">
-      <widget class="QListWidget" name="list_hrs">
-       <property name="selectionMode">
-        <enum>QAbstractItemView::MultiSelection</enum>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>inp 檔案</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
+     <item row="0" column="3" rowspan="9">
+      <widget class="Line" name="line">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
        </property>
       </widget>
      </item>
@@ -99,13 +76,52 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="label_4">
+     <item row="3" column="5">
+      <widget class="QLineEdit" name="l_leader_distance">
        <property name="text">
-        <string>工程名稱</string>
+        <string/>
        </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
+      </widget>
+     </item>
+     <item row="0" column="4">
+      <widget class="QLabel" name="label_5">
+       <property name="text">
+        <string>節點圖塊大小</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="5">
+      <widget class="QLineEdit" name="l_block_size">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="5">
+      <widget class="QListWidget" name="list_hrs">
+       <property name="selectionMode">
+        <enum>QAbstractItemView::MultiSelection</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="5">
+      <widget class="QPushButton" name="b_draw">
+       <property name="text">
+        <string>開始處理</string>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="4">
+      <widget class="QPushButton" name="b_reset">
+       <property name="text">
+        <string>重設</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="4" colspan="2">
+      <widget class="QCheckBox" name="checkBox">
+       <property name="text">
+        <string>自動調整大小</string>
        </property>
       </widget>
      </item>
@@ -119,14 +135,53 @@
        </property>
       </widget>
      </item>
-     <item row="3" column="5">
-      <widget class="QLineEdit" name="l_leader_distance">
+     <item row="0" column="0">
+      <widget class="QLabel" name="label">
        <property name="text">
-        <string/>
+        <string>inp 檔案</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
        </property>
       </widget>
      </item>
-     <item row="3" column="0" rowspan="4" colspan="2">
+     <item row="6" column="5">
+      <widget class="QComboBox" name="comboBox_digits">
+       <item>
+        <property name="text">
+         <string>0</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>0.0</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>0.00</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>0.000</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>0.0000</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <widget class="QPushButton" name="b_browser_inp">
+       <property name="text">
+        <string>瀏覽</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0" rowspan="6" colspan="2">
       <widget class="QTextBrowser" name="browser_log">
        <property name="html">
         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -140,59 +195,27 @@ li.checked::marker { content: &quot;\2612&quot;; }
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
-      <widget class="QLabel" name="l_inp_path">
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="3" rowspan="7">
-      <widget class="Line" name="line">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="5">
-      <widget class="QLineEdit" name="l_text_size">
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="4">
-      <widget class="QLabel" name="label_6">
-       <property name="text">
-        <string>文字大小</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="5">
-      <widget class="QLineEdit" name="l_block_size">
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="4">
-      <widget class="QLabel" name="label_5">
-       <property name="text">
-        <string>節點圖塊大小</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QLabel" name="l_rpt_path">
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
      <item row="3" column="4">
       <widget class="QLabel" name="label_7">
        <property name="text">
         <string>引線長度</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>工程名稱</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLabel" name="l_inp_path">
+       <property name="text">
+        <string/>
        </property>
       </widget>
      </item>
@@ -203,17 +226,41 @@ li.checked::marker { content: &quot;\2612&quot;; }
        </property>
       </widget>
      </item>
-     <item row="5" column="4">
-      <widget class="QLabel" name="label_3">
-       <property name="text">
-        <string>匯出時段</string>
+     <item row="0" column="5">
+      <widget class="QLineEdit" name="l_joint_size">
+       <property name="mouseTracking">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
-     <item row="0" column="2">
-      <widget class="QPushButton" name="b_browser_inp">
+     <item row="5" column="4" colspan="2">
+      <widget class="QCheckBox" name="chk_export_0cmd">
        <property name="text">
-        <string>瀏覽</string>
+        <string>匯出0CMD引線</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="4">
+      <widget class="QLabel" name="label_6">
+       <property name="text">
+        <string>文字大小</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="4">
+      <widget class="QLabel" name="label_9">
+       <property name="text">
+        <string>小數取位</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="5">
+      <widget class="QLineEdit" name="l_text_size">
+       <property name="text">
+        <string/>
        </property>
       </widget>
      </item>
@@ -224,27 +271,17 @@ li.checked::marker { content: &quot;\2612&quot;; }
        </property>
       </widget>
      </item>
-     <item row="4" column="4" colspan="2">
-      <widget class="QCheckBox" name="chk_export_0cmd">
+     <item row="8" column="2">
+      <widget class="QLabel" name="l_progress">
        <property name="text">
-        <string>匯出0CMD引線</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
+        <string/>
        </property>
       </widget>
      </item>
-     <item row="6" column="4">
-      <widget class="QPushButton" name="b_reset">
+     <item row="7" column="4">
+      <widget class="QLabel" name="label_3">
        <property name="text">
-        <string>重設</string>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="5">
-      <widget class="QPushButton" name="b_draw">
-       <property name="text">
-        <string>開始處理</string>
+        <string>匯出時段</string>
        </property>
       </widget>
      </item>

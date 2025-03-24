@@ -29,6 +29,7 @@ class MainWindow(QMainWindow):
         self.MainWindow.b_auto_block_size.clicked.connect(self.autoBlockSizeButton)
 
     def process1(self):
+        import time
         global df_NodeResults, df_LinkResults
 
         inpFile=config.inpFile
@@ -85,7 +86,6 @@ class MainWindow(QMainWindow):
                             self.MainWindow.browser_log.append(f'---------------------')
                             self.setLogToButton()
                             break
-
 
     def autoBlockSizeButton(self):
         if config.inpFile:
@@ -192,16 +192,19 @@ class MainWindow(QMainWindow):
                 self.save_dxf(cad=cad, path=dxfPath)
                 self.MainWindow.browser_log.append(f'{dxfPathWithoutExtension}.dxf 已存檔')
                 self.setLogToButton()
+                QCoreApplication.processEvents()
 
                 svg_path=dxfPath.replace('.dxf', '.svg')
                 self.save_svg(msp=msp, cad=cad, path=svg_path)
                 self.MainWindow.browser_log.append(f'{dxfPathWithoutExtension}.svg 已存檔')
                 self.setLogToButton()
+                QCoreApplication.processEvents()
 
                 png_path=dxfPath.replace('.dxf', '.png')
                 self.save_png(msp=msp, cad=cad, pngPath=png_path, svgPath=svg_path)
                 self.MainWindow.browser_log.append(f'{dxfPathWithoutExtension}.png 已存檔')
                 self.setLogToButton()
+                QCoreApplication.processEvents()
 
                 self.MainWindow.browser_log.append('完成!')
                 self.MainWindow.browser_log.append(f'---------------------')
@@ -320,17 +323,54 @@ class MainWindow(QMainWindow):
         return matchLink,matchNode
 
     def inp_to_df(self, inpFile):
+        import concurrent.futures
+        import time
         global df_Reservoirs, df_Tanks, df_Coords, df_Junctions, df_Pumps, df_Pipes, df_Vertices, df_Valves
-
+        
+        # with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+        #     df_Coords=executor.submit(self.readCoords,inpFile).result()
+        #     df_Junctions=executor.submit(self.readJunctions,inpFile).result()
+        #     df_Reservoirs=executor.submit(self.readReservoirs,inpFile).result()
+        #     df_Tanks=executor.submit(self.readTanks,inpFile).result()
+        #     df_Pumps=executor.submit(self.readPumps,inpFile).result()
+        #     df_Valves=executor.submit(self.readValves,inpFile).result()
+        #     df_Pipes=executor.submit(self.readPipes,inpFile).result()
+        #     df_Vertices=executor.submit(self.readVertices,inpFile).result()
+      
+        t0=time.time()
         df_Coords=self.readCoords(inpFile)
+        t1=time.time()
+        self.MainWindow.browser_log.append(f'節點坐標讀取完畢({t1-t0:.2f}s)')
+        QCoreApplication.processEvents()
         df_Junctions=self.readJunctions(inpFile)
+        t2=time.time()
+        self.MainWindow.browser_log.append(f'節點參數讀取完畢({t2-t1:.2f}s)')
+        QCoreApplication.processEvents()
         df_Reservoirs=self.readReservoirs(inpFile)
+        t3=time.time()
+        self.MainWindow.browser_log.append(f'接水點參數讀取完畢({t3-t2:.2f}s)')
+        QCoreApplication.processEvents()
         df_Tanks=self.readTanks(inpFile)
+        t4=time.time()
+        self.MainWindow.browser_log.append(f'水池參數讀取完畢({t4-t3:.2f}s)')
+        QCoreApplication.processEvents()
         df_Pumps=self.readPumps(inpFile)
+        t5=time.time()
+        self.MainWindow.browser_log.append(f'抽水機參數讀取完畢({t5-t4:.2f}s)')
+        QCoreApplication.processEvents()
         df_Valves=self.readValves(inpFile)
+        t6=time.time()
+        self.MainWindow.browser_log.append(f'閥件參數讀取完畢({t6-t5:.2f}s)')
+        QCoreApplication.processEvents()
         df_Pipes=self.readPipes(inpFile)
+        t7=time.time()
+        self.MainWindow.browser_log.append(f'管件參數讀取完畢({t7-t6:.2f}s)')
+        QCoreApplication.processEvents()
         df_Vertices=self.readVertices(inpFile)
-
+        t8=time.time()
+        self.MainWindow.browser_log.append(f'管件坐標讀取完畢({t8-t7:.2f}s)')
+        QCoreApplication.processEvents()
+        
     def multiHr(self, rptFile2):
         global hr_list
         rptFile2_lines=open(rptFile2).readlines()
@@ -418,8 +458,6 @@ class MainWindow(QMainWindow):
     def headPressureLeader(self, *args, **kwargs):
         from ezdxf.enums import TextEntityAlignment
         color=kwargs.get('color')
-        # align_vertical=kwargs.get('align_vertical')
-        # align_horizontal=kwargs.get('align_horizontal')
 
         try:
             for i in range(0, len(df_Junctions)):
@@ -693,40 +731,39 @@ class MainWindow(QMainWindow):
             self.setLogToButton()
 
     def pipeAnnotation(self):
-        for i in range(0, len(df_Pipes)):
-            link_id=df_Pipes.at[i, 'ID']
-            if link_id in df_Vertices['LINK'].tolist():
-                rows=df_Vertices.index[df_Vertices['LINK']==link_id].tolist()
-                if len(rows)==1:   #1個端點
-                    start_x=float(df_Pipes.at[i, 'Node1_x'])
-                    start_y=float(df_Pipes.at[i, 'Node1_y'])
-                    end_x=float(df_Vertices.at[rows[0], 'x'])
-                    end_y=float(df_Vertices.at[rows[0], 'y'])
+        # Convert LINK column to set for O(1) lookups
+        link_ids = set(df_Vertices['LINK'])
 
-                    self.pipeAnnotationBlock(link_id, start_x, start_y, end_x, end_y, i)
-                elif len(rows)>=1 and (len(rows) % 2) == 0:   #偶數端點
-                    row=len(rows)/2
-                    start_x=float(df_Vertices.at[rows[0]+row-1, 'x'])
-                    start_y=float(df_Vertices.at[rows[0]+row-1, 'y'])
-                    end_x=float(df_Vertices.at[rows[0]+row, 'x'])
-                    end_y=float(df_Vertices.at[rows[0]+row, 'y'])
+        # Group by LINK for fast access
+        vertices_dict = df_Vertices.groupby('LINK')[['x', 'y']].apply(lambda g: list(zip(g['x'], g['y']))).to_dict()
 
-                    self.pipeAnnotationBlock(link_id, start_x, start_y, end_x, end_y, i)
-                elif len(rows)>=1 and (len(rows) % 2) == 1: #寄數端點
-                    row=rows[0]+int(len(rows)/2)
-                    start_x=float(df_Vertices.at[row-1, 'x'])
-                    start_y=float(df_Vertices.at[row-1, 'y'])
-                    end_x=float(df_Vertices.at[row, 'x'])
-                    end_y=float(df_Vertices.at[row, 'y'])
+        for i, row in df_Pipes.iterrows():
+            link_id = row['ID']
 
-                    self.pipeAnnotationBlock(link_id, start_x, start_y, end_x, end_y, i)
-            else:   # 無端點
-                start_x=float(df_Pipes.at[i, 'Node1_x'])
-                start_y=float(df_Pipes.at[i, 'Node1_y'])
-                end_x=float(df_Pipes.at[i, 'Node2_x'])
-                end_y=float(df_Pipes.at[i, 'Node2_y'])
+            if link_id in link_ids:
+                verts = vertices_dict[link_id]
+                num_verts = len(verts)
 
-                self.pipeAnnotationBlock(link_id, start_x, start_y, end_x, end_y, i)
+                if num_verts == 1:  # 1 vertex
+                    start_x, start_y = float(row['Node1_x']), float(row['Node1_y'])
+                    end_x, end_y = verts[0]  # First and only vertex
+
+                elif num_verts % 2 == 0:  # Even number of vertices
+                    mid = num_verts // 2
+                    start_x, start_y = verts[mid - 1]
+                    end_x, end_y = verts[mid]
+
+                else:  # Odd number of vertices
+                    mid = num_verts // 2
+                    start_x, start_y = verts[mid - 1]
+                    end_x, end_y = verts[mid]
+
+            else:  # No vertices
+                start_x, start_y = float(row['Node1_x']), float(row['Node1_y'])
+                end_x, end_y = float(row['Node2_x']), float(row['Node2_y'])
+
+            # Call annotation function once per pipe
+            self.pipeAnnotationBlock(link_id, start_x, start_y, end_x, end_y, i)
 
     def rotation_text(self, start_x, start_y, end_x, end_y):
         import math
@@ -872,70 +909,58 @@ class MainWindow(QMainWindow):
         return df
 
     def readVertices(self, inpFile):
-        start, end=self.lineStartEnd(inpFile, '[VERTICES]', '[LABELS]',2,2)
+        start, end = self.lineStartEnd(inpFile, '[VERTICES]', '[LABELS]', 2, 2)
         lines = open(inpFile).readlines()
-        df=pd.DataFrame(columns=['LINK','x','y'])
-        for l in range (start-1, end):
-            d=self.line2dict(lines, l)
-            data={
-                'LINK':[d[0]],
-                'x':[float(d[1])],
-                'y':[float(d[2])],
-                }
-            new_df=pd.DataFrame.from_dict(data)
-            df=pd.concat([df,new_df])
-        df=df.reset_index(drop=True)
+
+        data = []
+        for l in range(start-1, end):
+            d = self.line2dict(lines, l)
+            data.append([d[0], float(d[1]), float(d[2])])
+        df = pd.DataFrame(data, columns=['LINK', 'x', 'y'])
         return df
 
     def readPipes(self, inpFile):
         try:
-            start, end=self.lineStartEnd(inpFile, '[PIPES]', '[PUMPS]',2,2)
+            start, end = self.lineStartEnd(inpFile, '[PIPES]', '[PUMPS]', 2, 2)
             lines = open(inpFile).readlines()
-            df=pd.DataFrame(columns=['ID','Node1','Node2', 'Length', 'Diameter', 'Node1_x', 'Node1_y', 'Node2_x', 'Node2_y', 'Roughness'])
-            for l in range (start-1, end):
-                d=self.line2dict(lines, l)
-                data={
-                    'ID':[d[1]],
-                    'Node1':[d[2]],
-                    'Node2':[d[3]],
-                    'Length':[d[4]],
-                    'Diameter':[d[5]],
-                    'Roughness':[d[6]]
-                    }
-                new_df=pd.DataFrame.from_dict(data)
-                df=pd.concat([df,new_df])
-            df=df.reset_index(drop=True)
 
-            for i in range (0, len(df)):
-                Node1=df.at[i,'Node1']
-                row=df_Coords.index[df_Coords['ID']==str(Node1)].tolist()[0]
-                df.at[i, 'Node1_x']=df_Coords.at[row, 'x']
-                df.at[i, 'Node1_y']=df_Coords.at[row, 'y']
+            data = []
+            for l in range(start - 1, end):
+                d = self.line2dict(lines, l)
+                data.append([d[1], d[2], d[3], d[4], d[5], d[6]])
+            df = pd.DataFrame(
+                data, columns=['ID', 'Node1', 'Node2', 'Length', 'Diameter', 'Roughness'])
 
-                Node2=df.at[i,'Node2']
-                row=df_Coords.index[df_Coords['ID']==str(Node2)].tolist()[0]
-                df.at[i, 'Node2_x']=df_Coords.at[row, 'x']
-                df.at[i, 'Node2_y']=df_Coords.at[row, 'y']
+            for i in range(0, len(df)):
+                Node1 = df.at[i, 'Node1']
+                row = df_Coords.index[df_Coords['ID'] == str(Node1)].tolist()[0]
+                df.at[i, 'Node1_x'] = df_Coords.at[row, 'x']
+                df.at[i, 'Node1_y'] = df_Coords.at[row, 'y']
+
+                Node2 = df.at[i, 'Node2']
+                row = df_Coords.index[df_Coords['ID'] == str(Node2)].tolist()[0]
+                df.at[i, 'Node2_x'] = df_Coords.at[row, 'x']
+                df.at[i, 'Node2_y'] = df_Coords.at[row, 'y']
         except Exception as e:
             print(e)
         return df
 
     def readCoords(self, inpFile):
-        start, end=self.lineStartEnd(inpFile, '[COORDINATES]', '[VERTICES]',2,2)
+        start, end = self.lineStartEnd(inpFile, '[COORDINATES]', '[VERTICES]', 2, 2)
         lines = open(inpFile).readlines()
-        df=pd.DataFrame(columns=['ID', 'x', 'y'])
-        for l in range (start-1, end):
-            d=self.line2dict(lines, l)
-            data={
-                'ID':d[0],
-                'x':d[1],
-                'y':d[2]
-                }
+        df = pd.DataFrame(columns=['ID', 'x', 'y'])
+        for l in range(start-1, end):
+            d = self.line2dict(lines, l)
+            data = {
+                'ID': d[0],
+                'x': d[1],
+                'y': d[2]
+            }
             if df.empty:
-                df.loc[0]=data
+                df.loc[0] = data
             else:
-                df.loc[len(df)]=data
-        df=df.reset_index(drop=True)
+                df.loc[len(df)] = data
+        df = df.reset_index(drop=True)
         return df
 
     def readJunctions(self, inpFile):
