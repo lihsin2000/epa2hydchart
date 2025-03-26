@@ -1,4 +1,4 @@
-# Form implementation generated from reading ui file 'd:\Work\code\epa2hydchart\ui_pyqt6.ui'
+# Form implementation generated from reading ui file 'c:\Users\user\Downloads\code\epa2hydchart\ui_pyqt6.ui'
 #
 # Created by: PyQt6 UI code generator 6.4.2
 #
@@ -16,7 +16,7 @@ class Ui_MainWindow(object):
         MainWindow.setMinimumSize(QtCore.QSize(800, 400))
         MainWindow.setMaximumSize(QtCore.QSize(800, 400))
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("d:\\Work\\code\\epa2hydchart\\icon.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        icon.addPixmap(QtGui.QPixmap("c:\\Users\\user\\Downloads\\code\\epa2hydchart\\icon.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         MainWindow.setWindowIcon(icon)
         self.centralwidget = QtWidgets.QWidget(parent=MainWindow)
         self.centralwidget.setObjectName("centralwidget")
@@ -61,9 +61,9 @@ class Ui_MainWindow(object):
         self.b_reset = QtWidgets.QPushButton(parent=self.gridLayoutWidget)
         self.b_reset.setObjectName("b_reset")
         self.gridLayout.addWidget(self.b_reset, 8, 4, 1, 1)
-        self.checkBox = QtWidgets.QCheckBox(parent=self.gridLayoutWidget)
-        self.checkBox.setObjectName("checkBox")
-        self.gridLayout.addWidget(self.checkBox, 4, 4, 1, 2)
+        self.chk_autoSize = QtWidgets.QCheckBox(parent=self.gridLayoutWidget)
+        self.chk_autoSize.setObjectName("chk_autoSize")
+        self.gridLayout.addWidget(self.chk_autoSize, 4, 4, 1, 2)
         self.label_2 = QtWidgets.QLabel(parent=self.gridLayoutWidget)
         self.label_2.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.label_2.setObjectName("label_2")
@@ -159,7 +159,7 @@ class Ui_MainWindow(object):
         self.label_5.setText(_translate("MainWindow", "節點圖塊大小"))
         self.b_draw.setText(_translate("MainWindow", "開始處理"))
         self.b_reset.setText(_translate("MainWindow", "重設"))
-        self.checkBox.setText(_translate("MainWindow", "自動調整大小"))
+        self.chk_autoSize.setText(_translate("MainWindow", "自動調整大小"))
         self.label_2.setText(_translate("MainWindow", "rpt 檔案"))
         self.label.setText(_translate("MainWindow", "inp 檔案"))
         self.comboBox_digits.setItemText(0, _translate("MainWindow", "0"))

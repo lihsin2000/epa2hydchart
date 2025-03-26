@@ -26,8 +26,34 @@ class MainWindow(QMainWindow):
         self.MainWindow.l_text_size.setValidator(QDoubleValidator())
         self.MainWindow.l_leader_distance.setText(str(config.leader_distance_default))
         self.MainWindow.l_leader_distance.setValidator(QIntValidator())
-        self.MainWindow.b_auto_block_size.clicked.connect(self.autoBlockSizeButton)
+        self.MainWindow.chk_autoSize.stateChanged.connect(self.autoSize)
 
+    def autoSize(self):
+        status=self.MainWindow.chk_autoSize.isChecked()
+        if status and config.inpFile:
+            df_Vertices=self.readVertices(config.inpFile)
+            df_Coords=self.readCoords(config.inpFile)
+            try:
+                coords=df_Coords[['x','y']]
+            except:
+                coords=pd.DataFrame()
+
+            try:
+                vertices=df_Vertices[['x','y']]
+            except:
+                vertices=pd.DataFrame()
+
+            x_min=min(float(min(coords['x'])),float(min(vertices['x'])))
+            x_max=max(float(max(coords['x'])),float(max(vertices['x'])))
+            blockSizeEstimate=float(int((x_max-x_min)/1000)*10)
+            if blockSizeEstimate == 0:
+                blockSizeEstimate=10
+            
+            self.MainWindow.l_block_size.setText(str(blockSizeEstimate))
+            self.MainWindow.l_joint_size.setText(str(blockSizeEstimate/4))
+            self.MainWindow.l_text_size.setText(str(blockSizeEstimate/4))
+            self.MainWindow.l_leader_distance.setText(str(blockSizeEstimate/2))
+        
     def process1(self):
         import time
         global df_NodeResults, df_LinkResults
@@ -42,7 +68,7 @@ class MainWindow(QMainWindow):
             file_name = os.path.basename(dxfPath)
             
             if dxfPath!='':
-                self.inp_to_df(inpFile)
+                self.inp_to_df(inpFile, showtime=True)
                 if hr_list==[]: # 單一時間結果
                     try:
                         df_NodeResults=self.readNodeResults(hr=None, input=rptFile2)
@@ -86,58 +112,6 @@ class MainWindow(QMainWindow):
                             self.MainWindow.browser_log.append(f'---------------------')
                             self.setLogToButton()
                             break
-
-    def autoBlockSizeButton(self):
-        if config.inpFile:
-            self.inp_to_df(config.inpFile)
-            df_coordsFromEverydf=pd.DataFrame()
-            try:
-                coords=df_Coords[['x','y']]
-            except:
-                coords=pd.DataFrame()
-
-            try:
-                junctions=df_Junctions[['x','y']]
-            except:
-                junctions=pd.DataFrame()
-
-            try:
-                reservoirs=df_Reservoirs[['x','y']]
-            except:
-                reservoirs=pd.DataFrame()
-
-            try:
-                tanks=df_Tanks[['x','y']]
-            except:
-                tanks=pd.DataFrame()
-
-            try:
-                pumps=df_Pumps[['x','y']]
-            except:
-                pumps=pd.DataFrame()
-
-            try:
-                valves=df_Valves[['x','y']]
-            except:
-                valves=pd.DataFrame()
-
-            try:
-                vertices=df_Vertices[['x','y']]
-            except:
-                vertices=pd.DataFrame()
-                
-            df_coordsFromEverydf=pd.concat([coords,junctions,reservoirs,tanks,pumps,valves,vertices], ignore_index=True)
-
-            x_min=min(df_coordsFromEverydf['x'])
-            x_max=max(df_coordsFromEverydf['x'])
-            blockSizeEstimate=float(int((x_max-x_min)/1000)*10)
-            if blockSizeEstimate == 0:
-                blockSizeEstimate=10
-            
-            self.MainWindow.l_block_size.setText(str(blockSizeEstimate))
-            self.MainWindow.l_joint_size.setText(str(blockSizeEstimate/4))
-            self.MainWindow.l_text_size.setText(str(blockSizeEstimate/4))
-            self.MainWindow.l_leader_distance.setText(str(blockSizeEstimate/2))
 
     def process2(self, *args, **kwargs):
         import os
@@ -322,7 +296,7 @@ class MainWindow(QMainWindow):
         matchNode=outputAllNode.equals(inputAllNode)
         return matchLink,matchNode
 
-    def inp_to_df(self, inpFile):
+    def inp_to_df(self, inpFile, showtime):
         import concurrent.futures
         import time
         global df_Reservoirs, df_Tanks, df_Coords, df_Junctions, df_Pumps, df_Pipes, df_Vertices, df_Valves
@@ -340,35 +314,43 @@ class MainWindow(QMainWindow):
         t0=time.time()
         df_Coords=self.readCoords(inpFile)
         t1=time.time()
-        self.MainWindow.browser_log.append(f'節點坐標讀取完畢({t1-t0:.2f}s)')
+        if showtime:
+            self.MainWindow.browser_log.append(f'節點坐標讀取完畢({t1-t0:.2f}s)')
         QCoreApplication.processEvents()
         df_Junctions=self.readJunctions(inpFile)
         t2=time.time()
-        self.MainWindow.browser_log.append(f'節點參數讀取完畢({t2-t1:.2f}s)')
+        if showtime:
+            self.MainWindow.browser_log.append(f'節點參數讀取完畢({t2-t1:.2f}s)')
         QCoreApplication.processEvents()
         df_Reservoirs=self.readReservoirs(inpFile)
         t3=time.time()
-        self.MainWindow.browser_log.append(f'接水點參數讀取完畢({t3-t2:.2f}s)')
+        if showtime:
+            self.MainWindow.browser_log.append(f'接水點參數讀取完畢({t3-t2:.2f}s)')
         QCoreApplication.processEvents()
         df_Tanks=self.readTanks(inpFile)
         t4=time.time()
-        self.MainWindow.browser_log.append(f'水池參數讀取完畢({t4-t3:.2f}s)')
+        if showtime:
+            self.MainWindow.browser_log.append(f'水池參數讀取完畢({t4-t3:.2f}s)')
         QCoreApplication.processEvents()
         df_Pumps=self.readPumps(inpFile)
         t5=time.time()
-        self.MainWindow.browser_log.append(f'抽水機參數讀取完畢({t5-t4:.2f}s)')
+        if showtime:
+            self.MainWindow.browser_log.append(f'抽水機參數讀取完畢({t5-t4:.2f}s)')
         QCoreApplication.processEvents()
         df_Valves=self.readValves(inpFile)
         t6=time.time()
-        self.MainWindow.browser_log.append(f'閥件參數讀取完畢({t6-t5:.2f}s)')
+        if showtime:
+            self.MainWindow.browser_log.append(f'閥件參數讀取完畢({t6-t5:.2f}s)')
         QCoreApplication.processEvents()
         df_Pipes=self.readPipes(inpFile)
         t7=time.time()
-        self.MainWindow.browser_log.append(f'管件參數讀取完畢({t7-t6:.2f}s)')
+        if showtime:
+            self.MainWindow.browser_log.append(f'管件參數讀取完畢({t7-t6:.2f}s)')
         QCoreApplication.processEvents()
         df_Vertices=self.readVertices(inpFile)
         t8=time.time()
-        self.MainWindow.browser_log.append(f'管件坐標讀取完畢({t8-t7:.2f}s)')
+        if showtime:
+            self.MainWindow.browser_log.append(f'管件坐標讀取完畢({t8-t7:.2f}s)')
         QCoreApplication.processEvents()
         
     def multiHr(self, rptFile2):
@@ -438,6 +420,8 @@ class MainWindow(QMainWindow):
         self.MainWindow.l_joint_size.setText(str(config.joint_scale_default))
         self.MainWindow.l_text_size.setText(str(config.text_size_default))
         self.MainWindow.l_leader_distance.setText(str(config.leader_distance_default))
+        self.MainWindow.chk_export_0cmd.setChecked(True)
+        self.MainWindow.chk_autoSize.setChecked(False)
         
         self.MainWindow.l_inp_path.setText('')
         self.MainWindow.l_rpt_path.setText('')
