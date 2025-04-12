@@ -1,4 +1,4 @@
-# Form implementation generated from reading ui file 'c:\Users\user\Downloads\code\epa2hydchart\ui_pyqt6.ui'
+# Form implementation generated from reading ui file 'd:\Work\code\epa2hydchart\ui_pyqt6.ui'
 #
 # Created by: PyQt6 UI code generator 6.4.2
 #
@@ -16,7 +16,7 @@ class Ui_MainWindow(object):
         MainWindow.setMinimumSize(QtCore.QSize(800, 400))
         MainWindow.setMaximumSize(QtCore.QSize(800, 400))
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("c:\\Users\\user\\Downloads\\code\\epa2hydchart\\icon.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        icon.addPixmap(QtGui.QPixmap("d:\\Work\\code\\epa2hydchart\\icon.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         MainWindow.setWindowIcon(icon)
         self.centralwidget = QtWidgets.QWidget(parent=MainWindow)
         self.centralwidget.setObjectName("centralwidget")
