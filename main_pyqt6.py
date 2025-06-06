@@ -29,8 +29,19 @@ class MainWindow(QMainWindow):
         self.MainWindow.chk_autoSize.stateChanged.connect(self.autoSize)
 
     def autoSize(self):
-        status=self.MainWindow.chk_autoSize.isChecked()
-        if status and config.inpFile:
+        items=[self.MainWindow.l_block_size,
+                   self.MainWindow.l_joint_size,
+                   self.MainWindow.l_text_size,
+                   self.MainWindow.l_leader_distance]
+        
+        if self.MainWindow.chk_autoSize.isChecked():
+            for item in items:
+                item.setEnabled(False)  
+        else:
+            for item in items:
+                item.setEnabled(True)
+            
+        if self.MainWindow.chk_autoSize.isChecked() and config.inpFile:
             df_Vertices=self.readVertices(config.inpFile)
             df_Coords=self.readCoords(config.inpFile)
             try:
@@ -43,8 +54,14 @@ class MainWindow(QMainWindow):
             except:
                 vertices=pd.DataFrame()
 
-            x_min=min(float(min(coords['x'])),float(min(vertices['x'])))
-            x_max=max(float(max(coords['x'])),float(max(vertices['x'])))
+            min_xs=[float(vertices['x'].min()),float(coords['x'].min())]
+            min_xs=[x for x in min_xs if str(x) != 'nan']
+            max_xs=[float(vertices['x'].max()),float(coords['x'].max())]
+            max_xs=[x for x in max_xs if str(x) != 'nan']
+            
+            x_min=min(min_xs)
+            x_max=max(max_xs)
+            
             blockSizeEstimate=float(int((x_max-x_min)/1000)*10)
             if blockSizeEstimate == 0:
                 blockSizeEstimate=10
