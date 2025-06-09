@@ -181,19 +181,19 @@ class MainWindow(QMainWindow):
                     
                 dxfPathWithoutExtension=dxfPath.replace('.dxf','')
                 self.saveDXF(cad=cad, path=dxfPath)
-                self.MainWindow.browser_log.append(f'{dxfPathWithoutExtension}.dxf 已存檔')
+                self.MainWindow.browser_log.append(f'{dxfPathWithoutExtension}.dxf 已匯出')
                 self.setLogToButton()
                 QCoreApplication.processEvents()
 
                 svg_path=dxfPath.replace('.dxf', '.svg')
                 self.save_svg(msp=msp, cad=cad, path=svg_path)
-                self.MainWindow.browser_log.append(f'{dxfPathWithoutExtension}.svg 已存檔')
+                self.MainWindow.browser_log.append(f'{dxfPathWithoutExtension}.svg 已匯出')
                 self.setLogToButton()
                 QCoreApplication.processEvents()
 
                 png_path=dxfPath.replace('.dxf', '.png')
                 self.convertSVGtoPNG(msp=msp, cad=cad, pngPath=png_path, svgPath=svg_path)
-                self.MainWindow.browser_log.append(f'{dxfPathWithoutExtension}.png 已存檔')
+                self.MainWindow.browser_log.append(f'{dxfPathWithoutExtension}.png 已匯出')
                 self.setLogToButton()
                 QCoreApplication.processEvents()
 
