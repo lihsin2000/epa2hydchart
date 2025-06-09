@@ -90,7 +90,7 @@ class MainWindow(QMainWindow):
                     try:
                         df_NodeResults=self.readNodeResults(hr=None, input=rptFile2)
                         df_LinkResults=self.readLinkResults(hr1=None, input=rptFile2)
-                        matchLink, matchNode = self.inp_rpt_match()
+                        matchLink, matchNode = self.matchInpRptFile()
                         self.process2(matchLink=matchLink, matchNode=matchNode, dxfPath=dxfPath, hr='')
                     except Exception as e:
                         print(e)
@@ -120,7 +120,7 @@ class MainWindow(QMainWindow):
                                 self.setLogToButton()
                                 break
                             
-                            matchLink, matchNode = self.inp_rpt_match()
+                            matchLink, matchNode = self.matchInpRptFile()
                             self.process2(matchLink=matchLink, matchNode=matchNode, dxfPath=dxfPath, hr=h)
 
                         except Exception as e:
@@ -149,7 +149,7 @@ class MainWindow(QMainWindow):
         if matchLink and matchNode:
             self.MainWindow.browser_log.append(f'{hr_str} .rpt及.inp內容相符')
             self.setLogToButton()
-            cad, msp=self.create_modelspace()
+            cad, msp=self.createModelspace()
 
             tankerLeaderColor=210
             reservoirLeaderColor=210
@@ -180,7 +180,7 @@ class MainWindow(QMainWindow):
                     dxfPath=f'{dictionary}/{file}_{hr_str}.dxf'
                     
                 dxfPathWithoutExtension=dxfPath.replace('.dxf','')
-                self.save_dxf(cad=cad, path=dxfPath)
+                self.saveDXF(cad=cad, path=dxfPath)
                 self.MainWindow.browser_log.append(f'{dxfPathWithoutExtension}.dxf 已存檔')
                 self.setLogToButton()
                 QCoreApplication.processEvents()
@@ -192,7 +192,7 @@ class MainWindow(QMainWindow):
                 QCoreApplication.processEvents()
 
                 png_path=dxfPath.replace('.dxf', '.png')
-                self.save_png(msp=msp, cad=cad, pngPath=png_path, svgPath=svg_path)
+                self.convertSVGtoPNG(msp=msp, cad=cad, pngPath=png_path, svgPath=svg_path)
                 self.MainWindow.browser_log.append(f'{dxfPathWithoutExtension}.png 已存檔')
                 self.setLogToButton()
                 QCoreApplication.processEvents()
@@ -209,7 +209,7 @@ class MainWindow(QMainWindow):
     def setLogToButton(self):
         self.MainWindow.browser_log.verticalScrollBar().setValue(self.MainWindow.browser_log.verticalScrollBar().maximum())
 
-    def create_modelspace(self, *args, **kwargs):
+    def createModelspace(self, *args, **kwargs):
         global msp
 
         cad = ezdxf.new()
@@ -260,7 +260,7 @@ class MainWindow(QMainWindow):
         
         msp.add_text(f'C={C_str}', height=2*config.text_size, dxfattribs={"style": "epa2HydChart"}).set_placement((x_min,y_max+10*config.text_size), align=TextEntityAlignment.TOP_LEFT)
 
-    def save_dxf(self, *args, **kwargs):
+    def saveDXF(self, *args, **kwargs):
         cad=kwargs.get('cad')
         dxfPath=kwargs.get('path')
         if dxfPath:
@@ -279,7 +279,7 @@ class MainWindow(QMainWindow):
                     if msg_box.clickedButton() == retry_button:
                         continue
 
-    def save_png(self, *args, **kwargs):
+    def convertSVGtoPNG(self, *args, **kwargs):
         # msp=kwargs.get('msp')
         # cad=kwargs.get('cad')
         pngPath=kwargs.get('pngPath')
@@ -297,7 +297,7 @@ class MainWindow(QMainWindow):
             dpi=600
             )
 
-    def inp_rpt_match(self):
+    def matchInpRptFile(self):
         inputAllLink=pd.concat([df_Pipes['ID'], df_Valves['ID'], df_Pumps['ID']])
         inputAllLink=inputAllLink.sort_values().reset_index(drop=True)
         outputAllLink=df_LinkResults['ID']
@@ -370,7 +370,7 @@ class MainWindow(QMainWindow):
             self.MainWindow.browser_log.append(f'管件坐標讀取完畢({t8-t7:.2f}s)')
         QCoreApplication.processEvents()
         
-    def multiHr(self, rptFile2):
+    def convertPatternsToHourList(self, rptFile2):
         global hr_list
         rptFile2_lines=open(rptFile2).readlines()
 
@@ -419,7 +419,7 @@ class MainWindow(QMainWindow):
             self.MainWindow.browser_log.append('.rpt前處理完成')
             self.setLogToButton()
 
-            hr_list=self.multiHr(rptFile2)
+            hr_list=self.convertPatternsToHourList(rptFile2)
 
             if hr_list==[]:
                 hr_list=['']
