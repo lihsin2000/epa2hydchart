@@ -1,5 +1,4 @@
 
-import pandas as pd
 import ezdxf
 import sys, warnings, traceback
 
@@ -9,7 +8,7 @@ from PyQt6.QtGui import QIntValidator, QDoubleValidator
 from PyQt6.QtCore import QCoreApplication
 
 import config, utils
-from process_utils import process1, process2
+from process_utils import process1
 from load_button import loadinpButton, loadrptButton
 import read_utils
 class MainWindow(QMainWindow):
@@ -69,8 +68,8 @@ class MainWindow(QMainWindow):
                 if config.df_NodeResults.at[row, 'Demand'] != None:
                     Q=Q+Decimal(config.df_NodeResults.at[row, 'Demand'])
                 else:
-                    self.MainWindow.browser_log.append(f'[Error]節點 {id} Demand數值錯誤，Q值總計可能有誤')
-                    self.setLogToButton()
+                    msg= f'[Error]節點 {id} Demand數值錯誤，Q值總計可能有誤'
+                    utils.renew_log(self, msg, True)
 
             # 匯整C值
             C_str=''
@@ -170,9 +169,8 @@ class MainWindow(QMainWindow):
 
                 msp.add_text(Head, height=config.text_size, dxfattribs={'color': color_head, "style": "epa2HydChart"}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y+2*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
                 msp.add_text(Pressure, height=config.text_size, dxfattribs={'color': color_pressure, "style": "epa2HydChart"}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y-0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
-                self.MainWindow.browser_log.append(f'節點 {id} 壓力引線已完成繪圖')
-                self.setLogToButton()
-                QCoreApplication.processEvents()
+                msg= f'節點 {id} 高度及壓力引線已完成繪圖'
+                utils.renew_log(self, msg, False)
         except Exception as e:
             traceback.print_exc()
     
@@ -230,9 +228,8 @@ class MainWindow(QMainWindow):
                                     (leader_up_end_x,leader_up_end_y),
                                     (leader_up_end_x+6*config.text_size,leader_up_end_y)], dxfattribs={'color': color})
                 msp.add_text(elev, height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y+0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
-                self.MainWindow.browser_log.append(f'節點 {id} 高程引線已完成繪圖')
-                self.setLogToButton()
-                QCoreApplication.processEvents()
+                msg= f'節點 {id} 高程引線已完成繪圖'
+                utils.renew_log(self, msg, False)
         except Exception as e:
             traceback.print_exc()
 
@@ -300,9 +297,8 @@ class MainWindow(QMainWindow):
                 msp.add_text(head, height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y+2*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
                 msp.add_text('ELEV', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y+0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
                 msp.add_text('Pressure', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y-0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
-                self.MainWindow.browser_log.append(f'接水點 {id} 引線已完成繪圖')
-                self.setLogToButton()
-                QCoreApplication.processEvents()
+                msg=f'接水點 {id} 引線已完成繪圖'
+                utils.renew_log(self, msg, False)
         except Exception as e:
             traceback.print_exc()
 
@@ -322,9 +318,8 @@ class MainWindow(QMainWindow):
 
                 msp.add_text(f'Q:{Q}', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((x+2*config.text_size,y-offset[0]), align=TextEntityAlignment.MIDDLE_RIGHT)
                 msp.add_text(f'H:{H}', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((x+2*config.text_size,y-offset[1]), align=TextEntityAlignment.MIDDLE_RIGHT)
-                self.MainWindow.browser_log.append(f'抽水機 {id} 已完成繪圖')
-                self.setLogToButton()
-                QCoreApplication.processEvents()
+                msg= f'抽水機 {id} 已完成繪圖'
+                utils.renew_log(self, msg, False)
         except Exception as e:
             traceback.print_exc()
 
@@ -351,9 +346,8 @@ class MainWindow(QMainWindow):
 
                 msp.add_text(f'{Type}', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((x,y-offset[0]), align=TextEntityAlignment.MIDDLE_CENTER)
                 msp.add_text(f'{Setting}', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((x,y-offset[1]), align=TextEntityAlignment.MIDDLE_CENTER)
-                self.MainWindow.browser_log.append(f'閥件 {id} 已完成繪圖')
-                self.setLogToButton()
-                QCoreApplication.processEvents()
+                msg= f'閥件 {id} 已完成繪圖'
+                utils.renew_log(self, msg, False)
         except Exception as e:
             traceback.print_exc()
 
@@ -388,9 +382,8 @@ class MainWindow(QMainWindow):
                 msp.add_text(f'Hwl:{maxElev}', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((leader_up_end_x+10*config.text_size,leader_up_end_y+2*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
                 msp.add_text(f'Mwl:{minElev}', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((leader_up_end_x+10*config.text_size,leader_up_end_y+0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
                 msp.add_text(f'Elev:{elev}', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((leader_up_end_x+10*config.text_size,leader_up_end_y-0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
-                self.MainWindow.browser_log.append(f'水池 {id} 已完成繪圖')
-                self.setLogToButton()
-                QCoreApplication.processEvents()
+                msg= f'水池 {id} 引線已完成繪圖'
+                utils.renew_log(self, msg, False)
         except Exception as e:
             traceback.print_exc()
 
@@ -436,8 +429,8 @@ class MainWindow(QMainWindow):
 
         except Exception as e:
             print(e)
-            self.MainWindow.browser_log.append(f'[Error]管線 {id} 錯誤，請重新匯出inp及rpt檔後重試')
-            self.setLogToButton()
+            msg=f'[Error]管線 {id} 錯誤，請重新匯出inp及rpt檔後重試'
+            utils.renew_log(self, msg, True)
             traceback.print_exc()
 
     def pipeAnnotation(self):
@@ -517,9 +510,8 @@ class MainWindow(QMainWindow):
                     lastVert_x=float(config.df_Vertices.at[rows[len(rows)-1],'x'])
                     lastVert_y=float(config.df_Vertices.at[rows[len(rows)-1],'y'])
                     msp.add_polyline2d([(lastVert_x,lastVert_y), (end_x,end_y)])
-                    self.MainWindow.browser_log.append(f'管線 {link_id} 已完成繪圖')
-                    self.setLogToButton()
-                
+                    msg= f'管線 {link_id} 已完成繪圖'
+                    utils.renew_log(self, msg, False)                
                 else:
                     msp.add_polyline2d([(end_x,end_y), (start_x,start_y)])
 
@@ -537,9 +529,8 @@ class MainWindow(QMainWindow):
                         x=float(df.at[i,'x'])
                         y=float(df.at[i,'y'])
                         msp.add_blockref(item, [x,y], dxfattribs={'xscale':config.block_scale, 'yscale':config.block_scale})
-                        self.MainWindow.browser_log.append(f'水池 {id} 圖塊已插入')
-                        self.setLogToButton()
-                        QCoreApplication.processEvents()
+                        msg= f'水池 {id} 圖塊已插入'
+                        utils.renew_log(self, msg, False)
 
                 if item == 'reservoir':
                     df=config.df_Reservoirs
@@ -548,9 +539,8 @@ class MainWindow(QMainWindow):
                         x=float(df.at[i,'x'])
                         y=float(df.at[i,'y'])
                         msp.add_blockref(item, [x,y], dxfattribs={'xscale':config.block_scale, 'yscale':config.block_scale})
-                        self.MainWindow.browser_log.append(f'接水點 {id} 圖塊已插入')
-                        self.setLogToButton()
-                        QCoreApplication.processEvents()
+                        msg= f'接水點 {id} 圖塊已插入'
+                        utils.renew_log(self, msg, False)
 
                 if item == 'pump':
                     df=config.df_Pumps
@@ -559,9 +549,8 @@ class MainWindow(QMainWindow):
                         x=float(df.at[i,'x'])
                         y=float(df.at[i,'y'])
                         msp.add_blockref(item, [x,y], dxfattribs={'xscale':config.block_scale, 'yscale':config.block_scale})
-                        self.MainWindow.browser_log.append(f'抽水機 {id} 圖塊已插入')
-                        self.setLogToButton()
-                        QCoreApplication.processEvents()
+                        msg= f'抽水機 {id} 圖塊已插入'
+                        utils.renew_log(self, msg, False)
 
                 if item == 'valve':
                     import math
@@ -581,9 +570,8 @@ class MainWindow(QMainWindow):
 
                         msp.add_blockref(item, [x,y], dxfattribs={'xscale':config.block_scale, 'yscale':config.block_scale, 'rotation':rotation})
                         msp.add_polyline2d([(x1,y1), (x2,y2)])
-                        self.MainWindow.browser_log.append(f'閥件 {id} 圖塊已插入')
-                        self.setLogToButton()
-                        QCoreApplication.processEvents()
+                        msg= f'閥件 {id} 圖塊已插入'
+                        utils.renew_log(self, msg, False)
 
                 if item == 'junction':
                     df=config.df_Junctions
@@ -592,9 +580,8 @@ class MainWindow(QMainWindow):
                         x=float(df.at[i,'x'])
                         y=float(df.at[i,'y'])
                         msp.add_blockref(item, [x,y], dxfattribs={'xscale':config.joint_scale, 'yscale':config.joint_scale})
-                        self.MainWindow.browser_log.append(f'節點 {id} 圖塊已插入')
-                        self.setLogToButton()
-                        QCoreApplication.processEvents()
+                        msg= f'節點 {id} 圖塊已插入'
+                        utils.renew_log(self, msg, False)
         except Exception as e:
             traceback.print_exc()
                 

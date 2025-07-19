@@ -36,13 +36,12 @@ def process1(main_window_instance: 'MainWindow'):
                     process2(main_window_instance, matchLink=matchLink, matchNode=matchNode, dxfPath=dxfPath, hr='')
 
                 else:   # 多時段結果
-                    config.hr_list_select = []
+                    hr_list_select = []
                     items = main_window_instance.MainWindow.list_hrs.selectedItems()
                     for item in items:
-                        config.hr_list_select.append(item.text())
+                        hr_list_select.append(item.text())
 
-                    for h in config.hr_list_select:
-
+                    for h in hr_list_select:
                         config.df_NodeResults = read_utils.readNodeResults(hr=h, input=config.arranged_rpt_file_path)
                         i_hr1 = config.hr_list.index(h)
                         i_hr2 = i_hr1 + 1
@@ -58,8 +57,8 @@ def process1(main_window_instance: 'MainWindow'):
 
 
     except Exception as e:
-        error_msg='[Error]不明錯誤，中止匯出'
-        utils.renew_log(main_window_instance, error_msg)
+        msg='[Error]不明錯誤，中止匯出'
+        utils.renew_log(main_window_instance, msg, True)
         traceback.print_exc()
 
 def process2(main_window_instance: 'MainWindow', *args, **kwargs):
@@ -81,8 +80,8 @@ def process2(main_window_instance: 'MainWindow', *args, **kwargs):
         file = os.path.splitext(os.path.basename(dxfPath))[0]
 
         if matchLink and matchNode:
-            main_window_instance.MainWindow.browser_log.append(f'{hr_str} .rpt及.inp內容相符')
-            main_window_instance.setLogToButton()
+            msg= f'{hr_str} .rpt及.inp內容相符，開始處理'
+            utils.renew_log(main_window_instance, msg, False)
             config.cad, config.msp = main_window_instance.createModelspace()
 
             tankerLeaderColor = 210
@@ -115,7 +114,6 @@ def process2(main_window_instance: 'MainWindow', *args, **kwargs):
                 if len(config.hr_list) >= 2:
                     dxfPath = f'{dictionary}/{file}_{hr_str}.dxf'
                 dxfPathWithoutExtension = dxfPath.replace('.dxf', '')
-                # main_window_instance.saveDXF(cad=config.cad, path=dxfPath)
 
                 # 檢查dxf是否可以儲存，如果被開啟，則提示用戶重試
                 while True:
@@ -127,11 +125,6 @@ def process2(main_window_instance: 'MainWindow', *args, **kwargs):
                         from PyQt6.QtWidgets import QApplication, QMessageBox
 
                         msg_box=QMessageBox(QApplication.activeWindow())
-                        # msg_box.critical(None, "錯誤", f'{dxfPath}使用中，無法儲存')
-                        # msg_box = QMessageBox(QApplication.activeWindow())
-                        # msg_box.setIcon(QMessageBox.Critical)
-                        # msg_box.setWindowTitle("錯誤")
-                        # msg_box.setText(f'{dxfPath}無法儲存')
                         msg_box.setIcon(QMessageBox.Icon.Critical)
                         msg_box.setWindowTitle("錯誤")
                         msg_box.setText(f'無法儲存 {dxfPath}，請關閉相關檔案後重試')
@@ -141,32 +134,32 @@ def process2(main_window_instance: 'MainWindow', *args, **kwargs):
                         if msg_box.clickedButton() == retry_button:
                             continue
                         elif msg_box.clickedButton() == cancel_button:
-                            error_msg=f'[Error]無法儲存 {dxfPath}，中止匯出'
-                            utils.renew_log(main_window_instance, error_msg)
+                            msg=f'[Error]無法儲存 {dxfPath}，中止匯出'
+                            utils.renew_log(main_window_instance, msg, True)
                             return
 
-                msg= f'{dxfPathWithoutExtension}.dxf 已匯出'
-                utils.renew_log(main_window_instance, msg)
+                msg= f'{dxfPathWithoutExtension}.dxf 匯出完成'
+                utils.renew_log(main_window_instance, msg, False)
                 # QCoreApplication.processEvents()
 
                 svg_path = dxfPath.replace('.dxf', '.svg')
                 main_window_instance.save_svg(msp=config.msp, cad=config.cad, path=svg_path)
                 msg = f'{dxfPathWithoutExtension}.svg匯出完成'
-                utils.renew_log(main_window_instance, msg)
+                utils.renew_log(main_window_instance, msg, False)
                 # QCoreApplication.processEvents()
 
                 png_path = dxfPath.replace('.dxf', '.png')
                 main_window_instance.convertSVGtoPNG(msp=config.msp, cad=config.cad, pngPath=png_path, svgPath=svg_path)
                 msg= f'{dxfPathWithoutExtension}.png匯出完成'
-                utils.renew_log(main_window_instance, msg)
+                utils.renew_log(main_window_instance, msg, False)
                 # QCoreApplication.processEvents()
 
-                msg= f'{dxfPathWithoutExtension}.dxf匯出完成'
-                utils.renew_log(main_window_instance, msg)
+                msg= '所有作業成功完成'
+                utils.renew_log(main_window_instance, msg, True)
 
         else:
             msg= f'[Error]{h}.rpt及.inp內容不符，中止匯出'
-            utils.renew_log(main_window_instance, msg)
+            utils.renew_log(main_window_instance, msg, True)
 
     except Exception as e:
         traceback.print_exc()  

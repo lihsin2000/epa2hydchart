@@ -16,7 +16,6 @@ rptFile=None
 projName=None
 
 hr_list=[]
-hr_list_select=None
 df_NodeResults=pd.DataFrame()
 df_LinkResults=pd.DataFrame()
 

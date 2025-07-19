@@ -215,32 +215,34 @@ def inp_to_df(main_window_instance: 'MainWindow', inpFile, showtime):
     except Exception as e:
         traceback.print_exc()  
 
+
 def matchInpRptFile():
     try:
-        inputAllLink=pd.concat([config.df_Pipes['ID'], config.df_Valves['ID'], config.df_Pumps['ID']])
-        inputAllLink=inputAllLink.sort_values().reset_index(drop=True)
-        outputAllLink=config.df_LinkResults['ID']
-        outputAllLink=outputAllLink.sort_values().reset_index(drop=True)
+        inputAllLink = pd.concat([config.df_Pipes['ID'], config.df_Valves['ID'], config.df_Pumps['ID']])
+        inputAllLink = inputAllLink.sort_values().reset_index(drop=True)
+        outputAllLink = config.df_LinkResults['ID']
+        outputAllLink = outputAllLink.sort_values().reset_index(drop=True)
 
-        matchLink=outputAllLink.equals(outputAllLink)
+        matchLink = outputAllLink.equals(outputAllLink)
 
-        inputAllNode=pd.concat([config.df_Junctions['ID'], config.df_Tanks['ID'], config.df_Reservoirs['ID']])
-        inputAllNode=inputAllNode.sort_values().reset_index(drop=True)
-        outputAllNode=config.df_NodeResults['ID']
-        outputAllNode=outputAllNode.sort_values().reset_index(drop=True)
+        inputAllNode = pd.concat([config.df_Junctions['ID'], config.df_Tanks['ID'], config.df_Reservoirs['ID']])
+        inputAllNode = inputAllNode.sort_values().reset_index(drop=True)
+        outputAllNode = config.df_NodeResults['ID']
+        outputAllNode = outputAllNode.sort_values().reset_index(drop=True)
 
-        matchNode=outputAllNode.equals(inputAllNode)
-        return matchLink,matchNode
+        matchNode = outputAllNode.equals(inputAllNode)
+        return matchLink, matchNode
     except Exception as e:
         traceback.print_exc()
 
-def renew_log(main_window_instance: 'MainWindow', msg):
+def renew_log(main_window_instance: 'MainWindow', msg, seperate:bool):
     """
     Display an error message in the main window's log and set the log to the button.
     """
     
     main_window_instance.MainWindow.browser_log.append(msg)
-    main_window_instance.MainWindow.browser_log.append(f'---------------------')
-    main_window_instance.setLogToButton()
+    if seperate:
+        main_window_instance.MainWindow.browser_log.append('---------------------')
+    main_window_instance.MainWindow.browser_log.verticalScrollBar().setValue(main_window_instance.MainWindow.browser_log.verticalScrollBar().maximum())
     QCoreApplication.processEvents()
     
