@@ -92,28 +92,6 @@ class MainWindow(QMainWindow):
         except Exception as e:
             traceback.print_exc()
 
-    # def saveDXF(*args, **kwargs):
-    #     try:
-    #         cad=kwargs.get('cad')
-    #         dxfPath=kwargs.get('path')
-    #         if dxfPath:
-    #             while True:
-    #                 try:
-    #                     cad.saveas(dxfPath)
-    #                     break
-    #                 except:
-    #                     traceback.print_exc()
-    #                     from PyQt6.QtWidgets import (QApplication, QMessageBox)
-    #                     msg_box = QMessageBox(Main)
-    #                     msg_box.setIcon(QMessageBox.Critical)
-    #                     msg_box.setWindowTitle("錯誤")
-    #                     msg_box.setText(f'{dxfPath}無法儲存')
-    #                     retry_button = msg_box.addButton("重試", QMessageBox.ActionRole)
-    #                     msg_box.exec()
-    #                     if msg_box.clickedButton() == retry_button:
-    #                         continue
-    #     except Exception as e:
-    #         traceback.print_exc()
 
     def convertSVGtoPNG(self, *args, **kwargs):
         try:

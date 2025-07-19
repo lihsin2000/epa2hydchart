@@ -2,7 +2,7 @@ import traceback
 import pandas as pd
 import config
 import utils
-from PyQt6.QtWidgets import QFileDialog, QMessageBox
+from PyQt6.QtWidgets import QMessageBox
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -11,8 +11,7 @@ if TYPE_CHECKING:
 
 def readVertices(inpFile):
     try:
-        start, end = utils.lineStartEnd(
-            inpFile, '[VERTICES]', '[LABELS]', 2, 2)
+        start, end = utils.lineStartEnd(inpFile, '[VERTICES]', '[LABELS]', 2, 2)
         lines = open(inpFile).readlines()
 
         data = []
@@ -39,14 +38,12 @@ def readPipes(inpFile):
 
         for i in range(0, len(df)):
             Node1 = df.at[i, 'Node1']
-            row = config.df_Coords.index[config.df_Coords['ID'] == str(Node1)].tolist()[
-                0]
+            row = config.df_Coords.index[config.df_Coords['ID'] == str(Node1)].tolist()[0]
             df.at[i, 'Node1_x'] = config.df_Coords.at[row, 'x']
             df.at[i, 'Node1_y'] = config.df_Coords.at[row, 'y']
 
             Node2 = df.at[i, 'Node2']
-            row = config.df_Coords.index[config.df_Coords['ID'] == str(Node2)].tolist()[
-                0]
+            row = config.df_Coords.index[config.df_Coords['ID'] == str(Node2)].tolist()[0]
             df.at[i, 'Node2_x'] = config.df_Coords.at[row, 'x']
             df.at[i, 'Node2_y'] = config.df_Coords.at[row, 'y']
         return df
@@ -56,8 +53,7 @@ def readPipes(inpFile):
 
 def readCoords(inpFile):
     try:
-        start, end = utils.lineStartEnd(
-            inpFile, '[COORDINATES]', '[VERTICES]', 2, 2)
+        start, end = utils.lineStartEnd(inpFile, '[COORDINATES]', '[VERTICES]', 2, 2)
         lines = open(inpFile).readlines()
         df = pd.DataFrame(columns=['ID', 'x', 'y'])
         for l in range(start-1, end):
@@ -79,8 +75,7 @@ def readCoords(inpFile):
 
 def readJunctions(inpFile):
     try:
-        start, end = utils.lineStartEnd(
-            inpFile, '[JUNCTIONS]', '[RESERVOIRS]', 2, 2)
+        start, end = utils.lineStartEnd(inpFile, '[JUNCTIONS]', '[RESERVOIRS]', 2, 2)
         lines = open(inpFile).readlines()
         df = pd.DataFrame(columns=['ID', 'Elev', 'BaseDemand', 'x', 'y'])
         for l in range(start-1, end):
@@ -103,8 +98,7 @@ def readJunctions(inpFile):
 
 def readReservoirs(inpFile):
     try:
-        start, end = utils.lineStartEnd(
-            inpFile, '[RESERVOIRS]', '[TANKS]', 2, 2)
+        start, end = utils.lineStartEnd(inpFile, '[RESERVOIRS]', '[TANKS]', 2, 2)
         lines = open(inpFile).readlines()
         df = pd.DataFrame(columns=['ID', 'Head', 'x', 'y'])
         for l in range(start-1, end):
@@ -170,10 +164,8 @@ def readValves(inpFile):
             Node2 = d[3]
             Type = d[5]
             Setting = d[6]
-            coords1_row = config.df_Coords.index[config.df_Coords['ID'] == Node1].tolist()[
-                0]
-            coords2_row = config.df_Coords.index[config.df_Coords['ID'] == Node2].tolist()[
-                0]
+            coords1_row = config.df_Coords.index[config.df_Coords['ID'] == Node1].tolist()[0]
+            coords2_row = config.df_Coords.index[config.df_Coords['ID'] == Node2].tolist()[0]
             Node1_x = config.df_Coords.at[coords1_row, 'x']
             Node1_y = config.df_Coords.at[coords1_row, 'y']
             Node2_x = config.df_Coords.at[coords2_row, 'x']
@@ -204,8 +196,7 @@ def readPumps(inpFile):
     try:
         lines = open(inpFile).readlines()
 
-        start_curve, end_curve = utils.lineStartEnd(
-            inpFile, '[CURVES]', '[CONTROLS]', 2, 1)
+        start_curve, end_curve = utils.lineStartEnd(inpFile, '[CURVES]', '[CONTROLS]', 2, 1)
         df_pumpCurves = pd.DataFrame(columns=['ID', 'Q', 'H'])
         for l in range(start_curve-1, end_curve):
             if 'PUMP' in lines[l]:
@@ -236,10 +227,8 @@ def readPumps(inpFile):
             ID = [d[1]][0]
             Node1 = [d[2]][0]
             Node2 = [d[3]][0]
-            coords1_row = config.df_Coords.index[config.df_Coords['ID'] == Node1].tolist()[
-                0]
-            coords2_row = config.df_Coords.index[config.df_Coords['ID'] == Node2].tolist()[
-                0]
+            coords1_row = config.df_Coords.index[config.df_Coords['ID'] == Node1].tolist()[0]
+            coords2_row = config.df_Coords.index[config.df_Coords['ID'] == Node2].tolist()[0]
             Node1_x = config.df_Coords.at[coords1_row, 'x']
             Node1_y = config.df_Coords.at[coords1_row, 'y']
             Node2_x = config.df_Coords.at[coords2_row, 'x']
@@ -305,9 +294,7 @@ def readNodeResults(*args, **kwargs):
                 }
 
             except:
-                MainWindow.MainWindow.browser_log.append(
-                    f'[Error]節點 {id} 錯誤，請手動修正.rpt檔內容')
-                MainWindow.setLogToButton()
+                MainWindow.MainWindow.browser_log.append(MainWindow.setLogToButton())
                 QMessageBox.warning(None, '警告', f'節點{id}資料錯誤，請手動修正.rpt檔內容')
 
                 data = {
@@ -316,7 +303,6 @@ def readNodeResults(*args, **kwargs):
                     'Head': None,
                     'Pressure': None,
                 }
-                # print(f'error id:{id}')
 
             if df.empty:
                 df.loc[0] = data
@@ -355,14 +341,11 @@ def readLinkResults(*args, **kwargs):
             # calculate headloss number:
             # 2 side in link are node:
             if pipe_id in config.df_Pipes['ID'].tolist():
-                pipe_index = config.df_Pipes.index[config.df_Pipes['ID'] == pipe_id].tolist()[
-                    0]
+                pipe_index = config.df_Pipes.index[config.df_Pipes['ID'] == pipe_id].tolist()[0]
                 node1 = config.df_Pipes.at[pipe_index, 'Node1']
-                i1 = config.df_NodeResults.index[config.df_NodeResults['ID'] == node1].tolist()[
-                    0]
+                i1 = config.df_NodeResults.index[config.df_NodeResults['ID'] == node1].tolist()[0]
                 node2 = config.df_Pipes.at[pipe_index, 'Node2']
-                i2 = config.df_NodeResults.index[config.df_NodeResults['ID'] == node2].tolist()[
-                    0]
+                i2 = config.df_NodeResults.index[config.df_NodeResults['ID'] == node2].tolist()[0]
 
                 from decimal import Decimal
                 try:
@@ -397,8 +380,7 @@ def appendCoords(df):
     try:
         for i in range(0, len(df)):
             ID = df.at[i, 'ID']
-            row = config.df_Coords.index[config.df_Coords['ID'] == str(ID)].tolist()[
-                0]
+            row = config.df_Coords.index[config.df_Coords['ID'] == str(ID)].tolist()[0]
             config.df_Coords['x'] = config.df_Coords['x'].astype(float)
             config.df_Coords['y'] = config.df_Coords['y'].astype(float)
             df.at[i, 'x'] = config.df_Coords.at[row, 'x']
