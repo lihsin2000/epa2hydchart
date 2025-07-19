@@ -1,10 +1,10 @@
-import config
+import config, utils
 import os
 from PyQt6.QtWidgets import QFileDialog
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from main_pyqt6 import MainWindow
+    from main import MainWindow
 
 
 def loadinpButton(main_window_instance: 'MainWindow'):
@@ -36,12 +36,12 @@ def loadrptButton(main_window_instance: 'MainWindow'):
         main_window_instance.MainWindow.l_rpt_path.setText(rpt_file)
 
         try:
-            config.arranged_rpt_file_path = main_window_instance.arrange_rpt_file(
+            config.arranged_rpt_file_path = utils.arrange_rpt_file(
                 rpt_file)
             main_window_instance.MainWindow.browser_log.append('.rpt前處理完成')
             main_window_instance.setLogToButton()
 
-            config.hr_list = main_window_instance.convertPatternsToHourList(
+            config.hr_list = utils.convertPatternsToHourList(
                 config.arranged_rpt_file_path)
 
             if config.hr_list == []:

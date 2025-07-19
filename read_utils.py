@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import QFileDialog, QMessageBox
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from main_pyqt6 import MainWindow
+    from main import MainWindow
 
 
 def readVertices(inpFile):
