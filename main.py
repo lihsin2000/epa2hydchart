@@ -247,31 +247,34 @@ class MainWindow(QMainWindow):
                 l=config.df_NodeResults.index[config.df_NodeResults['ID']==id].tolist()[0]
                 demand=config.df_NodeResults.at[l,'Demand']
 
-                if float(demand) == 0.0 and draw0cmd:
-                    self.drawDemandLeader(color, id, x, y, demand)
+                if draw0cmd:
+                    self.drawDemandLeader(color, id, x, y, demand, True)
                     self.setLogToButton()
-                elif float(demand) != 0.0:
-                    self.drawDemandLeader(color, id, x, y, demand)
+                else:
+                    self.drawDemandLeader(color, id, x, y, demand, False)
                     self.setLogToButton()
-                    
+                
                 QCoreApplication.processEvents()
         except Exception as e:
             traceback.print_exc()
 
-    def drawDemandLeader(self, color, id, x, y, demand):
+    def drawDemandLeader(self, color, id, x, y, demand, export0cmd:bool):
         from ezdxf.enums import TextEntityAlignment
 
         try:
-            leader_down_start_x=x+config.text_size
-            leader_down_start_y=y-config.text_size
+            if (export0cmd) or (export0cmd==False and float(demand)!=0.0):
+                leader_down_start_x=x+config.text_size
+                leader_down_start_y=y-config.text_size
 
-            leader_down_end_x=leader_down_start_x+config.leader_distance
-            leader_down_end_y=leader_down_start_y-config.leader_distance
-                    
-            msp.add_blockref('demandArrow', [leader_down_end_x,leader_down_end_y], dxfattribs={'xscale':config.block_scale, 'yscale':config.block_scale, 'rotation':225})
-            msp.add_polyline2d([(leader_down_start_x,leader_down_start_y),(leader_down_end_x,leader_down_end_y)], dxfattribs={'color': color})
-            msp.add_text(demand, height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((leader_down_end_x+0.5*config.text_size, leader_down_end_y-0.5*config.text_size), align=TextEntityAlignment.TOP_LEFT)
-            self.MainWindow.browser_log.append(f'節點 {id} 水量引線已完成繪圖')
+                leader_down_end_x=leader_down_start_x+config.leader_distance
+                leader_down_end_y=leader_down_start_y-config.leader_distance
+                        
+                msp.add_blockref('demandArrow', [leader_down_end_x,leader_down_end_y], dxfattribs={'xscale':config.block_scale, 'yscale':config.block_scale, 'rotation':225})
+                msp.add_polyline2d([(leader_down_start_x,leader_down_start_y),(leader_down_end_x,leader_down_end_y)], dxfattribs={'color': color})
+                msp.add_text(demand, height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((leader_down_end_x+0.5*config.text_size, leader_down_end_y-0.5*config.text_size), align=TextEntityAlignment.TOP_LEFT)
+                self.MainWindow.browser_log.append(f'節點 {id} 水量引線已完成繪圖')
+            elif export0cmd==False and float(demand)==0.0:
+                pass
         except Exception as e:
             traceback.print_exc()
 

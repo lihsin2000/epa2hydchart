@@ -122,8 +122,7 @@ def readTanks(inpFile):
     try:
         start, end = utils.lineStartEnd(inpFile, '[TANKS]', '[PIPES]', 2, 2)
         lines = open(inpFile).readlines()
-        df = pd.DataFrame(
-            columns=['ID', 'Elev', 'MinLevel', 'MaxLevel', 'MinElev', 'MaxElev', 'x', 'y'])
+        df = pd.DataFrame(columns=['ID', 'Elev', 'MinLevel', 'MaxLevel', 'MinElev', 'MaxElev', 'x', 'y'])
         for l in range(start-1, end):
             d = utils.line2dict(lines, l)
             elev = float(d[2])
@@ -154,8 +153,7 @@ def readValves(inpFile):
     try:
         start, end = utils.lineStartEnd(inpFile, '[VALVES]', '[TAGS]', 2, 2)
         lines = open(inpFile).readlines()
-        df = pd.DataFrame(columns=['ID', 'Node1', 'Node2', 'Node1_x',
-                          'Node1_y', 'Node2_x', 'Node2_y', 'Type', 'Setting'])
+        df = pd.DataFrame(columns=['ID', 'Node1', 'Node2', 'Node1_x', 'Node1_y', 'Node2_x', 'Node2_y', 'Type', 'Setting'])
         for l in range(start-1, end):
             d = utils.line2dict(lines, l)
 
@@ -220,8 +218,7 @@ def readPumps(inpFile):
         df_pumpCurves = df_pumpCurves.reset_index(drop=True)
 
         start, end = utils.lineStartEnd(inpFile, '[PUMPS]', '[VALVES]', 2, 2)
-        df = pd.DataFrame(columns=['ID', 'Node1', 'Node2', 'Node1_x',
-                          'Node1_y', 'Node2_x', 'Node2_y', 'x', 'y', 'Q', 'H'])
+        df = pd.DataFrame(columns=['ID', 'Node1', 'Node2', 'Node1_x', 'Node1_y', 'Node2_x', 'Node2_y', 'x', 'y', 'Q', 'H'])
         for l in range(start-1, end):
             d = utils.line2dict(lines, l)
             ID = [d[1]][0]
