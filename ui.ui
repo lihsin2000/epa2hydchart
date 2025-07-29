@@ -266,7 +266,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <item row="2" column="2" colspan="2">
          <widget class="QCheckBox" name="chk_export_0cmd">
           <property name="text">
-           <string>匯出0CMD引線</string>
+           <string>匯出0CMD</string>
           </property>
           <property name="checked">
            <bool>true</bool>

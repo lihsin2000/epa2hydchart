@@ -187,7 +187,7 @@ class Ui_MainWindow(object):
         self.label_6.setText(_translate("MainWindow", "文字大小"))
         self.chk_autoSize.setText(_translate("MainWindow", "自動調整大小"))
         self.b_draw.setText(_translate("MainWindow", "開始處理"))
-        self.chk_export_0cmd.setText(_translate("MainWindow", "匯出0CMD引線"))
+        self.chk_export_0cmd.setText(_translate("MainWindow", "匯出0CMD"))
         self.label_5.setText(_translate("MainWindow", "節點圖塊大小"))
         self.label_9.setText(_translate("MainWindow", "小數取位"))
         self.label_3.setText(_translate("MainWindow", "匯出時段"))
