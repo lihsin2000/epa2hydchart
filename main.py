@@ -29,6 +29,7 @@ class MainWindow(QMainWindow):
         self.MainWindow.l_leader_distance.setText(str(config.leader_distance_default))
         self.MainWindow.l_leader_distance.setValidator(QIntValidator())
         self.MainWindow.chk_autoSize.stateChanged.connect(lambda:utils.autoSize(self))
+        self.MainWindow.comboBox_digits.setCurrentText('0.00')
 
 
     def setLogToButton(self):
@@ -215,8 +216,7 @@ class MainWindow(QMainWindow):
                 id=config.df_Junctions.at[i,'ID']
                 x=float(config.df_Junctions.at[i,'x'])
                 y=float(config.df_Junctions.at[i,'y'])
-                elev=float(config.df_Junctions.at[i,'Elev'])
-                elev=f'{elev:.2f}'
+                elev=config.df_Junctions.at[i,'Elev']
 
                 leader_up_start_x=x+config.text_size
                 leader_up_start_y=y+config.text_size

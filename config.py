@@ -32,3 +32,5 @@ df_Vertices=None
 cad=None
 msp=None
 dxfPath=None
+
+digit_decimal=None

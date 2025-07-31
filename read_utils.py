@@ -370,6 +370,39 @@ def readLinkResults(*args, **kwargs):
         traceback.print_exc()
 
 
+def changeValueByDigits(*args, **kwargs):
+    df_nodeResult=config.df_NodeResults
+    df_junctions=config.df_Junctions
+
+    digits= kwargs.get('digits')
+
+    df_nodeResult['Demand']=df_nodeResult['Demand'].astype(float)
+    df_nodeResult['Head']=df_nodeResult['Head'].astype(float)
+    df_junctions['Elev']=df_junctions['Elev'].astype(float)
+
+    try:
+        if digits == 0:
+            df_nodeResult['Demand'] = df_nodeResult['Demand'].map(lambda x: f"{x:.0f}")
+            df_nodeResult['Head'] = df_nodeResult['Head'].map(lambda x: f"{x:.0f}")
+
+            df_junctions['Elev'] = df_junctions['Elev'].map(lambda x: f"{x:.0f}")
+            # df['Pressure'] = df['Pressure'].round(0)
+        elif digits == 1:
+            df_nodeResult['Demand'] = df_nodeResult['Demand'].map(lambda x: f"{x:.1f}")
+            df_nodeResult['Head'] = df_nodeResult['Head'].map(lambda x: f"{x:.1f}")
+
+            df_junctions['Elev'] = df_junctions['Elev'].map(lambda x: f"{x:.1f}")
+            # df['Pressure'] = df['Pressure'].round(1)
+        elif digits == 2:
+            df_nodeResult['Demand'] = df_nodeResult['Demand'].map(lambda x: f"{x:.2f}")
+            df_nodeResult['Head'] = df_nodeResult['Head'].map(lambda x: f"{x:.2f}")
+
+            df_junctions['Elev'] = df_junctions['Elev'].map(lambda x: f"{x:.2f}")
+            # df['Pressure'] = df['Pressure'].round(2)
+        return (df_nodeResult, df_junctions)
+    except Exception as e:
+        traceback.print_exc()
+
 def appendCoords(df):
     '''
     從config.df_Coords讀取Tank, Reservoir的座標
