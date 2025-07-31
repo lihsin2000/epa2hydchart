@@ -316,6 +316,7 @@ def readLinkResults(*args, **kwargs):
         hr1 = kwargs.get('hr1')
         hr2 = kwargs.get('hr2')
         rptFile = kwargs.get('input')
+        digits= kwargs.get('digits')
 
         if hr1 == None:     # without patteren
             start_str = 'Link Results:'
@@ -349,15 +350,19 @@ def readLinkResults(*args, **kwargs):
                     node1_head = Decimal(config.df_NodeResults.at[i1, 'Head'])
                     node2_head = Decimal(config.df_NodeResults.at[i2, 'Head'])
 
-                    Headloss = float(abs(node2_head-node1_head))
+                    Headloss = round(abs(node2_head-node1_head), digits)
+                    Headloss_str= f"{Headloss:.{digits}f}"
+
                 except:
                     Headloss = 0
+                    Headloss_str= f"{Headloss:.{digits}f}"
+
 
             data = {
                 'ID': pipe_id,
                 'Flow': flow,
                 'unitHeadloss': unitHeadloss,
-                'Headloss': Headloss
+                'Headloss': Headloss_str
             }
             if df.empty:
                 df.loc[0] = data
@@ -371,34 +376,33 @@ def readLinkResults(*args, **kwargs):
 
 
 def changeValueByDigits(*args, **kwargs):
-    df_nodeResult=config.df_NodeResults
-    df_junctions=config.df_Junctions
 
     digits= kwargs.get('digits')
-
-    df_nodeResult['Demand']=df_nodeResult['Demand'].astype(float)
-    df_nodeResult['Head']=df_nodeResult['Head'].astype(float)
-    df_junctions['Elev']=df_junctions['Elev'].astype(float)
-
+    
     try:
-        if digits == 0:
-            df_nodeResult['Demand'] = df_nodeResult['Demand'].map(lambda x: f"{x:.0f}")
-            df_nodeResult['Head'] = df_nodeResult['Head'].map(lambda x: f"{x:.0f}")
+        df_nodeResult=config.df_NodeResults
+        df_junctions=config.df_Junctions
 
-            df_junctions['Elev'] = df_junctions['Elev'].map(lambda x: f"{x:.0f}")
-            # df['Pressure'] = df['Pressure'].round(0)
-        elif digits == 1:
-            df_nodeResult['Demand'] = df_nodeResult['Demand'].map(lambda x: f"{x:.1f}")
-            df_nodeResult['Head'] = df_nodeResult['Head'].map(lambda x: f"{x:.1f}")
+        df_nodeResult['Demand']=df_nodeResult['Demand'].astype(float)
+        df_nodeResult['Head']=df_nodeResult['Head'].astype(float)
+        df_junctions['Elev']=df_junctions['Elev'].astype(float)
 
-            df_junctions['Elev'] = df_junctions['Elev'].map(lambda x: f"{x:.1f}")
-            # df['Pressure'] = df['Pressure'].round(1)
-        elif digits == 2:
-            df_nodeResult['Demand'] = df_nodeResult['Demand'].map(lambda x: f"{x:.2f}")
-            df_nodeResult['Head'] = df_nodeResult['Head'].map(lambda x: f"{x:.2f}")
+        df_nodeResult['Demand'] = df_nodeResult['Demand'].map(lambda x: f"{x:.{digits}f}")
+        df_nodeResult['Head'] = df_nodeResult['Head'].map(lambda x: f"{x:.{digits}f}")
 
-            df_junctions['Elev'] = df_junctions['Elev'].map(lambda x: f"{x:.2f}")
-            # df['Pressure'] = df['Pressure'].round(2)
+        for index, row in df_nodeResult.iterrows():
+            try:
+                id= row['ID']
+                head= float(row['Head'])
+                elev= float(df_junctions.loc[df_junctions['ID'] == id, 'Elev'].values[0])
+                pressure= head - elev
+                df_nodeResult.at[index, 'Pressure'] = f"{pressure:.{digits}f}"
+            except:
+                continue
+
+        df_junctions['Elev'] = df_junctions['Elev'].map(lambda x: f"{x:.{digits}f}")
+                # df['Pressure'] = df['Pressure'].round(0)
+        
         return (df_nodeResult, df_junctions)
     except Exception as e:
         traceback.print_exc()

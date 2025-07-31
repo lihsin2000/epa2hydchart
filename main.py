@@ -3,9 +3,9 @@ import ezdxf
 import sys, warnings, traceback
 
 from ui import Ui_MainWindow
-from PyQt6.QtWidgets import QMainWindow, QApplication, QFileDialog, QMessageBox
+from PyQt6.QtWidgets import QMainWindow, QApplication, QFileDialog, QMessageBox, QLabel
 from PyQt6.QtGui import QIntValidator, QDoubleValidator
-from PyQt6.QtCore import QCoreApplication
+from PyQt6.QtCore import QCoreApplication, Qt
 
 import config, utils
 from process_utils import process1
@@ -30,6 +30,10 @@ class MainWindow(QMainWindow):
         self.MainWindow.l_leader_distance.setValidator(QIntValidator())
         self.MainWindow.chk_autoSize.stateChanged.connect(lambda:utils.autoSize(self))
         self.MainWindow.comboBox_digits.setCurrentText('0.00')
+        # self.MainWindow.l_inp_path.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+        # self.MainWindow.l_inp_path.setToolTip(self.MainWindow.l_inp_path.text())
+        # self.MainWindow.l_rpt_path.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+        # self.MainWindow.l_rpt_path.setToolTip(self.MainWindow.l_rpt_path.text())
 
 
     def setLogToButton(self):
@@ -208,8 +212,9 @@ class MainWindow(QMainWindow):
         except Exception as e:
             traceback.print_exc()
 
-    def elevAnnotation(self, color):
+    def elevAnnotation(self, *args, **kwargs):
         from ezdxf.enums import TextEntityAlignment
+        color= kwargs.get('color')
 
         try:
             for i in range(0, len(config.df_Junctions)):
@@ -278,15 +283,19 @@ class MainWindow(QMainWindow):
         except Exception as e:
             traceback.print_exc()
 
-    def reservoirsLeader(self, color):
+    def reservoirsLeader(self, *args, **kwargs):
         from ezdxf.enums import TextEntityAlignment
+
+        color= kwargs.get('color')
+        digits= kwargs.get('digits')
+
         try:
             for i in range(0, len(config.df_Reservoirs)):
                 id=config.df_Reservoirs.at[i,'ID']
                 x=float(config.df_Reservoirs.at[i,'x'])
                 y=float(config.df_Reservoirs.at[i,'y'])
                 head=float(config.df_Reservoirs.at[i,'Head'])
-                head=f'{head:.2f}'
+                head=f'{head:.{digits}f}'
 
                 leader_up_start_x=x+config.text_size
                 leader_up_start_y=y+config.text_size
@@ -305,8 +314,10 @@ class MainWindow(QMainWindow):
         except Exception as e:
             traceback.print_exc()
 
-    def pumpAnnotation(self, color):
+    def pumpAnnotation(self, *args, **kwargs):
         from ezdxf.enums import TextEntityAlignment
+        color=kwargs.get('color')
+        digits=kwargs.get('digits')
         try:
             for i in range(0, len(config.df_Pumps)):
                 id=config.df_Pumps.at[i,'ID']
@@ -316,11 +327,14 @@ class MainWindow(QMainWindow):
                 Q=float(config.df_Pumps.at[i,'Q'])
                 H=float(config.df_Pumps.at[i,'H'])
 
+                Q_str=f"{Q:.{digits}f}"
+                H_str=f"{H:.{digits}f}"
+
                 offset=[config.block_scale+0.75*config.text_size,
                         config.block_scale+2*config.text_size]
 
-                msp.add_text(f'Q:{Q}', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((x+2*config.text_size,y-offset[0]), align=TextEntityAlignment.MIDDLE_RIGHT)
-                msp.add_text(f'H:{H}', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((x+2*config.text_size,y-offset[1]), align=TextEntityAlignment.MIDDLE_RIGHT)
+                msp.add_text(f'Q:{Q_str}', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((x+2*config.text_size,y-offset[0]), align=TextEntityAlignment.MIDDLE_RIGHT)
+                msp.add_text(f'H:{H_str}', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((x+2*config.text_size,y-offset[1]), align=TextEntityAlignment.MIDDLE_RIGHT)
                 msg= f'抽水機 {id} 已完成繪圖'
                 utils.renew_log(self, msg, False)
         except Exception as e:
@@ -354,9 +368,11 @@ class MainWindow(QMainWindow):
         except Exception as e:
             traceback.print_exc()
 
-    def tankLeader(self, color):
+    def tankLeader(self, *args, **kwargs):
         from ezdxf.enums import TextEntityAlignment
 
+        color= kwargs.get('color')
+        digits= kwargs.get('digits')
         try:
             for i in range(0, len(config.df_Tanks)):
                 id=config.df_Tanks.at[i,'ID']
@@ -364,13 +380,13 @@ class MainWindow(QMainWindow):
                 y=float(config.df_Tanks.at[i,'y'])
 
                 elev=float(config.df_Tanks.at[i,'Elev'])
-                elev=f'{elev:.2f}'
+                elev=f'{elev:.{digits}f}'
 
                 minElev=float(config.df_Tanks.at[i,'MinElev'])
-                minElev=f'{minElev:.2f}'
+                minElev=f'{minElev:.{digits}f}'
 
                 maxElev=float(config.df_Tanks.at[i,'MaxElev'])
-                maxElev=f'{maxElev:.2f}'
+                maxElev=f'{maxElev:.{digits}f}'
 
                 leader_up_start_x=x+config.text_size
                 leader_up_start_y=y+config.text_size
@@ -413,7 +429,7 @@ class MainWindow(QMainWindow):
             else:
                 rotation_annotaion=rotation
 
-            headloss=float(config.df_LinkResults.at[link_row, 'Headloss'])
+            headloss=config.df_LinkResults.at[link_row, 'Headloss']
 
             attrib={"char_height": config.text_size,
                     "style": "epa2HydChart",
@@ -421,7 +437,7 @@ class MainWindow(QMainWindow):
                     "line_spacing_factor":1.5,
                     'rotation':rotation_annotaion}
     
-            text=f"""{diameter}-{length}\n{abs(flow)} ({headloss:.2f})"""
+            text=f"""{diameter}-{length}\n{abs(flow)} ({headloss})"""
 
             msp.add_mtext(text, dxfattribs=attrib).set_location(insert=(center_x, center_y))
 

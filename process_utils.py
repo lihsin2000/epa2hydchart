@@ -34,7 +34,7 @@ def process1(main_window_instance: 'MainWindow'):
                 config.df_Pipes, config.df_Vertices) = utils.inp_to_df(main_window_instance, inpFile, showtime=True)
                 if config.hr_list == []:  # 單一時間結果
                     config.df_NodeResults = read_utils.readNodeResults(hr=None, input=config.arranged_rpt_file_path)
-                    config.df_LinkResults = read_utils.readLinkResults(hr1=None, input=config.arranged_rpt_file_path)
+                    config.df_LinkResults = read_utils.readLinkResults(hr1=None, input=config.arranged_rpt_file_path, digits=config.digit_decimal)
                     (config.df_NodeResults, config.df_Junctions) = read_utils.changeValueByDigits(digits=config.digit_decimal)
                     matchLink, matchNode = utils.matchInpRptFile()
                     process2(main_window_instance, matchLink=matchLink, matchNode=matchNode, dxfPath=dxfPath, hr='')
@@ -52,9 +52,9 @@ def process1(main_window_instance: 'MainWindow'):
 
                         if 1 <= i_hr2 <= len(config.hr_list) - 1:
                             hr2 = config.hr_list[i_hr2]
-                            config.df_LinkResults = read_utils.readLinkResults(hr1=h, hr2=hr2, input=config.arranged_rpt_file_path)
+                            config.df_LinkResults = read_utils.readLinkResults(hr1=h, hr2=hr2, input=config.arranged_rpt_file_path, digits=config.digit_decimal)
                         elif i_hr2 == len(config.hr_list):
-                            config.df_LinkResults = read_utils.readLinkResults(hr1=h, hr2='', input=config.arranged_rpt_file_path)
+                            config.df_LinkResults = read_utils.readLinkResults(hr1=h, hr2='', input=config.arranged_rpt_file_path, digits=config.digit_decimal)
 
                         matchLink, matchNode = utils.matchInpRptFile()
                         process2(main_window_instance, matchLink=matchLink, matchNode=matchNode, dxfPath=dxfPath, hr=h)
@@ -106,11 +106,11 @@ def process2(main_window_instance: 'MainWindow', *args, **kwargs):
             draw0cmd = main_window_instance.MainWindow.chk_export_0cmd.isChecked()
             
             main_window_instance.demandLeader(color=demandColor, draw0cmd=draw0cmd)
-            main_window_instance.elevAnnotation(elevLeaderColor)
+            main_window_instance.elevAnnotation(color=elevLeaderColor)
             main_window_instance.headPressureLeader(color=headPressureLeaderColor)
-            main_window_instance.reservoirsLeader(reservoirLeaderColor)
-            main_window_instance.tankLeader(tankerLeaderColor)
-            main_window_instance.pumpAnnotation(pumpAnnotaionColor)
+            main_window_instance.reservoirsLeader(color=reservoirLeaderColor, digits=config.digit_decimal)
+            main_window_instance.tankLeader(color=tankerLeaderColor, digits=config.digit_decimal)
+            main_window_instance.pumpAnnotation(color=pumpAnnotaionColor, digits=config.digit_decimal)
             main_window_instance.valveAnnotation(valveAnnotaionColor)
             main_window_instance.addTitle(hr_str=hr_str)
 
