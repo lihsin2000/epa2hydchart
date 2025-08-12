@@ -1,15 +1,17 @@
 
 import pandas as pd
 # default
-block_scale=100
-joint_scale=25
-text_size=25.0
-leader_distance=50.0
+block_size=None
+joint_size=None
+text_size=None
+leader_distance=None
+line_width=None
 
-block_scale_default=100.0
-joint_scale_default=25.0
+block_size_default=100.0
+joint_size_default=25.0
 text_size_default=25.0
 leader_distance_default=50.0
+line_with_default=0
 
 inpFile=None
 rptFile=None

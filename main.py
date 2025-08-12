@@ -20,21 +20,19 @@ class MainWindow(QMainWindow):
         self.MainWindow.b_browser_rpt.clicked.connect(lambda:loadrptButton(self))
         self.MainWindow.b_reset.clicked.connect(self.resetButton)
         self.MainWindow.b_draw.clicked.connect(self.processButton)
-        self.MainWindow.l_block_size.setText(str(config.block_scale_default))
+        self.MainWindow.l_block_size.setText(str(config.block_size_default))
         self.MainWindow.l_block_size.setValidator(QDoubleValidator())
-        self.MainWindow.l_joint_size.setText(str(config.joint_scale_default))
+        self.MainWindow.l_joint_size.setText(str(config.joint_size_default))
         self.MainWindow.l_joint_size.setValidator(QDoubleValidator())
         self.MainWindow.l_text_size.setText(str(config.text_size_default))
         self.MainWindow.l_text_size.setValidator(QDoubleValidator())
         self.MainWindow.l_leader_distance.setText(str(config.leader_distance_default))
         self.MainWindow.l_leader_distance.setValidator(QIntValidator())
+        self.MainWindow.l_line_width.setText(str(config.line_with_default))
+        self.MainWindow.l_line_width.setValidator(QIntValidator())
         self.MainWindow.chk_autoSize.stateChanged.connect(lambda:utils.autoSize(self))
         self.MainWindow.comboBox_digits.setCurrentText('0.00')
-        # self.MainWindow.l_inp_path.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-        # self.MainWindow.l_inp_path.setToolTip(self.MainWindow.l_inp_path.text())
-        # self.MainWindow.l_rpt_path.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-        # self.MainWindow.l_rpt_path.setToolTip(self.MainWindow.l_rpt_path.text())
-
+        
 
     def setLogToButton(self):
         self.MainWindow.browser_log.verticalScrollBar().setValue(self.MainWindow.browser_log.verticalScrollBar().maximum())
@@ -120,10 +118,11 @@ class MainWindow(QMainWindow):
 
     
     def resetButton(self):
-        self.MainWindow.l_block_size.setText(str(config.block_scale_default))
-        self.MainWindow.l_joint_size.setText(str(config.joint_scale_default))
+        self.MainWindow.l_block_size.setText(str(config.block_size_default))
+        self.MainWindow.l_joint_size.setText(str(config.joint_size_default))
         self.MainWindow.l_text_size.setText(str(config.text_size_default))
         self.MainWindow.l_leader_distance.setText(str(config.leader_distance_default))
+        self.MainWindow.l_line_width.setText(str(config.line_with_default))
         self.MainWindow.chk_export_0cmd.setChecked(True)
         self.MainWindow.chk_autoSize.setChecked(False)
         
@@ -136,9 +135,10 @@ class MainWindow(QMainWindow):
         config.projName=None
 
     def processButton(self):
-        config.block_scale=float(self.MainWindow.l_block_size.text())
-        config.joint_scale=float(self.MainWindow.l_joint_size.text())
+        config.block_size=float(self.MainWindow.l_block_size.text())
+        config.joint_size=float(self.MainWindow.l_joint_size.text())
         config.text_size=float(self.MainWindow.l_text_size.text())
+        config.line_width=float(self.MainWindow.l_line_width.text())
         config.leader_distance=float(self.MainWindow.l_leader_distance.text())
         
         process1(self)
@@ -214,9 +214,11 @@ class MainWindow(QMainWindow):
 
     def elevAnnotation(self, *args, **kwargs):
         from ezdxf.enums import TextEntityAlignment
-        color= kwargs.get('color')
 
         try:
+            color= kwargs.get('color')
+            width=kwargs.get('width')
+
             for i in range(0, len(config.df_Junctions)):
                 id=config.df_Junctions.at[i,'ID']
                 x=float(config.df_Junctions.at[i,'x'])
@@ -231,7 +233,7 @@ class MainWindow(QMainWindow):
 
                 msp.add_polyline2d([(leader_up_start_x,leader_up_start_y),
                                     (leader_up_end_x,leader_up_end_y),
-                                    (leader_up_end_x+6*config.text_size,leader_up_end_y)], dxfattribs={'color': color})
+                                    (leader_up_end_x+6*config.text_size,leader_up_end_y)], dxfattribs={'color': color, 'default_start_width': width, 'default_end_width': width})
                 msp.add_text(elev, height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y+0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
                 msg= f'節點 {id} 高程引線已完成繪圖'
                 utils.renew_log(self, msg, False)
@@ -274,7 +276,7 @@ class MainWindow(QMainWindow):
                 leader_down_end_x=leader_down_start_x+config.leader_distance
                 leader_down_end_y=leader_down_start_y-config.leader_distance
                         
-                msp.add_blockref('demandArrow', [leader_down_end_x,leader_down_end_y], dxfattribs={'xscale':config.block_scale, 'yscale':config.block_scale, 'rotation':225})
+                msp.add_blockref('demandArrow', [leader_down_end_x,leader_down_end_y], dxfattribs={'xscale':config.block_size, 'yscale':config.block_size, 'rotation':225})
                 msp.add_polyline2d([(leader_down_start_x,leader_down_start_y),(leader_down_end_x,leader_down_end_y)], dxfattribs={'color': color})
                 msp.add_text(demand, height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((leader_down_end_x+0.5*config.text_size, leader_down_end_y-0.5*config.text_size), align=TextEntityAlignment.TOP_LEFT)
                 self.MainWindow.browser_log.append(f'節點 {id} 水量引線已完成繪圖')
@@ -330,8 +332,8 @@ class MainWindow(QMainWindow):
                 Q_str=f"{Q:.{digits}f}"
                 H_str=f"{H:.{digits}f}"
 
-                offset=[config.block_scale+0.75*config.text_size,
-                        config.block_scale+2*config.text_size]
+                offset=[config.block_size+0.75*config.text_size,
+                        config.block_size+2*config.text_size]
 
                 msp.add_text(f'Q:{Q_str}', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((x+2*config.text_size,y-offset[0]), align=TextEntityAlignment.MIDDLE_RIGHT)
                 msp.add_text(f'H:{H_str}', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((x+2*config.text_size,y-offset[1]), align=TextEntityAlignment.MIDDLE_RIGHT)
@@ -358,8 +360,8 @@ class MainWindow(QMainWindow):
                 Type=config.df_Valves.at[i,'Type']
                 Setting=config.df_Valves.at[i,'Setting']
 
-                offset=[config.block_scale+0.75*config.text_size,
-                        config.block_scale+2*config.text_size]
+                offset=[config.block_size+0.75*config.text_size,
+                        config.block_size+2*config.text_size]
 
                 msp.add_text(f'{Type}', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((x,y-offset[0]), align=TextEntityAlignment.MIDDLE_CENTER)
                 msp.add_text(f'{Setting}', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((x,y-offset[1]), align=TextEntityAlignment.MIDDLE_CENTER)
@@ -373,6 +375,7 @@ class MainWindow(QMainWindow):
 
         color= kwargs.get('color')
         digits= kwargs.get('digits')
+        width=kwargs.get('width')
         try:
             for i in range(0, len(config.df_Tanks)):
                 id=config.df_Tanks.at[i,'ID']
@@ -396,7 +399,7 @@ class MainWindow(QMainWindow):
 
                 msp.add_polyline2d([(leader_up_start_x,leader_up_start_y),
                                     (leader_up_end_x,leader_up_end_y),
-                                    (leader_up_end_x+10*config.text_size,leader_up_end_y)], dxfattribs={'color': 210})
+                                    (leader_up_end_x+10*config.text_size,leader_up_end_y)], dxfattribs={'color': 210, 'default_start_width': width, 'default_end_width': width})
                 msp.add_text(f'___T', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((leader_up_end_x+10*config.text_size,leader_up_end_y+3.25*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
                 msp.add_text(f'Hwl:{maxElev}', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((leader_up_end_x+10*config.text_size,leader_up_end_y+2*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
                 msp.add_text(f'Mwl:{minElev}', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((leader_up_end_x+10*config.text_size,leader_up_end_y+0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
@@ -505,8 +508,10 @@ class MainWindow(QMainWindow):
         except Exception as e:
             traceback.print_exc()
 
-    def pipeLines(self):
+    def pipeLines(self, *args, **kwargs):
         try:
+            width=kwargs.get('width')
+
             for i in range(0, len(config.df_Pipes)):
                 start_x=float(config.df_Pipes.at[i, 'Node1_x'])
                 start_y=float(config.df_Pipes.at[i, 'Node1_y'])
@@ -518,59 +523,41 @@ class MainWindow(QMainWindow):
                     rows=config.df_Vertices.index[config.df_Vertices['LINK']==link_id].tolist()
                     firstVert_x=float(config.df_Vertices.at[rows[0],'x'])
                     firstVert_y=float(config.df_Vertices.at[rows[0],'y'])
-                    msp.add_polyline2d([(start_x,start_y), (firstVert_x,firstVert_y)])
+                    msp.add_polyline2d([(start_x,start_y), (firstVert_x,firstVert_y)], dxfattribs={'default_start_width': width, 'default_end_width': width})
                     for j in rows[:len(rows)-1]:
                         x1=float(config.df_Vertices.at[j,'x'])
                         y1=float(config.df_Vertices.at[j,'y'])
                         x2=float(config.df_Vertices.at[j+1,'x'])
                         y2=float(config.df_Vertices.at[j+1,'y'])
-                        msp.add_polyline2d([(x1,y1), (x2,y2)])
+                        msp.add_polyline2d([(x1,y1), (x2,y2)], dxfattribs={'default_start_width': width, 'default_end_width': width})
                 
                     lastVert_x=float(config.df_Vertices.at[rows[len(rows)-1],'x'])
                     lastVert_y=float(config.df_Vertices.at[rows[len(rows)-1],'y'])
-                    msp.add_polyline2d([(lastVert_x,lastVert_y), (end_x,end_y)])
+                    msp.add_polyline2d([(lastVert_x,lastVert_y), (end_x,end_y)], dxfattribs={'default_start_width': width, 'default_end_width': width})
                     msg= f'管線 {link_id} 已完成繪圖'
                     utils.renew_log(self, msg, False)                
                 else:
-                    msp.add_polyline2d([(end_x,end_y), (start_x,start_y)])
+                    msp.add_polyline2d([(end_x,end_y), (start_x,start_y)], dxfattribs={'default_start_width': width, 'default_end_width': width})
 
                 QCoreApplication.processEvents()
         except Exception as e:
             traceback.print_exc()
 
-    def insertBlocks(self):
+    def insertBlocks(self, *args, **kwargs):
         try:
+            width=kwargs.get('width')
+            mapping = {'tank': '水池',
+                    'reservoir': '接水點',
+                    'junction': '節點',
+                    'pump': '抽水機',
+                    'valve': '閥件'}
+
+            df_mapping = {'tank': config.df_Tanks,
+                        'reservoir': config.df_Reservoirs,
+                        'junction': config.df_Junctions,
+                        'pump': config.df_Pumps,
+                        'valve': config.df_Valves}
             for item in ['tank', 'reservoir', 'junction', 'pump', 'valve']:
-                if item == 'tank':
-                    df=config.df_Tanks
-                    for i in range (0, len(df)):
-                        id=df.at[i,'ID']
-                        x=float(df.at[i,'x'])
-                        y=float(df.at[i,'y'])
-                        msp.add_blockref(item, [x,y], dxfattribs={'xscale':config.block_scale, 'yscale':config.block_scale})
-                        msg= f'水池 {id} 圖塊已插入'
-                        utils.renew_log(self, msg, False)
-
-                if item == 'reservoir':
-                    df=config.df_Reservoirs
-                    for i in range (0, len(df)):
-                        id=df.at[i,'ID']
-                        x=float(df.at[i,'x'])
-                        y=float(df.at[i,'y'])
-                        msp.add_blockref(item, [x,y], dxfattribs={'xscale':config.block_scale, 'yscale':config.block_scale})
-                        msg= f'接水點 {id} 圖塊已插入'
-                        utils.renew_log(self, msg, False)
-
-                if item == 'pump':
-                    df=config.df_Pumps
-                    for i in range (0, len(df)):
-                        id=df.at[i,'ID']
-                        x=float(df.at[i,'x'])
-                        y=float(df.at[i,'y'])
-                        msp.add_blockref(item, [x,y], dxfattribs={'xscale':config.block_scale, 'yscale':config.block_scale})
-                        msg= f'抽水機 {id} 圖塊已插入'
-                        utils.renew_log(self, msg, False)
-
                 if item == 'valve':
                     import math
                     df=config.df_Valves
@@ -587,24 +574,27 @@ class MainWindow(QMainWindow):
                         rotation=math.atan2(y2-y1, x2-x1)
                         rotation=rotation*180/math.pi
 
-                        msp.add_blockref(item, [x,y], dxfattribs={'xscale':config.block_scale, 'yscale':config.block_scale, 'rotation':rotation})
-                        msp.add_polyline2d([(x1,y1), (x2,y2)])
+                        msp.add_blockref(item, [x,y], dxfattribs={'xscale':config.block_size, 'yscale':config.block_size, 'rotation':rotation})
+                        msp.add_polyline2d([(x1,y1), (x2,y2)], dxfattribs={'default_start_width': width, 'default_end_width': width})
                         msg= f'閥件 {id} 圖塊已插入'
                         utils.renew_log(self, msg, False)
 
-                if item == 'junction':
-                    df=config.df_Junctions
+                else:
+                    df=df_mapping[item]
                     for i in range (0, len(df)):
                         id=df.at[i,'ID']
                         x=float(df.at[i,'x'])
                         y=float(df.at[i,'y'])
-                        msp.add_blockref(item, [x,y], dxfattribs={'xscale':config.joint_scale, 'yscale':config.joint_scale})
-                        msg= f'節點 {id} 圖塊已插入'
+                        if item == 'junction':
+                            msp.add_blockref(item, [x,y], dxfattribs={'xscale':config.joint_size, 'yscale':config.joint_size})
+                        else:
+                            msp.add_blockref(item, [x,y], dxfattribs={'xscale':config.block_size, 'yscale':config.block_size})
+                        msg= f'{mapping[item]} {id} 圖塊已插入'
                         utils.renew_log(self, msg, False)
+
         except Exception as e:
             traceback.print_exc()
                 
-
 
     def save_svg(self, *args, **kwargs):
         try:
