@@ -95,7 +95,7 @@ class MainWindow(QMainWindow):
             traceback.print_exc()
 
 
-    def convertSVGtoPNG(self, *args, **kwargs):
+    def save_png(self, *args, **kwargs):
         try:
             # msp=kwargs.get('msp')
             # cad=kwargs.get('cad')
@@ -113,10 +113,11 @@ class MainWindow(QMainWindow):
                 output_width=10000,
                 dpi=600
                 )
+            return True
         except Exception as e:
             traceback.print_exc()
+            return False
 
-    
     def resetButton(self):
         self.MainWindow.l_block_size.setText(str(config.block_size_default))
         self.MainWindow.l_joint_size.setText(str(config.joint_size_default))
@@ -594,7 +595,32 @@ class MainWindow(QMainWindow):
 
         except Exception as e:
             traceback.print_exc()
-                
+    
+    def save_dxf(self, *args, **kwargs):
+        dxfPath=kwargs.get('dxfPath')
+        main_window_instance=kwargs.get('main_window_instance')
+        while True:
+            try:
+                config.cad.saveas(dxfPath)
+                return True
+                # break
+            except:
+                traceback.print_exc()
+                from PyQt6.QtWidgets import QApplication, QMessageBox
+
+                msg_box=QMessageBox(QApplication.activeWindow())
+                msg_box.setIcon(QMessageBox.Icon.Critical)
+                msg_box.setWindowTitle("錯誤")
+                msg_box.setText(f'無法儲存 {dxfPath}，請關閉相關檔案後重試')
+                retry_button = msg_box.addButton("重試", msg_box.ButtonRole.ActionRole)
+                cancel_button = msg_box.addButton("取消", msg_box.ButtonRole.ActionRole)
+                msg_box.exec()
+                if msg_box.clickedButton() == retry_button:
+                    continue
+                elif msg_box.clickedButton() == cancel_button:
+                    msg=f'[Error]無法儲存 {dxfPath}，中止匯出'
+                    utils.renew_log(main_window_instance, msg, True)
+                    return
 
     def save_svg(self, *args, **kwargs):
         try:
@@ -617,8 +643,10 @@ class MainWindow(QMainWindow):
 
             with open(svgPath, "wt", encoding="utf8") as fp:
                 fp.write(svg_string)
+            return True
         except Exception as e:
             traceback.print_exc()
+            return False
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 # QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)   # Enable high DPI

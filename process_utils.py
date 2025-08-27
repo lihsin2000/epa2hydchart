@@ -119,47 +119,39 @@ def process2(main_window_instance: 'MainWindow', *args, **kwargs):
                 if len(config.hr_list) >= 2:
                     dxfPath = f'{dictionary}/{file}_{hr_str}.dxf'
                 dxfPathWithoutExtension = dxfPath.replace('.dxf', '')
-
-                # 檢查dxf是否可以儲存，如果被開啟，則提示用戶重試
-                while True:
-                    try:
-                        config.cad.saveas(dxfPath)
-                        break
-                    except:
-                        traceback.print_exc()
-                        from PyQt6.QtWidgets import QApplication, QMessageBox
-
-                        msg_box=QMessageBox(QApplication.activeWindow())
-                        msg_box.setIcon(QMessageBox.Icon.Critical)
-                        msg_box.setWindowTitle("錯誤")
-                        msg_box.setText(f'無法儲存 {dxfPath}，請關閉相關檔案後重試')
-                        retry_button = msg_box.addButton("重試", msg_box.ButtonRole.ActionRole)
-                        cancel_button = msg_box.addButton("取消", msg_box.ButtonRole.ActionRole)
-                        msg_box.exec()
-                        if msg_box.clickedButton() == retry_button:
-                            continue
-                        elif msg_box.clickedButton() == cancel_button:
-                            msg=f'[Error]無法儲存 {dxfPath}，中止匯出'
-                            utils.renew_log(main_window_instance, msg, True)
-                            return
-
-                msg= f'{dxfPathWithoutExtension}.dxf 匯出完成'
-                utils.renew_log(main_window_instance, msg, False)
-                # QCoreApplication.processEvents()
-
                 svg_path = dxfPath.replace('.dxf', '.svg')
-                main_window_instance.save_svg(msp=config.msp, cad=config.cad, path=svg_path)
-                msg = f'{dxfPathWithoutExtension}.svg匯出完成'
-                utils.renew_log(main_window_instance, msg, False)
-                # QCoreApplication.processEvents()
-
                 png_path = dxfPath.replace('.dxf', '.png')
-                main_window_instance.convertSVGtoPNG(msp=config.msp, cad=config.cad, pngPath=png_path, svgPath=svg_path)
-                msg= f'{dxfPathWithoutExtension}.png匯出完成'
+                
+                if main_window_instance.save_dxf(main_window_instance=main_window_instance,dxfPath=dxfPath):
+                    config.export_dxf_success=True
+                    msg= f'{dxfPathWithoutExtension}.dxf 匯出完成'
+                else:
+                    config.export_dxf_success=False
+                    msg= f'[Error]{dxfPathWithoutExtension}.dxf匯出失敗'
                 utils.renew_log(main_window_instance, msg, False)
-                # QCoreApplication.processEvents()
 
-                msg= '所有作業成功完成'
+
+                if main_window_instance.save_svg(msp=config.msp, cad=config.cad, path=svg_path):
+                    config.export_svg_success=True
+                    msg = f'{dxfPathWithoutExtension}.svg匯出完成'
+                else:
+                    config.export_svg_success=False
+                    msg= f'[Error]{dxfPathWithoutExtension}.svg匯出失敗'
+                utils.renew_log(main_window_instance, msg, False)
+
+                if main_window_instance.save_png(pngPath=png_path, svgPath=svg_path):
+                    config.export_png_success
+                    msg= f'{dxfPathWithoutExtension}.png匯出完成'
+                else:
+                    config.export_png_success=False
+                    msg= f'[Error]{dxfPathWithoutExtension}.png匯出失敗'
+                utils.renew_log(main_window_instance, msg, False)
+
+
+                if config.export_svg_success and config.export_png_success:
+                    msg= '所有作業成功完成'
+                else:
+                    msg= '作業完成，但有部分檔案匯出失敗'
                 utils.renew_log(main_window_instance, msg, True)
 
         else:

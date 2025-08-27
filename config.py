@@ -36,3 +36,7 @@ msp=None
 dxfPath=None
 
 digit_decimal=None
+
+export_dxf_success=None
+export_svg_success=None
+export_png_success=None
