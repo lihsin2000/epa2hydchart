@@ -497,14 +497,14 @@ class MainWindow(QMainWindow):
     def rotation_text(self, start_x, start_y, end_x, end_y):
         import math
         try:
-            rotation=math.atan2(end_y-start_y, end_x-start_x)
-            rotation=math.degrees(rotation)
-            if rotation<0:
-                rotation+=360
-            if 90<rotation<270:
-                rotation_text=rotation-180
+            rotation = math.atan2(end_y-start_y, end_x-start_x)
+            rotation = math.degrees(rotation)
+            if rotation < 0:
+                rotation += 360
+            if 90 < rotation < 270:
+                rotation_text = rotation-180
             else:
-                rotation_text=rotation
+                rotation_text = rotation
             return rotation_text
         except Exception as e:
             traceback.print_exc()
