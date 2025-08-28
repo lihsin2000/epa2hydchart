@@ -38,6 +38,8 @@ def process1(main_window_instance: 'MainWindow'):
                     (config.df_NodeResults, config.df_Junctions) = read_utils.changeValueByDigits(digits=config.digit_decimal)
                     matchLink, matchNode = utils.matchInpRptFile()
                     process2(main_window_instance, matchLink=matchLink, matchNode=matchNode, dxfPath=dxfPath, hr='')
+                    headloss_unresonable_pipes=check_pipe_headloss(main_window_instance)
+                    pass
 
                 else:   # 多時段結果
                     hr_list_select = []
@@ -64,6 +66,29 @@ def process1(main_window_instance: 'MainWindow'):
         msg='[Error]不明錯誤，中止匯出'
         utils.renew_log(main_window_instance, msg, True)
         traceback.print_exc()
+
+def check_pipe_headloss(main_window_instance: 'MainWindow', *args, **kwargs):
+    link_results= config.df_LinkResults
+    pipes=config.df_Pipes
+    pumps= config.df_Pumps
+    valves= config.df_Valves
+    unreasonable_pipes = link_results[abs(link_results['unitHeadloss'].astype(float))>=config.HEADLOSS_THRESHOLD]
+
+    # remove pumps and valves from unreasonable_pipes
+    unreasonable_pipes=unreasonable_pipes[~unreasonable_pipes['ID'].isin(pumps['ID'])]
+    unreasonable_pipes=unreasonable_pipes[~unreasonable_pipes['ID'].isin(valves['ID'])]
+
+    for index, row in unreasonable_pipes.iterrows():
+        pipe_id=row['ID']
+        Node1=pipes.loc[pipes['ID']==pipe_id, 'Node1'].values[0]
+        Node2=pipes.loc[pipes['ID']==pipe_id, 'Node2'].values[0]
+        Diameter=pipes.loc[pipes['ID']==pipe_id, 'Diameter'].values[0]
+        unreasonable_pipes.at[index , 'Node1']=Node1
+        unreasonable_pipes.at[index , 'Node2']=Node2
+        unreasonable_pipes.at[index , 'Diameter']=Diameter
+        pass
+
+    return unreasonable_pipes
 
 def process2(main_window_instance: 'MainWindow', *args, **kwargs):
     """
