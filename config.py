@@ -41,4 +41,4 @@ export_dxf_success=None
 export_svg_success=None
 export_png_success=None
 
-HEADLOSS_THRESHOLD=0.1
+UNIT_HEADLOSS_THRESHOLD=1

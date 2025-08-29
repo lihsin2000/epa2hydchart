@@ -72,7 +72,7 @@ def check_pipe_headloss(main_window_instance: 'MainWindow', *args, **kwargs):
     pipes=config.df_Pipes
     pumps= config.df_Pumps
     valves= config.df_Valves
-    unreasonable_pipes = link_results[abs(link_results['unitHeadloss'].astype(float))>=config.HEADLOSS_THRESHOLD]
+    unreasonable_pipes = link_results[abs(link_results['unitHeadloss'].astype(float))>=config.UNIT_HEADLOSS_THRESHOLD]
 
     # remove pumps and valves from unreasonable_pipes
     unreasonable_pipes=unreasonable_pipes[~unreasonable_pipes['ID'].isin(pumps['ID'])]
@@ -83,9 +83,11 @@ def check_pipe_headloss(main_window_instance: 'MainWindow', *args, **kwargs):
         Node1=pipes.loc[pipes['ID']==pipe_id, 'Node1'].values[0]
         Node2=pipes.loc[pipes['ID']==pipe_id, 'Node2'].values[0]
         Diameter=pipes.loc[pipes['ID']==pipe_id, 'Diameter'].values[0]
+        Length=pipes.loc[pipes['ID']==pipe_id, 'Length'].values[0]
         unreasonable_pipes.at[index , 'Node1']=Node1
         unreasonable_pipes.at[index , 'Node2']=Node2
         unreasonable_pipes.at[index , 'Diameter']=Diameter
+        unreasonable_pipes.at[index , 'Length']=Length
         pass
 
     return unreasonable_pipes
