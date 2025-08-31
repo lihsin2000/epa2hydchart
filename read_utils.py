@@ -329,11 +329,12 @@ def readLinkResults(*args, **kwargs):
             end_str = f'Node Results at {hr2} Hrs:'
         start, end = utils.lineStartEnd(rptFile, start_str, end_str, 5, 2)
         lines = open(rptFile).readlines()
-        df = pd.DataFrame(columns=['ID', 'Flow', 'unitHeadloss', 'Headloss'])
+        df = pd.DataFrame(columns=['ID', 'Flow', 'Velocity', 'unitHeadloss', 'Headloss'])
         for l in range(start-1, end):
             d = utils.line2dict(lines, l)
             pipe_id = d[1]
             flow = d[2]
+            velocity = d[3]
             unitHeadloss = d[4]
 
             # calculate headloss number:
@@ -361,6 +362,7 @@ def readLinkResults(*args, **kwargs):
             data = {
                 'ID': pipe_id,
                 'Flow': flow,
+                'Velocity': velocity,
                 'unitHeadloss': unitHeadloss,
                 'Headloss': Headloss_str
             }
