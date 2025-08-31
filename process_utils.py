@@ -167,15 +167,14 @@ def process2(main_window_instance: 'MainWindow', *args, **kwargs):
                 utils.renew_log(main_window_instance, msg, False)
 
                 if main_window_instance.save_png(pngPath=png_path, svgPath=svg_path):
-                    config.export_png_success
+                    config.export_png_success=True
                     msg= f'{dxfPathWithoutExtension}.png匯出完成'
                 else:
                     config.export_png_success=False
                     msg= f'[Error]{dxfPathWithoutExtension}.png匯出失敗'
                 utils.renew_log(main_window_instance, msg, False)
 
-
-                if config.export_svg_success and config.export_png_success:
+                if config.export_svg_success and config.export_png_success and config.export_dxf_success:
                     msg= '所有作業成功完成'
                 else:
                     msg= '作業完成，但有部分檔案匯出失敗'
