@@ -42,7 +42,7 @@ def process1(main_window_instance: 'MainWindow'):
                     headloss_unreasonable_pipes=check_utils.filter_headloss_unreasonable_pipes()
                     pipe_dimension=check_utils.list_pipe_dimension()
                     velocity_unreasonable_pipes=check_utils.filter_velocity_unreasonable_pipes()
-                    check_utils.write_into_report(headloss_unreasonable_pipes=headloss_unreasonable_pipes, pipe_dimension=pipe_dimension, velocity_unreasonable_pipes=velocity_unreasonable_pipes)
+                    check_utils.write_report(headloss_unreasonable_pipes=headloss_unreasonable_pipes, pipe_dimension=pipe_dimension, velocity_unreasonable_pipes=velocity_unreasonable_pipes)
                     pass
 
                 else:   # 多時段結果

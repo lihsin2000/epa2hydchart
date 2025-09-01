@@ -65,7 +65,7 @@ def list_pipe_dimension(*args, **kwargs):
     df=df.reset_index(drop=True)
     return df
 
-def write_into_report(*args, **kwargs):
+def write_report(*args, **kwargs):
     import os
     headloss_unreasonable_pipes=kwargs.get('headloss_unreasonable_pipes')
     pipe_dimension=kwargs.get('pipe_dimension')
@@ -77,14 +77,16 @@ def write_into_report(*args, **kwargs):
     with open(f'{config.output_folder}/report.txt', 'a', encoding='utf-8') as f:
         f.write('\n\n')
         f.write('Result\n\n')
-        f.write('----------------------------------------------------------------------')
+        f.write('----------------------------------------------------------------------\n\n')
 
-        f.write(f'1. Unit Headloss >= {config.UNIT_HEADLOSS_THRESHOLD}.\n')
+        f.write(f'1. Unit Headloss >= {config.UNIT_HEADLOSS_THRESHOLD} m/km.\n')
         if headloss_unreasonable_pipes.empty:
             f.write('無\n\n')
         else:
             f.write(headloss_unreasonable_pipes.to_string(index=False))
             f.write('\n\n')
+
+        f.write('----------------------------------------------------------------------\n\n')
 
         f.write('2. Static for pipe dimentions.\n')
         if pipe_dimension.empty:
@@ -93,11 +95,13 @@ def write_into_report(*args, **kwargs):
             f.write(pipe_dimension.to_string(index=False))
             f.write('\n\n')
 
-        f.write('3. 流速過低管線清單 (<|{:.2f}| m/s，且管徑>100mm)\n'.format(config.UNIT_VELOCITY_THRESHOLD))
+        f.write('----------------------------------------------------------------------\n\n')
+
+        f.write(f'3. Velocity < {config.UNIT_VELOCITY_THRESHOLD} m/s and Diameter > 100 mm.\n')
         if velocity_unreasonable_pipes.empty:
             f.write('無\n\n')
         else:
             f.write(velocity_unreasonable_pipes.to_string(index=False))
             f.write('\n\n')
 
-        f.write('=============================================\n')
+        f.write('----------------------------------------------------------------------\n\n')
