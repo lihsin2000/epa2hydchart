@@ -5,6 +5,7 @@ from PyQt6.QtCore import QCoreApplication
 import config
 import read_utils
 import utils
+import check_utils
 
 from typing import TYPE_CHECKING
 
@@ -38,8 +39,10 @@ def process1(main_window_instance: 'MainWindow'):
                     (config.df_NodeResults, config.df_Junctions) = read_utils.changeValueByDigits(digits=config.digit_decimal)
                     matchLink, matchNode = utils.matchInpRptFile()
                     process2(main_window_instance, matchLink=matchLink, matchNode=matchNode, dxfPath=dxfPath, hr='')
-                    unresonable_pipes=filter_headloss_unreasonable_pipes()
-                    pipe_dimension=list_pipe_dimension()
+                    headloss_unreasonable_pipes=check_utils.filter_headloss_unreasonable_pipes()
+                    pipe_dimension=check_utils.list_pipe_dimension()
+                    velocity_unreasonable_pipes=check_utils.filter_velocity_unreasonable_pipes()
+                    check_utils.write_into_report(headloss_unreasonable_pipes=headloss_unreasonable_pipes, pipe_dimension=pipe_dimension, velocity_unreasonable_pipes=velocity_unreasonable_pipes)
                     pass
 
                 else:   # 多時段結果
@@ -67,42 +70,6 @@ def process1(main_window_instance: 'MainWindow'):
         msg='[Error]不明錯誤，中止匯出'
         utils.renew_log(main_window_instance, msg, True)
         traceback.print_exc()
-
-def filter_headloss_unreasonable_pipes(*args, **kwargs):
-    link_results= config.df_LinkResults
-    pipes=config.df_Pipes
-    pumps= config.df_Pumps
-    valves= config.df_Valves
-    df = link_results[abs(link_results['unitHeadloss'].astype(float))>=config.UNIT_HEADLOSS_THRESHOLD]
-
-    # remove pumps and valves from unreasonable_pipes
-    df=df[~df['ID'].isin(pumps['ID'])]
-    df=df[~df['ID'].isin(valves['ID'])]
-
-    for index, row in df.iterrows():
-        pipe_id=row['ID']
-        Node1=pipes.loc[pipes['ID']==pipe_id, 'Node1'].values[0]
-        Node2=pipes.loc[pipes['ID']==pipe_id, 'Node2'].values[0]
-        Diameter=pipes.loc[pipes['ID']==pipe_id, 'Diameter'].values[0]
-        Length=pipes.loc[pipes['ID']==pipe_id, 'Length'].values[0]
-        df.at[index , 'Node1']=Node1
-        df.at[index , 'Node2']=Node2
-        df.at[index , 'Diameter']=Diameter
-        df.at[index , 'Length']=Length
-        df.at[index , 'Reason']='Too high headloss (>|{:.2f}|)'.format(config.UNIT_HEADLOSS_THRESHOLD)
-    return df
-
-def list_pipe_dimension(*args, **kwargs):
-    df=pd.DataFrame(columns=['Diameter', 'Amount'])
-    pipes=config.df_Pipes
-    unique_diameters=pipes['Diameter'].unique().tolist()
-    unique_diameters.sort()
-    # unique_diameters=[int(x) for x in unique_diameters]
-    for item in unique_diameters:
-        pipe_amount_with_this_diameter=pipes[pipes['Diameter']==item]
-        new_row={'Diameter':item, 'Amount':len(pipe_amount_with_this_diameter)}
-        df=pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
-    return df
 
 def process2(main_window_instance: 'MainWindow', *args, **kwargs):
     """
@@ -160,6 +127,7 @@ def process2(main_window_instance: 'MainWindow', *args, **kwargs):
                 dxfPathWithoutExtension = dxfPath.replace('.dxf', '')
                 svg_path = dxfPath.replace('.dxf', '.svg')
                 png_path = dxfPath.replace('.dxf', '.png')
+                config.output_folder=os.path.dirname(dxfPath)
                 
                 if main_window_instance.save_dxf(main_window_instance=main_window_instance,dxfPath=dxfPath):
                     config.export_dxf_success=True

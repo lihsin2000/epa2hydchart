@@ -7,14 +7,15 @@ text_size=None
 leader_distance=None
 line_width=None
 
-block_size_default=100.0
-joint_size_default=25.0
-text_size_default=25.0
-leader_distance_default=50.0
-line_with_default=0
+BLOCK_SIZE_DEFAULT=100.0
+JOINT_SIZE_DEFAULT=25.0
+TEXT_SIZE_DEFAULT=25.0
+LEADER_DISTANCE_DEFAULT=50.0
+LINE_WIDTH_DEFAULT=0
 
 inpFile=None
 rptFile=None
+output_folder=None
 projName=None
 
 hr_list=[]
@@ -42,3 +43,4 @@ export_svg_success=None
 export_png_success=None
 
 UNIT_HEADLOSS_THRESHOLD=1
+UNIT_VELOCITY_THRESHOLD=0.3
