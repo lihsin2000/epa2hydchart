@@ -113,9 +113,9 @@ def process2(main_window_instance: 'MainWindow', *args, **kwargs):
 
             drmandArrowBlock = config.cad.blocks.new(name='demandArrow')
             drmandArrowBlock.add_polyline2d(
-                [(0, 0), (0.1, -0.25), (-0.1, -0.25)], close=True, dxfattribs={'color': demandColor})
+                [(0, 0), (0.075, -0.25), (-0.075, -0.25)], close=True, dxfattribs={'color': demandColor})
             drmandArrowBlock.add_hatch(color=demandColor).paths.add_polyline_path(
-                [(0, 0), (0.1, -0.25), (-0.1, -0.25)], is_closed=True)
+                [(0, 0), (0.075, -0.25), (-0.075, -0.25)], is_closed=True)
 
             main_window_instance.createBlocks(config.cad)
             main_window_instance.insertBlocks(width=config.line_width)
