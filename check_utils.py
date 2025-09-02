@@ -1,14 +1,12 @@
 import pandas as pd
 import config
+import traceback
 
-def filter_headloss_unreasonable_pipes(*args, **kwargs):
-    link_results= config.df_LinkResults
+def filter_unreasonable_pipes(*args, **kwargs):
+    df= config.df_LinkResults
     pipes=config.df_Pipes
     pumps= config.df_Pumps
     valves= config.df_Valves
-    df = link_results[abs(link_results['unitHeadloss'].astype(float))>=config.UNIT_HEADLOSS_THRESHOLD]
-
-    # remove pumps and valves from unreasonable_pipes
     df=df[~df['ID'].isin(pumps['ID'])]
     df=df[~df['ID'].isin(valves['ID'])]
 
@@ -26,30 +24,12 @@ def filter_headloss_unreasonable_pipes(*args, **kwargs):
     
     # df=df.drop(columns=['index'])
     df=df.reset_index(drop=True)
-    return df
 
-def filter_velocity_unreasonable_pipes(*args, **kwargs):
-    df = config.df_LinkResults
-    pipes=config.df_Pipes
+    df_headloss_unreasonable = df[abs(df['unitHeadloss'].astype(float))>=config.UNIT_HEADLOSS_THRESHOLD]
 
-    for index, row in df.iterrows():
-        pipe_id=row['ID']
-        Node1=pipes.loc[pipes['ID']==pipe_id, 'Node1'].values[0]
-        Diameter=pipes.loc[pipes['ID']==pipe_id, 'Diameter'].values[0]
-        Node2=pipes.loc[pipes['ID']==pipe_id, 'Node2'].values[0]
-        Length=pipes.loc[pipes['ID']==pipe_id, 'Length'].values[0]
-        df.at[index , 'Node1']=Node1
-        df.at[index , 'Node2']=Node2
-        df.at[index , 'Diameter']=Diameter
-        df.at[index , 'Length']=Length
-        # df.at[index , 'Reason']='Too Low velocity (<|{:.2f}|)'.format(config.UNIT_VELOCITY_THRESHOLD)
-    
-    df = df[abs(df['Velocity'].astype(float))<config.UNIT_VELOCITY_THRESHOLD]
-    df = df[(df['Diameter'].astype(int))>100]
-    
-    # df=df.drop(columns=['index'])
-    df=df.reset_index(drop=True)
-    return df
+    df_velocity_unreasonable = df[abs(df['Velocity'].astype(float))<config.UNIT_VELOCITY_THRESHOLD]
+    df_velocity_unreasonable = df[(df['Diameter'].astype(int))>100]
+    return df_headloss_unreasonable, df_velocity_unreasonable
 
 def list_pipe_dimension(*args, **kwargs):
     df=pd.DataFrame(columns=['Diameter', 'Amount'])
@@ -65,11 +45,9 @@ def list_pipe_dimension(*args, **kwargs):
     df=df.reset_index(drop=True)
     return df
 
-def write_report(*args, **kwargs):
+def write_report_header(*args, **kwargs):
     import os
-    headloss_unreasonable_pipes=kwargs.get('headloss_unreasonable_pipes')
-    pipe_dimension=kwargs.get('pipe_dimension')
-    velocity_unreasonable_pipes=kwargs.get('velocity_unreasonable_pipes')
+    # hr=kwargs.get('hr', None)
 
     if os.path.exists(f'{config.output_folder}/report.txt'):
         os.remove(f'{config.output_folder}/report.txt')
@@ -79,16 +57,12 @@ def write_report(*args, **kwargs):
         f.write('Result\n\n')
         f.write('----------------------------------------------------------------------\n\n')
 
-        f.write(f'1. Unit Headloss >= {config.UNIT_HEADLOSS_THRESHOLD} m/km.\n')
-        if headloss_unreasonable_pipes.empty:
-            f.write('無\n\n')
-        else:
-            f.write(headloss_unreasonable_pipes.to_string(index=False))
-            f.write('\n\n')
+def write_report_pipe_dimension(*args, **kwargs):
+    pipe_dimension=kwargs.get('pipe_dimension')
 
-        f.write('----------------------------------------------------------------------\n\n')
+    with open(f'{config.output_folder}/report.txt', 'a', encoding='utf-8') as f:
+        f.write('Static for pipe dimensions.\n\n')
 
-        f.write('2. Static for pipe dimentions.\n')
         if pipe_dimension.empty:
             f.write('無\n\n')
         else:
@@ -97,7 +71,31 @@ def write_report(*args, **kwargs):
 
         f.write('----------------------------------------------------------------------\n\n')
 
-        f.write(f'3. Velocity < {config.UNIT_VELOCITY_THRESHOLD} m/s and Diameter > 100 mm.\n')
+def write_report(*args, **kwargs):
+    import os
+    headloss_unreasonable_pipes=kwargs.get('headloss_unreasonable_pipes')
+    velocity_unreasonable_pipes=kwargs.get('velocity_unreasonable_pipes')
+    hr=kwargs.get('hr', None)
+
+    with open(f'{config.output_folder}/report.txt', 'a', encoding='utf-8') as f:
+        if hr:
+            f.write(f'Unit Headloss >= {config.UNIT_HEADLOSS_THRESHOLD} m/km in {hr}.\n\n')
+        else:
+            f.write(f'Unit Headloss >= {config.UNIT_HEADLOSS_THRESHOLD} m/km.\n\n')
+
+        if headloss_unreasonable_pipes.empty:
+            f.write('無\n\n')
+        else:
+            f.write(headloss_unreasonable_pipes.to_string(index=False))
+            f.write('\n\n')
+
+        f.write('----------------------------------------------------------------------\n\n')
+
+        if hr:
+            f.write(f'Velocity < {config.UNIT_VELOCITY_THRESHOLD} m/s in {hr}.\n\n')
+        else:
+            f.write(f'Velocity < {config.UNIT_VELOCITY_THRESHOLD} m/s.\n\n')
+
         if velocity_unreasonable_pipes.empty:
             f.write('無\n\n')
         else:

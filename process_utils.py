@@ -33,17 +33,25 @@ def process1(main_window_instance: 'MainWindow'):
                 (config.df_Coords, config.df_Junctions, config.df_Reservoirs,
                 config.df_Tanks, config.df_Pumps, config.df_Valves,
                 config.df_Pipes, config.df_Vertices) = utils.inp_to_df(main_window_instance, inpFile, showtime=True)
+                
+                config.output_folder=os.path.dirname(dxfPath)
+
+                check_utils.write_report_header()
+                pipe_dimension=check_utils.list_pipe_dimension()
+                check_utils.write_report_pipe_dimension(pipe_dimension=pipe_dimension)
+                
                 if config.hr_list == []:  # 單一時間結果
                     config.df_NodeResults = read_utils.readNodeResults(hr=None, input=config.arranged_rpt_file_path)
                     config.df_LinkResults = read_utils.readLinkResults(hr1=None, input=config.arranged_rpt_file_path, digits=config.digit_decimal)
                     (config.df_NodeResults, config.df_Junctions) = read_utils.changeValueByDigits(digits=config.digit_decimal)
                     matchLink, matchNode = utils.matchInpRptFile()
                     process2(main_window_instance, matchLink=matchLink, matchNode=matchNode, dxfPath=dxfPath, hr='')
-                    headloss_unreasonable_pipes=check_utils.filter_headloss_unreasonable_pipes()
-                    pipe_dimension=check_utils.list_pipe_dimension()
-                    velocity_unreasonable_pipes=check_utils.filter_velocity_unreasonable_pipes()
-                    check_utils.write_report(headloss_unreasonable_pipes=headloss_unreasonable_pipes, pipe_dimension=pipe_dimension, velocity_unreasonable_pipes=velocity_unreasonable_pipes)
-                    pass
+                    
+                    headloss_unreasonable_pipes, velocity_unreasonable_pipes=check_utils.filter_unreasonable_pipes()
+
+                    check_utils.write_report(headloss_unreasonable_pipes=headloss_unreasonable_pipes,
+                                             velocity_unreasonable_pipes=velocity_unreasonable_pipes)
+                    # pass
 
                 else:   # 多時段結果
                     hr_list_select = []
@@ -64,7 +72,11 @@ def process1(main_window_instance: 'MainWindow'):
 
                         matchLink, matchNode = utils.matchInpRptFile()
                         process2(main_window_instance, matchLink=matchLink, matchNode=matchNode, dxfPath=dxfPath, hr=h)
+                        headloss_unreasonable_pipes, velocity_unreasonable_pipes=check_utils.filter_unreasonable_pipes()
 
+                        check_utils.write_report(headloss_unreasonable_pipes=headloss_unreasonable_pipes,
+                                             velocity_unreasonable_pipes=velocity_unreasonable_pipes,
+                                              hr=h)
 
     except Exception as e:
         msg='[Error]不明錯誤，中止匯出'
@@ -120,45 +132,42 @@ def process2(main_window_instance: 'MainWindow', *args, **kwargs):
             main_window_instance.valveAnnotation(valveAnnotaionColor)
             main_window_instance.addTitle(hr_str=hr_str)
 
-            if dxfPath:
-                hr_str = hr_str.replace(':', '-')
-                if len(config.hr_list) >= 2:
-                    dxfPath = f'{dictionary}/{file}_{hr_str}.dxf'
-                dxfPathWithoutExtension = dxfPath.replace('.dxf', '')
-                svg_path = dxfPath.replace('.dxf', '.svg')
-                png_path = dxfPath.replace('.dxf', '.png')
-                config.output_folder=os.path.dirname(dxfPath)
-                
-                if main_window_instance.save_dxf(main_window_instance=main_window_instance,dxfPath=dxfPath):
-                    config.export_dxf_success=True
-                    msg= f'{dxfPathWithoutExtension}.dxf 匯出完成'
-                else:
-                    config.export_dxf_success=False
-                    msg= f'[Error]{dxfPathWithoutExtension}.dxf匯出失敗'
-                utils.renew_log(main_window_instance, msg, False)
+            hr_str = hr_str.replace(':', '-')
+            if len(config.hr_list) >= 2:
+                dxfPath = f'{dictionary}/{file}_{hr_str}.dxf'
+            dxfPathWithoutExtension = dxfPath.replace('.dxf', '')
+            svg_path = dxfPath.replace('.dxf', '.svg')
+            png_path = dxfPath.replace('.dxf', '.png')
+            
+            if main_window_instance.save_dxf(main_window_instance=main_window_instance,dxfPath=dxfPath):
+                config.export_dxf_success=True
+                msg= f'{dxfPathWithoutExtension}.dxf 匯出完成'
+            else:
+                config.export_dxf_success=False
+                msg= f'[Error]{dxfPathWithoutExtension}.dxf匯出失敗'
+            utils.renew_log(main_window_instance, msg, False)
 
+            if main_window_instance.save_svg(msp=config.msp, cad=config.cad, path=svg_path):
+                config.export_svg_success=True
+                msg = f'{dxfPathWithoutExtension}.svg匯出完成'
+            else:
+                config.export_svg_success=False
+                msg= f'[Error]{dxfPathWithoutExtension}.svg匯出失敗'
+            utils.renew_log(main_window_instance, msg, False)
 
-                if main_window_instance.save_svg(msp=config.msp, cad=config.cad, path=svg_path):
-                    config.export_svg_success=True
-                    msg = f'{dxfPathWithoutExtension}.svg匯出完成'
-                else:
-                    config.export_svg_success=False
-                    msg= f'[Error]{dxfPathWithoutExtension}.svg匯出失敗'
-                utils.renew_log(main_window_instance, msg, False)
+            if main_window_instance.save_png(pngPath=png_path, svgPath=svg_path):
+                config.export_png_success=True
+                msg= f'{dxfPathWithoutExtension}.png匯出完成'
+            else:
+                config.export_png_success=False
+                msg= f'[Error]{dxfPathWithoutExtension}.png匯出失敗'
+            utils.renew_log(main_window_instance, msg, False)
 
-                if main_window_instance.save_png(pngPath=png_path, svgPath=svg_path):
-                    config.export_png_success=True
-                    msg= f'{dxfPathWithoutExtension}.png匯出完成'
-                else:
-                    config.export_png_success=False
-                    msg= f'[Error]{dxfPathWithoutExtension}.png匯出失敗'
-                utils.renew_log(main_window_instance, msg, False)
-
-                if config.export_svg_success and config.export_png_success and config.export_dxf_success:
-                    msg= '所有作業成功完成'
-                else:
-                    msg= '作業完成，但有部分檔案匯出失敗'
-                utils.renew_log(main_window_instance, msg, True)
+            if config.export_svg_success and config.export_png_success and config.export_dxf_success:
+                msg= '所有作業成功完成'
+            else:
+                msg= '作業完成，但有部分檔案匯出失敗'
+            utils.renew_log(main_window_instance, msg, True)
 
         else:
             msg= f'[Error]{h}.rpt及.inp內容不符，中止匯出'

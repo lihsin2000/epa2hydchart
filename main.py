@@ -136,13 +136,16 @@ class MainWindow(QMainWindow):
         config.projName=None
 
     def processButton(self):
-        config.block_size=float(self.MainWindow.l_block_size.text())
-        config.joint_size=float(self.MainWindow.l_joint_size.text())
-        config.text_size=float(self.MainWindow.l_text_size.text())
-        config.line_width=float(self.MainWindow.l_line_width.text())
-        config.leader_distance=float(self.MainWindow.l_leader_distance.text())
+        try:
+            config.block_size=float(self.MainWindow.l_block_size.text())
+            config.joint_size=float(self.MainWindow.l_joint_size.text())
+            config.text_size=float(self.MainWindow.l_text_size.text())
+            config.line_width=float(self.MainWindow.l_line_width.text())
+            config.leader_distance=float(self.MainWindow.l_leader_distance.text())
         
-        process1(self)
+            process1(self)
+        except Exception as e:
+            traceback.print_exc()
 
     def headPressureLeader(self, *args, **kwargs):
         from ezdxf.enums import TextEntityAlignment

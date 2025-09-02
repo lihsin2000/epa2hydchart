@@ -58,3 +58,4 @@ png再壓縮
 預覽視窗
 大型inp rpt檔freeze 問題
 inp_to_df 多執行續
+abnormal-pressure內，負值過大無法讀取

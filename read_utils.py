@@ -301,10 +301,10 @@ def readNodeResults(*args, **kwargs):
                     'Pressure': None,
                 }
 
-            if df.empty:
-                df.loc[0] = data
-            else:
-                df.loc[len(df)] = data
+            # if df.empty:
+            #     df.loc[0] = data
+            # else:
+            df.loc[len(df)] = data
         df = df.reset_index(drop=True)
         return df
     except Exception as e:
