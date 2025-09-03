@@ -62,14 +62,40 @@ def autoSize(main_window_instance: 'MainWindow'):
         traceback.print_exc()
 
 
-def line2dict(lines, l):
+def line2dict(lines, l, position):
+    """
+    Converts a line of text into a dictionary by splitting it into components.
+    
+    Args:
+        lines (list): A list of strings, typically read from a file
+        l (int): The index of the line to process from the lines list
+        position (int): The position in the split line to start processing for special dash handling
+        
+    Returns:
+        list: A list of values split from the processed line
+    """
     try:
+        dash_in_string=False
         text = lines[l].replace('\n', '')
         # text=text.replace('-', ' -')
         text = re.sub(r'\s+', ',', text)
-        text = text[:len(text)-1]
+        # text = text[:len(text)-1]
         d = text.split(',')
-        return d
+        for i in range(position,len(d)):
+            item=d[i]
+            position_for_dash=item.find('-')
+            if '-' in item and position_for_dash != 0:
+                dash_in_string=True
+                break
+
+        if dash_in_string:
+            text_after_position=','.join(d[position:])
+            text_after_position=text_after_position.replace('-', ',-')
+            text_new=','.join(d[0:position])+','+text_after_position
+            d = text_new.split(',')
+            return d
+        else:
+            return d
     except Exception as e:
         traceback.print_exc()
 
@@ -245,4 +271,3 @@ def renew_log(main_window_instance: 'MainWindow', msg, seperate:bool):
         main_window_instance.MainWindow.browser_log.append('---------------------')
     main_window_instance.MainWindow.browser_log.verticalScrollBar().setValue(main_window_instance.MainWindow.browser_log.verticalScrollBar().maximum())
     QCoreApplication.processEvents()
-    

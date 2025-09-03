@@ -205,8 +205,8 @@ class MainWindow(QMainWindow):
 
             flowDirectionArrowBlock=cad.blocks.new(name='flowDirectionArrow')
             # flowDirectionArrowBlock.add_polyline2d([(-1,0.5), (0,0), (-1,-0.5)], close=False)
-            flowDirectionArrowBlock.add_polyline2d([(0,0), (-1,0.5), (-1,-0.5)], close=True)
-            flowDirectionArrowBlock.add_hatch().paths.add_polyline_path([(0,0), (-1,0.5), (-1,-0.5)], is_closed=True)
+            flowDirectionArrowBlock.add_polyline2d([(0,0), (-1,0.4), (-1,-0.4)], close=True)
+            flowDirectionArrowBlock.add_hatch().paths.add_polyline_path([(0,0), (-1,0.4), (-1,-0.4)], is_closed=True)
 
             from ezdxf.enums import TextEntityAlignment
             from ezdxf.math import Vec2

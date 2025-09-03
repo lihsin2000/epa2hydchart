@@ -16,7 +16,7 @@ def readVertices(inpFile):
 
         data = []
         for l in range(start-1, end):
-            d = utils.line2dict(lines, l)
+            d = utils.line2dict(lines=lines, l=l, position=2)
             data.append([d[0], float(d[1]), float(d[2])])
         df = pd.DataFrame(data, columns=['LINK', 'x', 'y'])
         return df
@@ -31,7 +31,7 @@ def readPipes(inpFile):
 
         data = []
         for l in range(start - 1, end):
-            d = utils.line2dict(lines, l)
+            d = utils.line2dict(lines=lines, l=l, position=4)
             data.append([d[1], d[2], d[3], d[4], d[5], d[6]])
         df = pd.DataFrame(
             data, columns=['ID', 'Node1', 'Node2', 'Length', 'Diameter', 'Roughness'])
@@ -57,7 +57,7 @@ def readCoords(inpFile):
         lines = open(inpFile).readlines()
         df = pd.DataFrame(columns=['ID', 'x', 'y'])
         for l in range(start-1, end):
-            d = utils.line2dict(lines, l)
+            d = utils.line2dict(lines=lines, l=l, position=2)
             data = {
                 'ID': d[0],
                 'x': d[1],
@@ -79,7 +79,7 @@ def readJunctions(inpFile):
         lines = open(inpFile).readlines()
         df = pd.DataFrame(columns=['ID', 'Elev', 'BaseDemand', 'x', 'y'])
         for l in range(start-1, end):
-            d = utils.line2dict(lines, l)
+            d = utils.line2dict(lines=lines, l=l, position=2)
             data = {
                 'ID': d[1],
                 'Elev': d[2],
@@ -102,7 +102,7 @@ def readReservoirs(inpFile):
         lines = open(inpFile).readlines()
         df = pd.DataFrame(columns=['ID', 'Head', 'x', 'y'])
         for l in range(start-1, end):
-            d = utils.line2dict(lines, l)
+            d = utils.line2dict(lines=lines, l=l, position=2)
             data = {
                 'ID': d[1],
                 'Head': d[2]
@@ -124,7 +124,7 @@ def readTanks(inpFile):
         lines = open(inpFile).readlines()
         df = pd.DataFrame(columns=['ID', 'Elev', 'MinLevel', 'MaxLevel', 'MinElev', 'MaxElev', 'x', 'y'])
         for l in range(start-1, end):
-            d = utils.line2dict(lines, l)
+            d = utils.line2dict(lines=lines, l=l, position=2)
             elev = float(d[2])
             MinLevel = float(d[4])
             MaxLevel = float(d[5])
@@ -155,7 +155,7 @@ def readValves(inpFile):
         lines = open(inpFile).readlines()
         df = pd.DataFrame(columns=['ID', 'Node1', 'Node2', 'Node1_x', 'Node1_y', 'Node2_x', 'Node2_y', 'Type', 'Setting'])
         for l in range(start-1, end):
-            d = utils.line2dict(lines, l)
+            d = utils.line2dict(lines=lines, l=l, position=2)
 
             id = d[1]
             Node1 = d[2]
@@ -202,7 +202,7 @@ def readPumps(inpFile):
             elif '\n' == lines[l]:
                 continue
             else:
-                d = utils.line2dict(lines, l)
+                d = utils.line2dict(lines=lines, l=l, position=2)
                 ID = d[1]
                 Q = d[2]
                 H = d[3]
@@ -220,7 +220,7 @@ def readPumps(inpFile):
         start, end = utils.lineStartEnd(inpFile, '[PUMPS]', '[VALVES]', 2, 2)
         df = pd.DataFrame(columns=['ID', 'Node1', 'Node2', 'Node1_x', 'Node1_y', 'Node2_x', 'Node2_y', 'x', 'y', 'Q', 'H'])
         for l in range(start-1, end):
-            d = utils.line2dict(lines, l)
+            d = utils.line2dict(lines=lines, l=l, position=2)
             ID = [d[1]][0]
             Node1 = [d[2]][0]
             Node2 = [d[3]][0]
@@ -276,7 +276,7 @@ def readNodeResults(*args, **kwargs):
         lines = open(rptFile).readlines()
         df = pd.DataFrame(columns=['ID', 'Demand', 'Head', 'Pressure'])
         for l in range(start-1, end):
-            d = utils.line2dict(lines, l)
+            d = utils.line2dict(lines=lines, l=l, position=2)
             try:
                 id = d[1]
                 demand = d[2]
@@ -331,7 +331,7 @@ def readLinkResults(*args, **kwargs):
         lines = open(rptFile).readlines()
         df = pd.DataFrame(columns=['ID', 'Flow', 'Velocity', 'unitHeadloss', 'Headloss'])
         for l in range(start-1, end):
-            d = utils.line2dict(lines, l)
+            d = utils.line2dict(lines=lines, l=l, position=2)
             pipe_id = d[1]
             flow = d[2]
             velocity = d[3]
