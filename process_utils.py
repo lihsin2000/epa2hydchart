@@ -48,9 +48,14 @@ def process1(main_window_instance: 'MainWindow'):
                     process2(main_window_instance, matchLink=matchLink, matchNode=matchNode, dxfPath=dxfPath, hr='')
                     
                     headloss_unreasonable_pipes, velocity_unreasonable_pipes=check_utils.filter_unreasonable_pipes()
+                    low_pressure_junctions, nagavite_pressure=check_utils.check_negative_low_pressure_junctions()
 
-                    check_utils.write_report(headloss_unreasonable_pipes=headloss_unreasonable_pipes,
-                                             velocity_unreasonable_pipes=velocity_unreasonable_pipes)
+                    check_utils.write_report(headloss_unreasonable_pipes,
+                                             velocity_unreasonable_pipes,
+                                             low_pressure_junctions,
+                                             nagavite_pressure,
+                                             None,
+                                             )
                     # pass
 
                 else:   # 多時段結果
@@ -73,10 +78,14 @@ def process1(main_window_instance: 'MainWindow'):
                         matchLink, matchNode = utils.matchInpRptFile()
                         process2(main_window_instance, matchLink=matchLink, matchNode=matchNode, dxfPath=dxfPath, hr=h)
                         headloss_unreasonable_pipes, velocity_unreasonable_pipes=check_utils.filter_unreasonable_pipes()
-
-                        check_utils.write_report(headloss_unreasonable_pipes=headloss_unreasonable_pipes,
-                                             velocity_unreasonable_pipes=velocity_unreasonable_pipes,
-                                              hr=h)
+                        low_pressure_junctions, nagavite_pressure=check_utils.check_negative_low_pressure_junctions()
+                        
+                    check_utils.write_report(headloss_unreasonable_pipes,
+                                             velocity_unreasonable_pipes,
+                                             low_pressure_junctions,
+                                             nagavite_pressure,
+                                             h,
+                                             )
 
     except Exception as e:
         msg='[Error]不明錯誤，中止匯出'

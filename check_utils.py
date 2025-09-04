@@ -2,6 +2,15 @@ import pandas as pd
 import config
 import traceback
 
+def check_negative_low_pressure_junctions(*args, **kwargs):
+    df= config.df_NodeResults
+    reservoirs=config.df_Reservoirs
+    df=df[~df['ID'].isin(reservoirs['ID'])]
+    df_nagavite_pressure = df[df['Pressure'].astype(float)<config.NAGAVITE_PRESSURE_THRESHOLD]
+    df_low_pressure_junctions = df[df['Pressure'].astype(float)<config.LOW_PRESSURE_THRESHOLD]
+    return df_low_pressure_junctions, df_nagavite_pressure
+
+
 def filter_unreasonable_pipes(*args, **kwargs):
     df= config.df_LinkResults
     pipes=config.df_Pipes
@@ -70,11 +79,13 @@ def write_report_pipe_dimension(*args, **kwargs):
 
         f.write('----------------------------------------------------------------------\n\n')
 
-def write_report(*args, **kwargs):
+def write_report(headloss_unreasonable_pipes, velocity_unreasonable_pipes, low_pressure_junctions, nagavite_pressure, hr):
     import os
-    headloss_unreasonable_pipes=kwargs.get('headloss_unreasonable_pipes')
-    velocity_unreasonable_pipes=kwargs.get('velocity_unreasonable_pipes')
-    hr=kwargs.get('hr', None)
+    
+    # headloss_unreasonable_pipes=kwargs.get('headloss_unreasonable_pipes', None)
+    # velocity_unreasonable_pipes=kwargs.get('velocity_unreasonable_pipes', None)
+    # nagavite_pressure_junctions=kwargs.get('nagavite_pressure_junctions', None)
+    # hr=kwargs.get('hr', None)
 
     with open(f'{config.output_folder}/report.txt', 'a', encoding='utf-8') as f:
         if hr:
@@ -102,3 +113,30 @@ def write_report(*args, **kwargs):
             f.write('\n\n')
 
         f.write('----------------------------------------------------------------------\n\n')
+
+        if hr:
+            f.write(f'Pressure < {config.LOW_PRESSURE_THRESHOLD} m in {hr}.\n\n')
+        else:
+            f.write(f'Pressure < {config.LOW_PRESSURE_THRESHOLD} m.\n\n')
+
+        if low_pressure_junctions.empty:
+            f.write('無\n\n')
+        else:
+            f.write(low_pressure_junctions.to_string(index=False))
+            f.write('\n\n')
+
+        f.write('----------------------------------------------------------------------\n\n')
+
+        if hr:
+            f.write(f'Negative Pressure < {config.NAGAVITE_PRESSURE_THRESHOLD} m in {hr}.\n\n')
+        else:
+            f.write(f'Negative Pressure < {config.NAGAVITE_PRESSURE_THRESHOLD} m.\n\n')
+
+        if nagavite_pressure.empty:
+            f.write('無\n\n')
+        else:
+            f.write(nagavite_pressure.to_string(index=False))
+            f.write('\n\n')
+
+        f.write('----------------------------------------------------------------------\n\n')
+        
