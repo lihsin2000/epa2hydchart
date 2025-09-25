@@ -1,9 +1,7 @@
 [a0-0.1.0]
-2024/11/27
-first alpha release
+First alpha release
 
 [a1-0.1.0]
-2024/11/28
 Fix: 修正流量方向箭頭錯誤問題
 Fix: 修正pattern狀況下節點demand讀取錯誤問題
 

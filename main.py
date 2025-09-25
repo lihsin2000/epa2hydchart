@@ -259,17 +259,17 @@ class MainWindow(QMainWindow):
                 demand=config.df_NodeResults.at[l,'Demand']
 
                 if draw0cmd:
-                    self.drawDemandLeader(color, id, x, y, demand, True)
+                    self.drawDemandLeader(color, id, x, y, demand, True, config.line_width)
                     self.setLogToButton()
                 else:
-                    self.drawDemandLeader(color, id, x, y, demand, False)
+                    self.drawDemandLeader(color, id, x, y, demand, False, config.line_width)
                     self.setLogToButton()
                 
                 QCoreApplication.processEvents()
         except Exception as e:
             traceback.print_exc()
 
-    def drawDemandLeader(self, color, id, x, y, demand, export0cmd:bool):
+    def drawDemandLeader(self, color, id, x, y, demand, export0cmd:bool, width):
         from ezdxf.enums import TextEntityAlignment
 
         try:
@@ -281,7 +281,7 @@ class MainWindow(QMainWindow):
                 leader_down_end_y=leader_down_start_y-config.leader_distance
                         
                 msp.add_blockref('demandArrow', [leader_down_end_x,leader_down_end_y], dxfattribs={'xscale':config.block_size, 'yscale':config.block_size, 'rotation':225})
-                msp.add_polyline2d([(leader_down_start_x,leader_down_start_y),(leader_down_end_x,leader_down_end_y)], dxfattribs={'color': color})
+                msp.add_polyline2d([(leader_down_start_x,leader_down_start_y),(leader_down_end_x,leader_down_end_y)], dxfattribs={'color': color, 'default_start_width': width, 'default_end_width': width})
                 msp.add_text(demand, height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((leader_down_end_x+0.5*config.text_size, leader_down_end_y-0.5*config.text_size), align=TextEntityAlignment.TOP_LEFT)
                 self.MainWindow.browser_log.append(f'節點 {id} 水量引線已完成繪圖')
             elif export0cmd==False and float(demand)==0.0:

@@ -61,44 +61,63 @@ def autoSize(main_window_instance: 'MainWindow'):
     except Exception as e:
         traceback.print_exc()
 
+# def line2dict(lines, l, position):
+#     """
+#     Converts a line of text into a dictionary by splitting it into components.
+
+#     Args:
+#         lines (list): A list of strings, typically read from a file
+#         l (int): The index of the line to process from the lines list
+#         position (int): The position in the split line to start processing for special dash handling
+
+#     Returns:
+#         list: A list of values split from the processed line
+#     """
+#     try:
+#         dash_in_string=False
+#         text = lines[l].replace('\n', '')
+#         # text=text.replace('-', ' -')
+#         text = re.sub(r'\s+', ',', text)
+#         # text = text[:len(text)-1]
+#         d = text.split(',')
+#         for i in range(position,len(d)):
+#             item=d[i]
+#             position_for_dash=item.find('-')
+#             if '-' in item and position_for_dash != 0:
+#                 dash_in_string=True
+#                 break
+
+#         if dash_in_string:
+#             text_after_position=','.join(d[position:])
+#             text_after_position=text_after_position.replace('-', ',-')
+#             text_new=','.join(d[0:position])+','+text_after_position
+#             d = text_new.split(',')
+#             return d
+#         else:
+#             return d
+#     except Exception as e:
+#         traceback.print_exc()
 
 def line2dict(lines, l, position):
     """
     Converts a line of text into a dictionary by splitting it into components.
-    
+
     Args:
         lines (list): A list of strings, typically read from a file
         l (int): The index of the line to process from the lines list
         position (int): The position in the split line to start processing for special dash handling
-        
+
     Returns:
         list: A list of values split from the processed line
     """
     try:
-        dash_in_string=False
         text = lines[l].replace('\n', '')
-        # text=text.replace('-', ' -')
-        text = re.sub(r'\s+', ',', text)
-        # text = text[:len(text)-1]
-        d = text.split(',')
-        for i in range(position,len(d)):
-            item=d[i]
-            position_for_dash=item.find('-')
-            if '-' in item and position_for_dash != 0:
-                dash_in_string=True
-                break
-
-        if dash_in_string:
-            text_after_position=','.join(d[position:])
-            text_after_position=text_after_position.replace('-', ',-')
-            text_new=','.join(d[0:position])+','+text_after_position
-            d = text_new.split(',')
-            return d
-        else:
-            return d
+        text = re.sub(r'\s+', ' ', text)
+        d = text.split(' ')
+        return d
+    
     except Exception as e:
         traceback.print_exc()
-
 
 def lineStartEnd(input, startStr, endStr, start_offset, end_offset):
     try:
@@ -192,8 +211,8 @@ def convertPatternsToHourList(rptFile2):
 def inp_to_df(main_window_instance: 'MainWindow', inpFile, showtime):
     import time
     from PyQt6.QtCore import QCoreApplication
-    
-    try:  
+
+    try:
         t0=time.time()
         config.df_Coords=read_utils.readCoords(inpFile)
         t1=time.time()
@@ -239,7 +258,7 @@ def inp_to_df(main_window_instance: 'MainWindow', inpFile, showtime):
                 config.df_Tanks, config.df_Pumps, config.df_Valves, config.df_Pipes,
                 config.df_Vertices)
     except Exception as e:
-        traceback.print_exc()  
+        traceback.print_exc()
 
 
 def matchInpRptFile():
@@ -265,7 +284,7 @@ def renew_log(main_window_instance: 'MainWindow', msg, seperate:bool):
     """
     Display an error message in the main window's log and set the log to the button.
     """
-    
+
     main_window_instance.MainWindow.browser_log.append(msg)
     if seperate:
         main_window_instance.MainWindow.browser_log.append('---------------------')

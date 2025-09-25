@@ -41,7 +41,7 @@ def process1(main_window_instance: 'MainWindow'):
                 check_utils.write_report_pipe_dimension(pipe_dimension=pipe_dimension)
                 
                 if config.hr_list == []:  # 單一時間結果
-                    config.df_NodeResults = read_utils.readNodeResults(hr=None, input=config.arranged_rpt_file_path)
+                    config.df_NodeResults = read_utils.readNodeResults(main_window_instance, hr=None, input=config.arranged_rpt_file_path)
                     config.df_LinkResults = read_utils.readLinkResults(hr1=None, input=config.arranged_rpt_file_path, digits=config.digit_decimal)
                     (config.df_NodeResults, config.df_Junctions) = read_utils.changeValueByDigits(digits=config.digit_decimal)
                     matchLink, matchNode = utils.matchInpRptFile()
@@ -172,10 +172,10 @@ def process2(main_window_instance: 'MainWindow', *args, **kwargs):
                 msg= f'[Error]{dxfPathWithoutExtension}.png匯出失敗'
             utils.renew_log(main_window_instance, msg, False)
 
-            if config.export_svg_success and config.export_png_success and config.export_dxf_success:
+            if config.export_svg_success and config.export_png_success and config.export_dxf_success and not config.any_error:
                 msg= '所有作業成功完成'
             else:
-                msg= '作業完成，但有部分檔案匯出失敗'
+                msg= '作業完成，但有部分錯誤發生，請查看log內容'
             utils.renew_log(main_window_instance, msg, True)
 
         else:
