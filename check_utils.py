@@ -71,7 +71,7 @@ def write_report_header(*args, **kwargs):
         os.remove(f'{config.output_folder}/report.txt')
 
     with open(f'{config.output_folder}/report.txt', 'a', encoding='utf-8') as f:
-        f.write('Result\n\n')
+        f.write('Report\n\n')
         f.write('----------------------------------------------------------------------\n\n')
 
 def write_report_pipe_dimension(*args, **kwargs):

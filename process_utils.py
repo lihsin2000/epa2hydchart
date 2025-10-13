@@ -65,7 +65,7 @@ def process1(main_window_instance: 'MainWindow'):
                         hr_list_select.append(item.text())
 
                     for h in hr_list_select:
-                        config.df_NodeResults = read_utils.readNodeResults(hr=h, input=config.arranged_rpt_file_path)
+                        config.df_NodeResults = read_utils.readNodeResults(main_window_instance, hr=h, input=config.arranged_rpt_file_path)
                         i_hr1 = config.hr_list.index(h)
                         i_hr2 = i_hr1 + 1
 
