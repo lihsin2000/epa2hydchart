@@ -3,6 +3,7 @@ import pandas as pd
 import re
 import traceback
 import read_utils
+import progress_utils
 from PyQt6.QtCore import QCoreApplication
 
 from typing import TYPE_CHECKING

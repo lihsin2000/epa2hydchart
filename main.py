@@ -11,6 +11,8 @@ import config, utils
 from process_utils import process1
 from load_button import loadinpButton, loadrptButton
 import read_utils
+import progress_utils
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
@@ -72,7 +74,7 @@ class MainWindow(QMainWindow):
                     Q=Q+Decimal(config.df_NodeResults.at[row, 'Demand'])
                 else:
                     msg= f'[Error]節點 {id} Demand數值錯誤，Q值總計可能有誤'
-                    utils.renew_log(self, msg, True)
+                    utils.renew_log(self, msg, False)
 
             # 匯整C值
             C_str=''
@@ -147,7 +149,7 @@ class MainWindow(QMainWindow):
         except Exception as e:
             traceback.print_exc()
 
-    def headPressureLeader(self, *args, **kwargs):
+    def insertHeadPressureLeader(self, *args, **kwargs):
         from ezdxf.enums import TextEntityAlignment
         color=kwargs.get('color')
 
@@ -160,12 +162,12 @@ class MainWindow(QMainWindow):
                 Head=config.df_NodeResults.at[result_row,'Head']
                 Pressure=config.df_NodeResults.at[result_row,'Pressure']
 
-                if float(Pressure)<0:
+                if (Pressure == None) or (float(Pressure)<0):
                     color_pressure=1
                 else:
                     color_pressure=color
 
-                if float(Head)<0:
+                if (Head == None) or (float(Head)<0):
                     color_head=1
                 else:
                     color_head=color
@@ -180,6 +182,8 @@ class MainWindow(QMainWindow):
                 msp.add_text(Pressure, height=config.text_size, dxfattribs={'color': color_pressure, "style": "epa2HydChart"}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y-0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
                 msg= f'節點 {id} 高度及壓力引線已完成繪圖'
                 utils.renew_log(self, msg, False)
+                self.setLogToButton()
+                progress_utils.setProgress(self)
         except Exception as e:
             traceback.print_exc()
     
@@ -216,7 +220,7 @@ class MainWindow(QMainWindow):
         except Exception as e:
             traceback.print_exc()
 
-    def elevAnnotation(self, *args, **kwargs):
+    def insertElevAnnotation(self, *args, **kwargs):
         from ezdxf.enums import TextEntityAlignment
 
         try:
@@ -241,10 +245,12 @@ class MainWindow(QMainWindow):
                 msp.add_text(elev, height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y+0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
                 msg= f'節點 {id} 高程引線已完成繪圖'
                 utils.renew_log(self, msg, False)
+                self.setLogToButton()
+                progress_utils.setProgress(self)
         except Exception as e:
             traceback.print_exc()
 
-    def demandLeader(self, *args, **kwargs):
+    def insertDemandLeader(self, *args, **kwargs):
         
         try:
             color=kwargs.get('color')
@@ -260,10 +266,16 @@ class MainWindow(QMainWindow):
 
                 if draw0cmd:
                     self.drawDemandLeader(color, id, x, y, demand, True, config.line_width)
+                    msg= f'節點 {id} 水量引線已完成繪圖'
+                    utils.renew_log(self, msg, False)
                     self.setLogToButton()
+                    progress_utils.setProgress(self)
                 else:
                     self.drawDemandLeader(color, id, x, y, demand, False, config.line_width)
+                    msg= f'節點 {id} 水量引線已完成繪圖'
+                    utils.renew_log(self, msg, False)
                     self.setLogToButton()
+                    progress_utils.setProgress(self)
                 
                 QCoreApplication.processEvents()
         except Exception as e:
@@ -289,7 +301,7 @@ class MainWindow(QMainWindow):
         except Exception as e:
             traceback.print_exc()
 
-    def reservoirsLeader(self, *args, **kwargs):
+    def insertReservoirsLeader(self, *args, **kwargs):
         from ezdxf.enums import TextEntityAlignment
 
         color= kwargs.get('color')
@@ -317,10 +329,12 @@ class MainWindow(QMainWindow):
                 msp.add_text('Pressure', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((leader_up_end_x+6*config.text_size,leader_up_end_y-0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
                 msg=f'接水點 {id} 引線已完成繪圖'
                 utils.renew_log(self, msg, False)
+                self.setLogToButton()
+                progress_utils.setProgress(self)
         except Exception as e:
             traceback.print_exc()
 
-    def pumpAnnotation(self, *args, **kwargs):
+    def insertPumpAnnotation(self, *args, **kwargs):
         from ezdxf.enums import TextEntityAlignment
         color=kwargs.get('color')
         digits=kwargs.get('digits')
@@ -343,10 +357,12 @@ class MainWindow(QMainWindow):
                 msp.add_text(f'H:{H_str}', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((x+2*config.text_size,y-offset[1]), align=TextEntityAlignment.MIDDLE_RIGHT)
                 msg= f'抽水機 {id} 已完成繪圖'
                 utils.renew_log(self, msg, False)
+                self.setLogToButton()
+                progress_utils.setProgress(self)
         except Exception as e:
             traceback.print_exc()
 
-    def valveAnnotation(self, color):
+    def insertValveAnnotation(self, color):
         from ezdxf.enums import TextEntityAlignment
         try:
             for i in range(0, len(config.df_Valves)):
@@ -371,10 +387,12 @@ class MainWindow(QMainWindow):
                 msp.add_text(f'{Setting}', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((x,y-offset[1]), align=TextEntityAlignment.MIDDLE_CENTER)
                 msg= f'閥件 {id} 已完成繪圖'
                 utils.renew_log(self, msg, False)
+                self.setLogToButton()
+                progress_utils.setProgress(self)
         except Exception as e:
             traceback.print_exc()
 
-    def tankLeader(self, *args, **kwargs):
+    def insertTankLeader(self, *args, **kwargs):
         from ezdxf.enums import TextEntityAlignment
 
         color= kwargs.get('color')
@@ -410,6 +428,8 @@ class MainWindow(QMainWindow):
                 msp.add_text(f'Elev:{elev}', height=config.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((leader_up_end_x+10*config.text_size,leader_up_end_y-0.75*config.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
                 msg= f'水池 {id} 引線已完成繪圖'
                 utils.renew_log(self, msg, False)
+                self.setLogToButton()
+                progress_utils.setProgress(self)
         except Exception as e:
             traceback.print_exc()
 
@@ -459,7 +479,7 @@ class MainWindow(QMainWindow):
             utils.renew_log(self, msg, True)
             traceback.print_exc()
 
-    def pipeAnnotation(self):
+    def insertPipeAnnotation(self):
         try:
             # Convert LINK column to set for O(1) lookups
             link_ids = set(config.df_Vertices['LINK'])
@@ -494,6 +514,10 @@ class MainWindow(QMainWindow):
 
                 # Call annotation function once per pipe
                 self.pipeAnnotationBlock(link_id, start_x, start_y, end_x, end_y, i)
+                msg= f'管線 {link_id} 已插入標示'
+                utils.renew_log(self, msg, False)
+                self.setLogToButton()
+                progress_utils.setProgress(self)
         except Exception as e:
             traceback.print_exc()
 
@@ -512,7 +536,7 @@ class MainWindow(QMainWindow):
         except Exception as e:
             traceback.print_exc()
 
-    def pipeLines(self, *args, **kwargs):
+    def insertPipeLines(self, *args, **kwargs):
         try:
             width=kwargs.get('width')
 
@@ -539,7 +563,9 @@ class MainWindow(QMainWindow):
                     lastVert_y=float(config.df_Vertices.at[rows[len(rows)-1],'y'])
                     msp.add_polyline2d([(lastVert_x,lastVert_y), (end_x,end_y)], dxfattribs={'default_start_width': width, 'default_end_width': width})
                     msg= f'管線 {link_id} 已完成繪圖'
-                    utils.renew_log(self, msg, False)                
+                    utils.renew_log(self, msg, False)
+                    self.setLogToButton()
+                    progress_utils.setProgress(self)
                 else:
                     msp.add_polyline2d([(end_x,end_y), (start_x,start_y)], dxfattribs={'default_start_width': width, 'default_end_width': width})
 
@@ -582,6 +608,8 @@ class MainWindow(QMainWindow):
                         msp.add_polyline2d([(x1,y1), (x2,y2)], dxfattribs={'default_start_width': width, 'default_end_width': width})
                         msg= f'閥件 {id} 圖塊已插入'
                         utils.renew_log(self, msg, False)
+                        self.setLogToButton()
+                        progress_utils.setProgress(self)
 
                 else:
                     df=df_mapping[item]
@@ -595,6 +623,8 @@ class MainWindow(QMainWindow):
                             msp.add_blockref(item, [x,y], dxfattribs={'xscale':config.block_size, 'yscale':config.block_size})
                         msg= f'{mapping[item]} {id} 圖塊已插入'
                         utils.renew_log(self, msg, False)
+                        self.setLogToButton()
+                        progress_utils.setProgress(self)
 
         except Exception as e:
             traceback.print_exc()

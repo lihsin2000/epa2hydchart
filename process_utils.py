@@ -6,6 +6,7 @@ import config
 import read_utils
 import utils
 import check_utils
+import progress_utils
 
 from typing import TYPE_CHECKING
 
@@ -126,19 +127,23 @@ def process2(main_window_instance: 'MainWindow', *args, **kwargs):
             drmandArrowBlock.add_hatch(color=demandColor).paths.add_polyline_path(
                 [(0, 0), (0.1, -0.25), (-0.1, -0.25)], is_closed=True)
 
+            config.progress_steps = progress_utils.calculateProgressSteps()
+            config.progress_space= 100 / config.progress_steps
+            config.progress_value=0
+
             main_window_instance.createBlocks(config.cad)
             main_window_instance.insertBlocks(width=config.line_width)
-            main_window_instance.pipeLines(width=config.line_width)
-            main_window_instance.pipeAnnotation()
+            main_window_instance.insertPipeLines(width=config.line_width)
+            main_window_instance.insertPipeAnnotation()
             draw0cmd = main_window_instance.MainWindow.chk_export_0cmd.isChecked()
             
-            main_window_instance.demandLeader(color=demandColor, draw0cmd=draw0cmd)
-            main_window_instance.elevAnnotation(color=elevLeaderColor, width=config.line_width)
-            main_window_instance.headPressureLeader(color=headPressureLeaderColor)
-            main_window_instance.reservoirsLeader(color=reservoirLeaderColor, digits=config.digit_decimal)
-            main_window_instance.tankLeader(color=tankerLeaderColor, digits=config.digit_decimal, width=config.line_width)
-            main_window_instance.pumpAnnotation(color=pumpAnnotaionColor, digits=config.digit_decimal)
-            main_window_instance.valveAnnotation(valveAnnotaionColor)
+            main_window_instance.insertDemandLeader(color=demandColor, draw0cmd=draw0cmd)
+            main_window_instance.insertElevAnnotation(color=elevLeaderColor, width=config.line_width)
+            main_window_instance.insertHeadPressureLeader(color=headPressureLeaderColor)
+            main_window_instance.insertReservoirsLeader(color=reservoirLeaderColor, digits=config.digit_decimal)
+            main_window_instance.insertTankLeader(color=tankerLeaderColor, digits=config.digit_decimal, width=config.line_width)
+            main_window_instance.insertPumpAnnotation(color=pumpAnnotaionColor, digits=config.digit_decimal)
+            main_window_instance.insertValveAnnotation(valveAnnotaionColor)
             main_window_instance.addTitle(hr_str=hr_str)
 
             hr_str = hr_str.replace(':', '-')

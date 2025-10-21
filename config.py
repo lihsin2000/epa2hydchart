@@ -48,3 +48,7 @@ NAGAVITE_PRESSURE_THRESHOLD=0.0
 LOW_PRESSURE_THRESHOLD=10.0
 
 any_error=False
+
+progress_steps=None
+progress_value=None
+progress_space=None
