@@ -2,9 +2,8 @@ import globals
 import pandas as pd
 import re
 import traceback
-import utils
 import read_utils
-import progress_utils
+import log
 from PyQt6.QtCore import QCoreApplication
 
 from typing import TYPE_CHECKING
@@ -305,7 +304,7 @@ def addTitle(*args, **kwargs):
                 Q=Q+Decimal(globals.df_NodeResults.at[row, 'Demand'])
             else:
                 msg= f'[Error]節點 {id} Demand數值錯誤，Q值總計可能有誤'
-                utils.renew_log(msg, False)
+                log.renew_log(msg, False)
 
         # 匯整C值
         C_str=''

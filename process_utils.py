@@ -1,7 +1,5 @@
 import os, traceback
-import pandas as pd
-from PyQt6.QtWidgets import QFileDialog, QMessageBox
-from PyQt6.QtCore import QCoreApplication
+from PyQt6.QtWidgets import QFileDialog
 import globals
 import read_utils
 import utils

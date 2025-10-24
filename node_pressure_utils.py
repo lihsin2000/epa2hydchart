@@ -1,4 +1,4 @@
-import globals, utils, progress_utils, traceback
+import globals, progress_utils, traceback
 import log
 from typing import TYPE_CHECKING
 

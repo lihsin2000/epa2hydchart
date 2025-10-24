@@ -8,16 +8,12 @@ import sys, warnings, traceback
 warnings.filterwarnings("ignore", category=DeprecationWarning, message=".*sipPyTypeDict.*")
 
 from ui import Ui_MainWindow
-from PyQt6.QtWidgets import QMainWindow, QApplication, QFileDialog, QMessageBox, QLabel
+from PyQt6.QtWidgets import QMainWindow, QApplication
 from PyQt6.QtGui import QIntValidator, QDoubleValidator
-from PyQt6.QtCore import QCoreApplication, Qt
 
 import globals, utils
 from process_utils import process1
 from load_button import loadinpButton, loadrptButton
-import read_utils
-import log
-import progress_utils
 
 class MainWindow(QMainWindow):
     def __init__(self):
