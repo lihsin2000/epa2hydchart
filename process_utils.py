@@ -182,23 +182,29 @@ def process2(*args, **kwargs):
             log.setLogToButton()
             progress_utils.setProgress(98)
 
-            if globals.main_window.save_png(pngPath=png_path, svgPath=svg_path):
-                globals.export_png_success=True
-                msg= f'{dxfPathWithoutExtension}.png 匯出完成'
-            else:
-                globals.export_png_success=False
-                msg= f'[Error]{dxfPathWithoutExtension}.png 匯出失敗'
-            log.renew_log(msg, False)
-            log.setLogToButton()
-            progress_utils.setProgress(99)
-
-            if globals.export_svg_success and globals.export_png_success and globals.export_dxf_success and not globals.any_error:
-                msg= '所有作業成功完成'
-            else:
-                msg= '作業完成，但有部分錯誤發生，請查看log內容'
-            log.renew_log(msg, True)
-            log.setLogToButton()
-            progress_utils.setProgress(100)
+            # PNG conversion callback to handle async completion
+            def on_png_complete(success):
+                if success:
+                    globals.export_png_success = True
+                    msg = f'{dxfPathWithoutExtension}.png 匯出完成'
+                else:
+                    globals.export_png_success = False
+                    msg = f'[Error]{dxfPathWithoutExtension}.png 匯出失敗'
+                log.renew_log(msg, False)
+                log.setLogToButton()
+                progress_utils.setProgress(99)
+                
+                # Final completion message
+                if globals.export_svg_success and globals.export_png_success and globals.export_dxf_success and not globals.any_error:
+                    final_msg = '所有作業成功完成'
+                else:
+                    final_msg = '作業完成，但有部分錯誤發生，請查看log內容'
+                log.renew_log(final_msg, True)
+                log.setLogToButton()
+                progress_utils.setProgress(100)
+            
+            # Start async PNG conversion with callback
+            globals.main_window.save_png(pngPath=png_path, svgPath=svg_path, callback=on_png_complete)
 
         else:
             msg= f'[Error]{h}.rpt及.inp內容不符，中止匯出'

@@ -10,7 +10,7 @@ warnings.filterwarnings("ignore", category=DeprecationWarning, message=".*sipPyT
 from ui import Ui_MainWindow
 from PyQt6.QtWidgets import QMainWindow, QApplication, QFileDialog, QMessageBox, QLabel
 from PyQt6.QtGui import QIntValidator, QDoubleValidator
-from PyQt6.QtCore import QCoreApplication, Qt
+from PyQt6.QtCore import QCoreApplication, Qt, QThread, pyqtSignal
 
 import globals, utils
 from process_utils import process1
@@ -18,6 +18,28 @@ from load_button import loadinpButton, loadrptButton
 import read_utils
 import log
 import progress_utils
+
+class PngConverterThread(QThread):
+    """Worker thread for PNG conversion to prevent UI freezing"""
+    finished = pyqtSignal(bool, str)  # success, error_message
+    
+    def __init__(self, svg_path, png_path):
+        super().__init__()
+        self.svg_path = svg_path
+        self.png_path = png_path
+    
+    def run(self):
+        try:
+            import cairosvg
+            cairosvg.svg2png(
+                url=self.svg_path,
+                write_to=self.png_path,
+                output_width=10000,
+                dpi=600
+            )
+            self.finished.emit(True, "")
+        except Exception as e:
+            self.finished.emit(False, str(e))
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -56,27 +78,32 @@ class MainWindow(QMainWindow):
             traceback.print_exc()
 
     def save_png(self, *args, **kwargs):
-        try:
-            # msp=kwargs.get('msp')
-            # cad=kwargs.get('cad')
-            pngPath=kwargs.get('pngPath')
-            svgPath=kwargs.get('svgPath')
-
-            import cairosvg
-            # lib: GTK+ for Windows Runtime Environment Installer
-            # https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer
-            # https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/releases/download/2022-01-04/gtk3-runtime-3.24.31-2022-01-04-ts-win64.exe
-
-            cairosvg.svg2png(
-                url=svgPath,
-                write_to=pngPath,
-                output_width=10000,
-                dpi=600
-                )
-            return True
-        except Exception as e:
-            traceback.print_exc()
-            return False
+        """
+        Convert SVG to PNG using a separate thread to prevent UI freezing
+        """
+        pngPath = kwargs.get('pngPath')
+        svgPath = kwargs.get('svgPath')
+        callback = kwargs.get('callback')  # Optional callback for when conversion completes
+        
+        # Create and start the converter thread
+        self.png_thread = PngConverterThread(svgPath, pngPath)
+        
+        def on_conversion_finished(success, error_msg):
+            if success:
+                if callback:
+                    callback(True)
+            else:
+                traceback.print_exc()
+                print(f"PNG conversion error: {error_msg}")
+                if callback:
+                    callback(False)
+        
+        self.png_thread.finished.connect(on_conversion_finished)
+        self.png_thread.start()
+        
+        # Note: This now returns immediately, actual result is async
+        # If you need synchronous behavior, use wait()
+        return True
 
     def resetButton(self):
         self.MainWindow.l_block_size.setText(str(globals.BLOCK_SIZE_DEFAULT))
