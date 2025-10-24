@@ -4,6 +4,8 @@ from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from main import MainWindow
+    from ezdxf.document import Drawing
+    from ezdxf.layouts import Modelspace
 
 # main window instance
 main_window: Optional['MainWindow'] = None
@@ -40,8 +42,8 @@ df_Valves=None
 df_Pipes=None
 df_Vertices=None
 
-cad=None
-msp=None
+cad: Optional['Drawing'] = None
+msp: Optional['Modelspace'] = None
 dxfPath=None
 
 digit_decimal=None
