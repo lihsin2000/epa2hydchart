@@ -10,7 +10,7 @@ warnings.filterwarnings("ignore", category=DeprecationWarning, message=".*sipPyT
 from ui import Ui_MainWindow
 from PyQt6.QtWidgets import QMainWindow, QApplication, QFileDialog, QMessageBox, QLabel
 from PyQt6.QtGui import QIntValidator, QDoubleValidator
-from PyQt6.QtCore import QCoreApplication, Qt, QThread, pyqtSignal
+from PyQt6.QtCore import QCoreApplication, Qt
 
 import globals, utils
 from process_utils import process1
@@ -18,28 +18,6 @@ from load_button import loadinpButton, loadrptButton
 import read_utils
 import log
 import progress_utils
-
-class PngConverterThread(QThread):
-    """Worker thread for PNG conversion to prevent UI freezing"""
-    finished = pyqtSignal(bool, str)  # success, error_message
-    
-    def __init__(self, svg_path, png_path):
-        super().__init__()
-        self.svg_path = svg_path
-        self.png_path = png_path
-    
-    def run(self):
-        try:
-            import cairosvg
-            cairosvg.svg2png(
-                url=self.svg_path,
-                write_to=self.png_path,
-                output_width=10000,
-                dpi=600
-            )
-            self.finished.emit(True, "")
-        except Exception as e:
-            self.finished.emit(False, str(e))
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -77,34 +55,6 @@ class MainWindow(QMainWindow):
         except Exception as e:
             traceback.print_exc()
 
-    def save_png(self, *args, **kwargs):
-        """
-        Convert SVG to PNG using a separate thread to prevent UI freezing
-        """
-        pngPath = kwargs.get('pngPath')
-        svgPath = kwargs.get('svgPath')
-        callback = kwargs.get('callback')  # Optional callback for when conversion completes
-        
-        # Create and start the converter thread
-        self.png_thread = PngConverterThread(svgPath, pngPath)
-        
-        def on_conversion_finished(success, error_msg):
-            if success:
-                if callback:
-                    callback(True)
-            else:
-                traceback.print_exc()
-                print(f"PNG conversion error: {error_msg}")
-                if callback:
-                    callback(False)
-        
-        self.png_thread.finished.connect(on_conversion_finished)
-        self.png_thread.start()
-        
-        # Note: This now returns immediately, actual result is async
-        # If you need synchronous behavior, use wait()
-        return True
-
     def resetButton(self):
         self.MainWindow.l_block_size.setText(str(globals.BLOCK_SIZE_DEFAULT))
         self.MainWindow.l_joint_size.setText(str(globals.JOINT_SIZE_DEFAULT))
@@ -133,147 +83,6 @@ class MainWindow(QMainWindow):
             process1()
         except Exception as e:
             traceback.print_exc()
-
-    def createBlocks(self, cad):
-        try:
-            tankBlock=cad.blocks.new(name='tank')
-            tankBlock.add_polyline2d([(0.5,0), (0.5,0.5), (-0.5,0.5), (-0.5,0), (-0.25,0), (-0.25,-0.5), (0.25,-0.5), (0.25,0)], close=True)
-            tankBlock.add_hatch().paths.add_polyline_path([(0.5,0), (0.5,0.5), (-0.5,0.5), (-0.5,0), (-0.25,0), (-0.25,-0.5), (0.25,-0.5), (0.25,0)], is_closed=True)
-
-            reservoirBlock=cad.blocks.new(name='reservoir')
-            reservoirBlock.add_polyline2d([(0.5,-0.25), (0.5,0.5), (0.4,0.5), (0.4,0.25), (-0.4,0.25), (-0.4,0.5), (-0.5,0.5), (-0.5,-0.25)], close=True)
-            reservoirBlock.add_hatch().paths.add_polyline_path([(0.5,-0.25), (0.5,0.5), (0.4,0.5), (0.4,0.25), (-0.4,0.25), (-0.4,0.5), (-0.5,0.5), (-0.5,-0.25)], is_closed=True)
-
-            junctionBlock=cad.blocks.new(name='junction')
-            junctionBlock.add_ellipse((0,0), major_axis=(0,0.5), ratio=1)
-            junctionBlock.add_hatch().paths.add_edge_path().add_ellipse((0,0), major_axis=(0,0.5), ratio=1)
-
-            valveBlock=cad.blocks.new(name='valve')
-            valveBlock.add_polyline2d([(0,0), (0.5,0.3), (0.5,-0.3)], close=True)
-            valveBlock.add_polyline2d([(0,0), (-0.5,0.3), (-0.5,-0.3)], close=True)
-            valveBlock.add_hatch().paths.add_polyline_path([(0,0), (0.5,0.3), (0.5,-0.3)], is_closed=True)
-            valveBlock.add_hatch().paths.add_polyline_path([(0,0), (-0.5,0.3), (-0.5,-0.3)], is_closed=True)
-
-            flowDirectionArrowBlock=cad.blocks.new(name='flowDirectionArrow')
-            # flowDirectionArrowBlock.add_polyline2d([(-1,0.5), (0,0), (-1,-0.5)], close=False)
-            flowDirectionArrowBlock.add_polyline2d([(0,0), (-1,0.4), (-1,-0.4)], close=True)
-            flowDirectionArrowBlock.add_hatch().paths.add_polyline_path([(0,0), (-1,0.4), (-1,-0.4)], is_closed=True)
-
-            from ezdxf.enums import TextEntityAlignment
-            from ezdxf.math import Vec2
-            pumpBlock=cad.blocks.new(name='pump')
-            pumpBlock.add_circle(Vec2(0,0), 0.5)
-            pumpBlock.add_text("P", height=0.8, dxfattribs={"style": "epa2HydChart"}).set_placement((0,0), align=TextEntityAlignment.MIDDLE_CENTER)
-        except Exception as e:
-            traceback.print_exc()
-
-    def insertBlocks(self, *args, **kwargs):
-        try:
-            width=kwargs.get('width')
-            mapping = {'tank': '水池',
-                    'reservoir': '接水點',
-                    'junction': '節點',
-                    'pump': '抽水機',
-                    'valve': '閥件'}
-
-            df_mapping = {'tank': globals.df_Tanks,
-                        'reservoir': globals.df_Reservoirs,
-                        'junction': globals.df_Junctions,
-                        'pump': globals.df_Pumps,
-                        'valve': globals.df_Valves}
-            for item in ['tank', 'reservoir', 'junction', 'pump', 'valve']:
-                if item == 'valve':
-                    import math
-                    df=globals.df_Valves
-                    for i in range (0, len(df)):
-                        id=df.at[i,'ID']
-                        x1=float(df.at[i,'Node1_x'])
-                        y1=float(df.at[i,'Node1_y'])
-                        x2=float(df.at[i,'Node2_x'])
-                        y2=float(df.at[i,'Node2_y'])
-
-                        x=0.5*(float(x1)+float(x2))
-                        y=0.5*(float(y1)+float(y2))
-
-                        rotation=math.atan2(y2-y1, x2-x1)
-                        rotation=rotation*180/math.pi
-
-                        globals.msp.add_blockref(item, [x,y], dxfattribs={'xscale':globals.block_size, 'yscale':globals.block_size, 'rotation':rotation})
-                        globals.msp.add_polyline2d([(x1,y1), (x2,y2)], dxfattribs={'default_start_width': width, 'default_end_width': width})
-                        msg= f'閥件 {id} 圖塊已插入'
-                        log.renew_log(msg, False)
-                        log.setLogToButton()
-                        progress_utils.setProgress(ForcedValue=None)
-
-                else:
-                    df=df_mapping[item]
-                    for i in range (0, len(df)):
-                        id=df.at[i,'ID']
-                        x=float(df.at[i,'x'])
-                        y=float(df.at[i,'y'])
-                        if item == 'junction':
-                            globals.msp.add_blockref(item, [x,y], dxfattribs={'xscale':globals.joint_size, 'yscale':globals.joint_size})
-                        else:
-                            globals.msp.add_blockref(item, [x,y], dxfattribs={'xscale':globals.block_size, 'yscale':globals.block_size})
-                        msg= f'{mapping[item]} {id} 圖塊已插入'
-                        log.renew_log(msg, False)
-                        log.setLogToButton()
-                        progress_utils.setProgress(ForcedValue=None)
-
-        except Exception as e:
-            traceback.print_exc()
-    
-    def save_dxf(self, *args, **kwargs):
-        dxfPath=kwargs.get('dxfPath')
-        main_window_instance=kwargs.get('main_window_instance')
-        while True:
-            try:
-                globals.cad.saveas(dxfPath)
-                return True
-                # break
-            except:
-                traceback.print_exc()
-                from PyQt6.QtWidgets import QApplication, QMessageBox
-
-                msg_box=QMessageBox(QApplication.activeWindow())
-                msg_box.setIcon(QMessageBox.Icon.Critical)
-                msg_box.setWindowTitle("錯誤")
-                msg_box.setText(f'無法儲存 {dxfPath}，請關閉相關檔案後重試')
-                retry_button = msg_box.addButton("重試", msg_box.ButtonRole.ActionRole)
-                cancel_button = msg_box.addButton("取消", msg_box.ButtonRole.ActionRole)
-                msg_box.exec()
-                if msg_box.clickedButton() == retry_button:
-                    continue
-                elif msg_box.clickedButton() == cancel_button:
-                    msg=f'[Error]無法儲存 {dxfPath}，中止匯出'
-                    utils.renew_log(msg, True)
-                    return
-
-    def save_svg(self, *args, **kwargs):
-        try:
-            msp=kwargs.get('msp')
-            cad=kwargs.get('cad')
-            svgPath=kwargs.get('path')
-            from ezdxf.addons.drawing import Frontend, RenderContext, svg, layout, config
-            msp = cad.modelspace()
-            context = RenderContext(cad)
-            backend = svg.SVGBackend()
-            cfg = config.Configuration(
-                background_policy=config.BackgroundPolicy.WHITE,
-            )
-            frontend = Frontend(context, backend, config=cfg)
-            frontend.draw_layout(msp)
-            page = layout.Page(0, 0, layout.Units.mm, margins=layout.Margins.all(10))
-            svg_string = backend.get_string(
-                page, settings=layout.Settings(scale=1, fit_page=False)
-            )
-
-            with open(svgPath, "wt", encoding="utf8") as fp:
-                fp.write(svg_string)
-            return True
-        except Exception as e:
-            traceback.print_exc()
-            return False
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 # QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)   # Enable high DPI

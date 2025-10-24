@@ -11,6 +11,8 @@ import node_utilis
 import node_pressure_utils
 import pipe_utils
 import node_demand_utils
+import block_utils
+import convert_utils
 import log
 
 from typing import TYPE_CHECKING
@@ -139,8 +141,8 @@ def process2(*args, **kwargs):
             globals.progress_space= 95 / globals.progress_steps
             globals.progress_value=0
             
-            globals.main_window.createBlocks(globals.cad)
-            globals.main_window.insertBlocks(width=globals.line_width)
+            block_utils.createBlocks(globals.cad)
+            block_utils.insertBlocks(width=globals.line_width)
 
             pipe_utils.insertPipeLines(width=globals.line_width)
             pipe_utils.insertPipeAnnotation()
@@ -162,7 +164,7 @@ def process2(*args, **kwargs):
             svg_path = dxfPath.replace('.dxf', '.svg')
             png_path = dxfPath.replace('.dxf', '.png')
             
-            if globals.main_window.save_dxf(main_window_instance=globals.main_window, dxfPath=dxfPath):
+            if convert_utils.save_dxf(main_window_instance=globals.main_window, dxfPath=dxfPath):
                 globals.export_dxf_success=True
                 msg= f'{dxfPathWithoutExtension}.dxf 匯出完成'
             else:
@@ -172,7 +174,7 @@ def process2(*args, **kwargs):
             log.setLogToButton()
             progress_utils.setProgress(97)
 
-            if globals.main_window.save_svg(msp=globals.msp, cad=globals.cad, path=svg_path):
+            if convert_utils.save_svg(msp=globals.msp, cad=globals.cad, path=svg_path):
                 globals.export_svg_success=True
                 msg = f'{dxfPathWithoutExtension}.svg 匯出完成'
             else:
@@ -204,7 +206,7 @@ def process2(*args, **kwargs):
                 progress_utils.setProgress(100)
             
             # Start async PNG conversion with callback
-            globals.main_window.save_png(pngPath=png_path, svgPath=svg_path, callback=on_png_complete)
+            convert_utils.save_png(pngPath=png_path, svgPath=svg_path, callback=on_png_complete)
 
         else:
             msg= f'[Error]{h}.rpt及.inp內容不符，中止匯出'
