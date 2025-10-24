@@ -36,12 +36,9 @@ def process1():
             file_name = os.path.basename(dxfPath)
 
             if dxfPath != '':
-                (globals.df_Coords, globals.df_Junctions, globals.df_Reservoirs,
-                globals.df_Tanks, globals.df_Pumps, globals.df_Valves,
-                globals.df_Pipes, globals.df_Vertices) = utils.inp_to_df(inpFile, showtime=True)
-                
-                globals.output_folder=os.path.dirname(dxfPath)
 
+                utils.inp_to_df(inpFile, showtime=True)
+                globals.output_folder=os.path.dirname(dxfPath)
                 check_utils.write_report_header()
                 pipe_dimension=check_utils.list_pipe_dimension()
                 check_utils.write_report_pipe_dimension(pipe_dimension=pipe_dimension)
@@ -51,7 +48,7 @@ def process1():
                     globals.df_LinkResults = read_utils.readLinkResults(hr1=None, input=globals.arranged_rpt_file_path, digits=globals.digit_decimal)
                     progress_utils.setProgress(0)
                     (globals.df_NodeResults, globals.df_Junctions) = read_utils.changeValueByDigits(digits=globals.digit_decimal)
-                    matchLink, matchNode = utils.matchInpRptFile()
+                    matchLink, matchNode = utils.IsInpRptMatch()
                     process2(matchLink=matchLink, matchNode=matchNode, dxfPath=dxfPath, hr='')
                     
                     headloss_unreasonable_pipes, velocity_unreasonable_pipes=check_utils.filter_unreasonable_pipes()
@@ -84,7 +81,7 @@ def process1():
 
                         progress_utils.setProgress(0)
                         
-                        matchLink, matchNode = utils.matchInpRptFile()
+                        matchLink, matchNode = utils.IsInpRptMatch()
                         process2(matchLink=matchLink, matchNode=matchNode, dxfPath=dxfPath, hr=h)
                         headloss_unreasonable_pipes, velocity_unreasonable_pipes=check_utils.filter_unreasonable_pipes()
                         low_pressure_junctions, nagavite_pressure=check_utils.check_negative_low_pressure_junctions()
@@ -147,8 +144,7 @@ def process2(*args, **kwargs):
             
             draw0cmd = globals.main_window.MainWindow.chk_export_0cmd.isChecked()
             node_demand_utils.insertDemandLeader(color=demandColor, draw0cmd=draw0cmd)
-            node_pressure_utils.insertElevAnnotation(color=elevLeaderColor, width=globals.line_width)
-            node_pressure_utils.insertHeadPressureLeader(color=headPressureLeaderColor)
+            node_pressure_utils.insertHeadPressureLeader(HeadColor=headPressureLeaderColor, ElevColor=elevLeaderColor, width=globals.line_width)
             node_utilis.insertReservoirsLeader(color=reservoirLeaderColor, digits=globals.digit_decimal)
             node_utilis.insertTankLeader(color=tankerLeaderColor, digits=globals.digit_decimal, width=globals.line_width)
             node_utilis.insertPumpAnnotation(color=pumpAnnotaionColor, digits=globals.digit_decimal)

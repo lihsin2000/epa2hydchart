@@ -255,14 +255,14 @@ def inp_to_df(inpFile, showtime):
         if showtime:
             globals.main_window.MainWindow.browser_log.append(f'管線坐標讀取完畢({t8-t7:.2f}s)')
         QCoreApplication.processEvents()
-        return (globals.df_Coords, globals.df_Junctions, globals.df_Reservoirs,
-                globals.df_Tanks, globals.df_Pumps, globals.df_Valves, globals.df_Pipes,
-                globals.df_Vertices)
+        # return (globals.df_Coords, globals.df_Junctions, globals.df_Reservoirs,
+        #         globals.df_Tanks, globals.df_Pumps, globals.df_Valves, globals.df_Pipes,
+        #         globals.df_Vertices)
     except Exception as e:
         traceback.print_exc()
 
 
-def matchInpRptFile():
+def IsInpRptMatch():
     try:
         inputAllLink = pd.concat([globals.df_Pipes['ID'], globals.df_Valves['ID'], globals.df_Pumps['ID']])
         inputAllLink = inputAllLink.sort_values().reset_index(drop=True)
