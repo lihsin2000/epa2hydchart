@@ -1,6 +1,6 @@
 import traceback
 import pandas as pd
-import config
+import globals
 import utils
 from PyQt6.QtWidgets import QMessageBox
 from typing import TYPE_CHECKING
@@ -38,14 +38,14 @@ def readPipes(inpFile):
 
         for i in range(0, len(df)):
             Node1 = df.at[i, 'Node1']
-            row = config.df_Coords.index[config.df_Coords['ID'] == str(Node1)].tolist()[0]
-            df.at[i, 'Node1_x'] = config.df_Coords.at[row, 'x']
-            df.at[i, 'Node1_y'] = config.df_Coords.at[row, 'y']
+            row = globals.df_Coords.index[globals.df_Coords['ID'] == str(Node1)].tolist()[0]
+            df.at[i, 'Node1_x'] = globals.df_Coords.at[row, 'x']
+            df.at[i, 'Node1_y'] = globals.df_Coords.at[row, 'y']
 
             Node2 = df.at[i, 'Node2']
-            row = config.df_Coords.index[config.df_Coords['ID'] == str(Node2)].tolist()[0]
-            df.at[i, 'Node2_x'] = config.df_Coords.at[row, 'x']
-            df.at[i, 'Node2_y'] = config.df_Coords.at[row, 'y']
+            row = globals.df_Coords.index[globals.df_Coords['ID'] == str(Node2)].tolist()[0]
+            df.at[i, 'Node2_x'] = globals.df_Coords.at[row, 'x']
+            df.at[i, 'Node2_y'] = globals.df_Coords.at[row, 'y']
         return df
     except Exception as e:
         traceback.print_exc()
@@ -162,12 +162,12 @@ def readValves(inpFile):
             Node2 = d[3]
             Type = d[5]
             Setting = d[6]
-            coords1_row = config.df_Coords.index[config.df_Coords['ID'] == Node1].tolist()[0]
-            coords2_row = config.df_Coords.index[config.df_Coords['ID'] == Node2].tolist()[0]
-            Node1_x = config.df_Coords.at[coords1_row, 'x']
-            Node1_y = config.df_Coords.at[coords1_row, 'y']
-            Node2_x = config.df_Coords.at[coords2_row, 'x']
-            Node2_y = config.df_Coords.at[coords2_row, 'y']
+            coords1_row = globals.df_Coords.index[globals.df_Coords['ID'] == Node1].tolist()[0]
+            coords2_row = globals.df_Coords.index[globals.df_Coords['ID'] == Node2].tolist()[0]
+            Node1_x = globals.df_Coords.at[coords1_row, 'x']
+            Node1_y = globals.df_Coords.at[coords1_row, 'y']
+            Node2_x = globals.df_Coords.at[coords2_row, 'x']
+            Node2_y = globals.df_Coords.at[coords2_row, 'y']
 
             data = {
                 'ID': id,
@@ -224,12 +224,12 @@ def readPumps(inpFile):
             ID = [d[1]][0]
             Node1 = [d[2]][0]
             Node2 = [d[3]][0]
-            coords1_row = config.df_Coords.index[config.df_Coords['ID'] == Node1].tolist()[0]
-            coords2_row = config.df_Coords.index[config.df_Coords['ID'] == Node2].tolist()[0]
-            Node1_x = config.df_Coords.at[coords1_row, 'x']
-            Node1_y = config.df_Coords.at[coords1_row, 'y']
-            Node2_x = config.df_Coords.at[coords2_row, 'x']
-            Node2_y = config.df_Coords.at[coords2_row, 'y']
+            coords1_row = globals.df_Coords.index[globals.df_Coords['ID'] == Node1].tolist()[0]
+            coords2_row = globals.df_Coords.index[globals.df_Coords['ID'] == Node2].tolist()[0]
+            Node1_x = globals.df_Coords.at[coords1_row, 'x']
+            Node1_y = globals.df_Coords.at[coords1_row, 'y']
+            Node2_x = globals.df_Coords.at[coords2_row, 'x']
+            Node2_y = globals.df_Coords.at[coords2_row, 'y']
             x = 0.5*(float(Node1_x)+float(Node2_x))
             y = 0.5*(float(Node1_y)+float(Node2_y))
 
@@ -291,8 +291,8 @@ def readNodeResults(*args, **kwargs):
                 }
 
             except:
-                config.main_window.MainWindow.browser_log.append(f'節點 {id} 資料錯誤，請手動修正.rpt檔內容')
-                config.any_error=True
+                globals.main_window.MainWindow.browser_log.append(f'節點 {id} 資料錯誤，請手動修正.rpt檔內容')
+                globals.any_error=True
                 # QMessageBox.warning(None, '警告', f'節點{id}資料錯誤，請手動修正.rpt檔內容')
 
                 data = {
@@ -340,17 +340,17 @@ def readLinkResults(*args, **kwargs):
 
             # calculate headloss number:
             # 2 side in link are node:
-            if pipe_id in config.df_Pipes['ID'].tolist():
-                pipe_index = config.df_Pipes.index[config.df_Pipes['ID'] == pipe_id].tolist()[0]
-                node1 = config.df_Pipes.at[pipe_index, 'Node1']
-                i1 = config.df_NodeResults.index[config.df_NodeResults['ID'] == node1].tolist()[0]
-                node2 = config.df_Pipes.at[pipe_index, 'Node2']
-                i2 = config.df_NodeResults.index[config.df_NodeResults['ID'] == node2].tolist()[0]
+            if pipe_id in globals.df_Pipes['ID'].tolist():
+                pipe_index = globals.df_Pipes.index[globals.df_Pipes['ID'] == pipe_id].tolist()[0]
+                node1 = globals.df_Pipes.at[pipe_index, 'Node1']
+                i1 = globals.df_NodeResults.index[globals.df_NodeResults['ID'] == node1].tolist()[0]
+                node2 = globals.df_Pipes.at[pipe_index, 'Node2']
+                i2 = globals.df_NodeResults.index[globals.df_NodeResults['ID'] == node2].tolist()[0]
 
                 from decimal import Decimal
                 try:
-                    node1_head = Decimal(config.df_NodeResults.at[i1, 'Head'])
-                    node2_head = Decimal(config.df_NodeResults.at[i2, 'Head'])
+                    node1_head = Decimal(globals.df_NodeResults.at[i1, 'Head'])
+                    node2_head = Decimal(globals.df_NodeResults.at[i2, 'Head'])
 
                     Headloss = round(abs(node2_head-node1_head), digits)
                     Headloss_str= f"{Headloss:.{digits}f}"
@@ -383,8 +383,8 @@ def changeValueByDigits(*args, **kwargs):
     digits= kwargs.get('digits')
     
     try:
-        df_nodeResult=config.df_NodeResults
-        df_junctions=config.df_Junctions
+        df_nodeResult=globals.df_NodeResults
+        df_junctions=globals.df_Junctions
 
         df_nodeResult['Demand']=df_nodeResult['Demand'].astype(float)
         df_nodeResult['Head']=df_nodeResult['Head'].astype(float)
@@ -417,11 +417,11 @@ def appendCoords(df):
     try:
         for i in range(0, len(df)):
             ID = df.at[i, 'ID']
-            row = config.df_Coords.index[config.df_Coords['ID'] == str(ID)].tolist()[0]
-            config.df_Coords['x'] = config.df_Coords['x'].astype(float)
-            config.df_Coords['y'] = config.df_Coords['y'].astype(float)
-            df.at[i, 'x'] = config.df_Coords.at[row, 'x']
-            df.at[i, 'y'] = config.df_Coords.at[row, 'y']
+            row = globals.df_Coords.index[globals.df_Coords['ID'] == str(ID)].tolist()[0]
+            globals.df_Coords['x'] = globals.df_Coords['x'].astype(float)
+            globals.df_Coords['y'] = globals.df_Coords['y'].astype(float)
+            df.at[i, 'x'] = globals.df_Coords.at[row, 'x']
+            df.at[i, 'y'] = globals.df_Coords.at[row, 'y']
         return df
     except Exception as e:
         traceback.print_exc()

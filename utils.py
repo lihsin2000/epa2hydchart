@@ -1,4 +1,4 @@
-import config
+import globals
 import pandas as pd
 import re
 import traceback
@@ -14,21 +14,21 @@ if TYPE_CHECKING:
 
 def autoSize():
     try:
-        items = [config.main_window.MainWindow.l_block_size,
-                 config.main_window.MainWindow.l_joint_size,
-                 config.main_window.MainWindow.l_text_size,
-                 config.main_window.MainWindow.l_leader_distance]
+        items = [globals.main_window.MainWindow.l_block_size,
+                 globals.main_window.MainWindow.l_joint_size,
+                 globals.main_window.MainWindow.l_text_size,
+                 globals.main_window.MainWindow.l_leader_distance]
 
-        if config.main_window.MainWindow.chk_autoSize.isChecked():
+        if globals.main_window.MainWindow.chk_autoSize.isChecked():
             for item in items:
                 item.setEnabled(False)
         else:
             for item in items:
                 item.setEnabled(True)
 
-        if config.main_window.MainWindow.chk_autoSize.isChecked() and config.inpFile:
-            df_Vertices = read_utils.readVertices(config.inpFile)
-            df_Coords = read_utils.readCoords(config.inpFile)
+        if globals.main_window.MainWindow.chk_autoSize.isChecked() and globals.inpFile:
+            df_Vertices = read_utils.readVertices(globals.inpFile)
+            df_Coords = read_utils.readCoords(globals.inpFile)
             try:
                 coords = df_Coords[['x', 'y']]
             except:
@@ -51,13 +51,13 @@ def autoSize():
             if blockSizeEstimate == 0:
                 blockSizeEstimate = 10
 
-            config.main_window.MainWindow.l_block_size.setText(
+            globals.main_window.MainWindow.l_block_size.setText(
                 str(blockSizeEstimate))
-            config.main_window.MainWindow.l_joint_size.setText(
+            globals.main_window.MainWindow.l_joint_size.setText(
                 str(blockSizeEstimate/4))
-            config.main_window.MainWindow.l_text_size.setText(
+            globals.main_window.MainWindow.l_text_size.setText(
                 str(blockSizeEstimate/4))
-            config.main_window.MainWindow.l_leader_distance.setText(
+            globals.main_window.MainWindow.l_leader_distance.setText(
                 str(blockSizeEstimate/2))
     except Exception as e:
         traceback.print_exc()
@@ -215,79 +215,68 @@ def inp_to_df(inpFile, showtime):
 
     try:
         t0=time.time()
-        config.df_Coords=read_utils.readCoords(inpFile)
+        globals.df_Coords=read_utils.readCoords(inpFile)
         t1=time.time()
         if showtime:
-            config.main_window.MainWindow.browser_log.append(f'節點坐標讀取完畢({t1-t0:.2f}s)')
+            globals.main_window.MainWindow.browser_log.append(f'節點坐標讀取完畢({t1-t0:.2f}s)')
         QCoreApplication.processEvents()
-        config.df_Junctions=read_utils.readJunctions(inpFile)
+        globals.df_Junctions=read_utils.readJunctions(inpFile)
         t2=time.time()
         if showtime:
-            config.main_window.MainWindow.browser_log.append(f'節點參數讀取完畢({t2-t1:.2f}s)')
+            globals.main_window.MainWindow.browser_log.append(f'節點參數讀取完畢({t2-t1:.2f}s)')
         QCoreApplication.processEvents()
-        config.df_Reservoirs=read_utils.readReservoirs(inpFile)
+        globals.df_Reservoirs=read_utils.readReservoirs(inpFile)
         t3=time.time()
         if showtime:
-            config.main_window.MainWindow.browser_log.append(f'接水點參數讀取完畢({t3-t2:.2f}s)')
+            globals.main_window.MainWindow.browser_log.append(f'接水點參數讀取完畢({t3-t2:.2f}s)')
         QCoreApplication.processEvents()
-        config.df_Tanks=read_utils.readTanks(inpFile)
+        globals.df_Tanks=read_utils.readTanks(inpFile)
         t4=time.time()
         if showtime:
-            config.main_window.MainWindow.browser_log.append(f'水池參數讀取完畢({t4-t3:.2f}s)')
+            globals.main_window.MainWindow.browser_log.append(f'水池參數讀取完畢({t4-t3:.2f}s)')
         QCoreApplication.processEvents()
-        config.df_Pumps=read_utils.readPumps(inpFile)
+        globals.df_Pumps=read_utils.readPumps(inpFile)
         t5=time.time()
         if showtime:
-            config.main_window.MainWindow.browser_log.append(f'抽水機參數讀取完畢({t5-t4:.2f}s)')
+            globals.main_window.MainWindow.browser_log.append(f'抽水機參數讀取完畢({t5-t4:.2f}s)')
         QCoreApplication.processEvents()
-        config.df_Valves=read_utils.readValves(inpFile)
+        globals.df_Valves=read_utils.readValves(inpFile)
         t6=time.time()
         if showtime:
-            config.main_window.MainWindow.browser_log.append(f'閥件參數讀取完畢({t6-t5:.2f}s)')
+            globals.main_window.MainWindow.browser_log.append(f'閥件參數讀取完畢({t6-t5:.2f}s)')
         QCoreApplication.processEvents()
-        config.df_Pipes=read_utils.readPipes(inpFile)
+        globals.df_Pipes=read_utils.readPipes(inpFile)
         t7=time.time()
         if showtime:
-            config.main_window.MainWindow.browser_log.append(f'管件參數讀取完畢({t7-t6:.2f}s)')
+            globals.main_window.MainWindow.browser_log.append(f'管件參數讀取完畢({t7-t6:.2f}s)')
         QCoreApplication.processEvents()
-        config.df_Vertices=read_utils.readVertices(inpFile)
+        globals.df_Vertices=read_utils.readVertices(inpFile)
         t8=time.time()
         if showtime:
-            config.main_window.MainWindow.browser_log.append(f'管件坐標讀取完畢({t8-t7:.2f}s)')
+            globals.main_window.MainWindow.browser_log.append(f'管件坐標讀取完畢({t8-t7:.2f}s)')
         QCoreApplication.processEvents()
-        return (config.df_Coords, config.df_Junctions, config.df_Reservoirs,
-                config.df_Tanks, config.df_Pumps, config.df_Valves, config.df_Pipes,
-                config.df_Vertices)
+        return (globals.df_Coords, globals.df_Junctions, globals.df_Reservoirs,
+                globals.df_Tanks, globals.df_Pumps, globals.df_Valves, globals.df_Pipes,
+                globals.df_Vertices)
     except Exception as e:
         traceback.print_exc()
 
 
 def matchInpRptFile():
     try:
-        inputAllLink = pd.concat([config.df_Pipes['ID'], config.df_Valves['ID'], config.df_Pumps['ID']])
+        inputAllLink = pd.concat([globals.df_Pipes['ID'], globals.df_Valves['ID'], globals.df_Pumps['ID']])
         inputAllLink = inputAllLink.sort_values().reset_index(drop=True)
-        outputAllLink = config.df_LinkResults['ID']
+        outputAllLink = globals.df_LinkResults['ID']
         outputAllLink = outputAllLink.sort_values().reset_index(drop=True)
 
         matchLink = outputAllLink.equals(outputAllLink)
 
-        inputAllNode = pd.concat([config.df_Junctions['ID'], config.df_Tanks['ID'], config.df_Reservoirs['ID']])
+        inputAllNode = pd.concat([globals.df_Junctions['ID'], globals.df_Tanks['ID'], globals.df_Reservoirs['ID']])
         inputAllNode = inputAllNode.sort_values().reset_index(drop=True)
-        outputAllNode = config.df_NodeResults['ID']
+        outputAllNode = globals.df_NodeResults['ID']
         outputAllNode = outputAllNode.sort_values().reset_index(drop=True)
 
         matchNode = outputAllNode.equals(inputAllNode)
         return matchLink, matchNode
     except Exception as e:
         traceback.print_exc()
-
-def renew_log(msg, seperate:bool):
-    """
-    Display an error message in the main window's log and set the log to the button.
-    """
-
-    config.main_window.MainWindow.browser_log.append(msg)
-    if seperate:
-        config.main_window.MainWindow.browser_log.append('---------------------')
-    config.main_window.MainWindow.browser_log.verticalScrollBar().setValue(config.main_window.MainWindow.browser_log.verticalScrollBar().maximum())
-    QCoreApplication.processEvents()
