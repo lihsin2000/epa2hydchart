@@ -12,21 +12,21 @@ if TYPE_CHECKING:
     from main import MainWindow
 
 
-def autoSize(main_window_instance: 'MainWindow'):
+def autoSize():
     try:
-        items = [main_window_instance.MainWindow.l_block_size,
-                 main_window_instance.MainWindow.l_joint_size,
-                 main_window_instance.MainWindow.l_text_size,
-                 main_window_instance.MainWindow.l_leader_distance]
+        items = [config.main_window.MainWindow.l_block_size,
+                 config.main_window.MainWindow.l_joint_size,
+                 config.main_window.MainWindow.l_text_size,
+                 config.main_window.MainWindow.l_leader_distance]
 
-        if main_window_instance.MainWindow.chk_autoSize.isChecked():
+        if config.main_window.MainWindow.chk_autoSize.isChecked():
             for item in items:
                 item.setEnabled(False)
         else:
             for item in items:
                 item.setEnabled(True)
 
-        if main_window_instance.MainWindow.chk_autoSize.isChecked() and config.inpFile:
+        if config.main_window.MainWindow.chk_autoSize.isChecked() and config.inpFile:
             df_Vertices = read_utils.readVertices(config.inpFile)
             df_Coords = read_utils.readCoords(config.inpFile)
             try:
@@ -51,13 +51,13 @@ def autoSize(main_window_instance: 'MainWindow'):
             if blockSizeEstimate == 0:
                 blockSizeEstimate = 10
 
-            main_window_instance.MainWindow.l_block_size.setText(
+            config.main_window.MainWindow.l_block_size.setText(
                 str(blockSizeEstimate))
-            main_window_instance.MainWindow.l_joint_size.setText(
+            config.main_window.MainWindow.l_joint_size.setText(
                 str(blockSizeEstimate/4))
-            main_window_instance.MainWindow.l_text_size.setText(
+            config.main_window.MainWindow.l_text_size.setText(
                 str(blockSizeEstimate/4))
-            main_window_instance.MainWindow.l_leader_distance.setText(
+            config.main_window.MainWindow.l_leader_distance.setText(
                 str(blockSizeEstimate/2))
     except Exception as e:
         traceback.print_exc()
@@ -209,7 +209,7 @@ def convertPatternsToHourList(rptFile2):
         traceback.print_exc()
 
 
-def inp_to_df(main_window_instance: 'MainWindow', inpFile, showtime):
+def inp_to_df(inpFile, showtime):
     import time
     from PyQt6.QtCore import QCoreApplication
 
@@ -218,42 +218,42 @@ def inp_to_df(main_window_instance: 'MainWindow', inpFile, showtime):
         config.df_Coords=read_utils.readCoords(inpFile)
         t1=time.time()
         if showtime:
-            main_window_instance.MainWindow.browser_log.append(f'節點坐標讀取完畢({t1-t0:.2f}s)')
+            config.main_window.MainWindow.browser_log.append(f'節點坐標讀取完畢({t1-t0:.2f}s)')
         QCoreApplication.processEvents()
         config.df_Junctions=read_utils.readJunctions(inpFile)
         t2=time.time()
         if showtime:
-            main_window_instance.MainWindow.browser_log.append(f'節點參數讀取完畢({t2-t1:.2f}s)')
+            config.main_window.MainWindow.browser_log.append(f'節點參數讀取完畢({t2-t1:.2f}s)')
         QCoreApplication.processEvents()
         config.df_Reservoirs=read_utils.readReservoirs(inpFile)
         t3=time.time()
         if showtime:
-            main_window_instance.MainWindow.browser_log.append(f'接水點參數讀取完畢({t3-t2:.2f}s)')
+            config.main_window.MainWindow.browser_log.append(f'接水點參數讀取完畢({t3-t2:.2f}s)')
         QCoreApplication.processEvents()
         config.df_Tanks=read_utils.readTanks(inpFile)
         t4=time.time()
         if showtime:
-            main_window_instance.MainWindow.browser_log.append(f'水池參數讀取完畢({t4-t3:.2f}s)')
+            config.main_window.MainWindow.browser_log.append(f'水池參數讀取完畢({t4-t3:.2f}s)')
         QCoreApplication.processEvents()
         config.df_Pumps=read_utils.readPumps(inpFile)
         t5=time.time()
         if showtime:
-            main_window_instance.MainWindow.browser_log.append(f'抽水機參數讀取完畢({t5-t4:.2f}s)')
+            config.main_window.MainWindow.browser_log.append(f'抽水機參數讀取完畢({t5-t4:.2f}s)')
         QCoreApplication.processEvents()
         config.df_Valves=read_utils.readValves(inpFile)
         t6=time.time()
         if showtime:
-            main_window_instance.MainWindow.browser_log.append(f'閥件參數讀取完畢({t6-t5:.2f}s)')
+            config.main_window.MainWindow.browser_log.append(f'閥件參數讀取完畢({t6-t5:.2f}s)')
         QCoreApplication.processEvents()
         config.df_Pipes=read_utils.readPipes(inpFile)
         t7=time.time()
         if showtime:
-            main_window_instance.MainWindow.browser_log.append(f'管件參數讀取完畢({t7-t6:.2f}s)')
+            config.main_window.MainWindow.browser_log.append(f'管件參數讀取完畢({t7-t6:.2f}s)')
         QCoreApplication.processEvents()
         config.df_Vertices=read_utils.readVertices(inpFile)
         t8=time.time()
         if showtime:
-            main_window_instance.MainWindow.browser_log.append(f'管件坐標讀取完畢({t8-t7:.2f}s)')
+            config.main_window.MainWindow.browser_log.append(f'管件坐標讀取完畢({t8-t7:.2f}s)')
         QCoreApplication.processEvents()
         return (config.df_Coords, config.df_Junctions, config.df_Reservoirs,
                 config.df_Tanks, config.df_Pumps, config.df_Valves, config.df_Pipes,
@@ -281,13 +281,13 @@ def matchInpRptFile():
     except Exception as e:
         traceback.print_exc()
 
-def renew_log(main_window_instance: 'MainWindow', msg, seperate:bool):
+def renew_log(msg, seperate:bool):
     """
     Display an error message in the main window's log and set the log to the button.
     """
 
-    main_window_instance.MainWindow.browser_log.append(msg)
+    config.main_window.MainWindow.browser_log.append(msg)
     if seperate:
-        main_window_instance.MainWindow.browser_log.append('---------------------')
-    main_window_instance.MainWindow.browser_log.verticalScrollBar().setValue(main_window_instance.MainWindow.browser_log.verticalScrollBar().maximum())
+        config.main_window.MainWindow.browser_log.append('---------------------')
+    config.main_window.MainWindow.browser_log.verticalScrollBar().setValue(config.main_window.MainWindow.browser_log.verticalScrollBar().maximum())
     QCoreApplication.processEvents()

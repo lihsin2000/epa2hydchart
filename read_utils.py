@@ -261,7 +261,7 @@ def readPumps(inpFile):
         traceback.print_exc()
 
 
-def readNodeResults(main_window_instance: 'MainWindow', *args, **kwargs):
+def readNodeResults(*args, **kwargs):
     try:
         hr = kwargs.get('hr')
         rptFile = kwargs.get('input')
@@ -291,7 +291,7 @@ def readNodeResults(main_window_instance: 'MainWindow', *args, **kwargs):
                 }
 
             except:
-                main_window_instance.MainWindow.browser_log.append(f'節點 {id} 資料錯誤，請手動修正.rpt檔內容')
+                config.main_window.MainWindow.browser_log.append(f'節點 {id} 資料錯誤，請手動修正.rpt檔內容')
                 config.any_error=True
                 # QMessageBox.warning(None, '警告', f'節點{id}資料錯誤，請手動修正.rpt檔內容')
 

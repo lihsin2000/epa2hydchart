@@ -34,7 +34,7 @@ def filter_unreasonable_pipes(*args, **kwargs):
     # df=df.drop(columns=['index'])
     df=df.reset_index(drop=True)
 
-    df_headloss_unreasonable = df[abs(df['unitHeadloss'].astype(float))>=config.UNIT_HEADLOSS_THRESHOLD]
+    df_headloss_unreasonable = df[abs(df['unitHeadloss'].astype(float))>=config.UNIT_HEADLOSS_THRESHOLD].copy()
 
     for index, row in df_headloss_unreasonable.iterrows():
         unitHeadloss=float(row['unitHeadloss'])
@@ -42,7 +42,7 @@ def filter_unreasonable_pipes(*args, **kwargs):
         if Diameter >=100:
             Diameter_suggest=((unitHeadloss/config.UNIT_HEADLOSS_THRESHOLD)*(Diameter ** 4.8704)) ** (1/4.8704)
             Diameter_suggest=50*(int(Diameter_suggest/50)+1)
-            df_headloss_unreasonable.at[index , 'Diameter_suggest']=f'{Diameter_suggest:.0f}'
+            df_headloss_unreasonable.loc[index , 'Diameter_suggest']=f'{Diameter_suggest:.0f}'
         pass
 
     df_velocity_unreasonable = df[abs(df['Velocity'].astype(float))<config.UNIT_VELOCITY_THRESHOLD]
@@ -148,4 +148,3 @@ def write_report(headloss_unreasonable_pipes, velocity_unreasonable_pipes, low_p
             f.write('\n\n')
 
         f.write('----------------------------------------------------------------------\n\n')
-        

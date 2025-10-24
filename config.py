@@ -1,5 +1,13 @@
 
 import pandas as pd
+from typing import TYPE_CHECKING, Optional
+
+if TYPE_CHECKING:
+    from main import MainWindow
+
+# main window instance
+main_window: Optional['MainWindow'] = None
+
 # default
 block_size=None
 joint_size=None

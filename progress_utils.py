@@ -44,7 +44,7 @@ def calculateProgressSteps():
     
     return total_steps
 
-def setProgress(main_window_instance: 'MainWindow'):
+def setProgress():
     config.progress_value += config.progress_space
     value=int(config.progress_value)
-    main_window_instance.MainWindow.progressBar.setValue(value)
+    config.main_window.MainWindow.progressBar.setValue(value)

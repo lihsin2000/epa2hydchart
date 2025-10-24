@@ -7,6 +7,7 @@ import read_utils
 import utils
 import check_utils
 import progress_utils
+import node_utilis
 
 from typing import TYPE_CHECKING
 
@@ -14,7 +15,7 @@ if TYPE_CHECKING:
     from main import MainWindow
 
 
-def process1(main_window_instance: 'MainWindow'):
+def process1():
     """
     Moved from MainWindow class - processes inp and rpt files to generate DXF output
     """
@@ -23,17 +24,17 @@ def process1(main_window_instance: 'MainWindow'):
         inpFile = config.inpFile
         rptFile = config.rptFile
 
-        digits=main_window_instance.MainWindow.comboBox_digits.currentText()
+        digits=config.main_window.MainWindow.comboBox_digits.currentText()
         config.digit_decimal=digits.count('0')-1
 
         if inpFile and rptFile:
-            dxfPath, _ = QFileDialog.getSaveFileName(main_window_instance, "儲存", "", filter='dxf (*.dxf)')
+            dxfPath, _ = QFileDialog.getSaveFileName(config.main_window, "儲存", "", filter='dxf (*.dxf)')
             file_name = os.path.basename(dxfPath)
 
             if dxfPath != '':
                 (config.df_Coords, config.df_Junctions, config.df_Reservoirs,
                 config.df_Tanks, config.df_Pumps, config.df_Valves,
-                config.df_Pipes, config.df_Vertices) = utils.inp_to_df(main_window_instance, inpFile, showtime=True)
+                config.df_Pipes, config.df_Vertices) = utils.inp_to_df(inpFile, showtime=True)
                 
                 config.output_folder=os.path.dirname(dxfPath)
 
@@ -42,11 +43,11 @@ def process1(main_window_instance: 'MainWindow'):
                 check_utils.write_report_pipe_dimension(pipe_dimension=pipe_dimension)
                 
                 if config.hr_list == []:  # 單一時間結果
-                    config.df_NodeResults = read_utils.readNodeResults(main_window_instance, hr=None, input=config.arranged_rpt_file_path)
+                    config.df_NodeResults = read_utils.readNodeResults(hr=None, input=config.arranged_rpt_file_path)
                     config.df_LinkResults = read_utils.readLinkResults(hr1=None, input=config.arranged_rpt_file_path, digits=config.digit_decimal)
                     (config.df_NodeResults, config.df_Junctions) = read_utils.changeValueByDigits(digits=config.digit_decimal)
                     matchLink, matchNode = utils.matchInpRptFile()
-                    process2(main_window_instance, matchLink=matchLink, matchNode=matchNode, dxfPath=dxfPath, hr='')
+                    process2(matchLink=matchLink, matchNode=matchNode, dxfPath=dxfPath, hr='')
                     
                     headloss_unreasonable_pipes, velocity_unreasonable_pipes=check_utils.filter_unreasonable_pipes()
                     low_pressure_junctions, nagavite_pressure=check_utils.check_negative_low_pressure_junctions()
@@ -61,12 +62,12 @@ def process1(main_window_instance: 'MainWindow'):
 
                 else:   # 多時段結果
                     hr_list_select = []
-                    items = main_window_instance.MainWindow.list_hrs.selectedItems()
+                    items = config.main_window.MainWindow.list_hrs.selectedItems()
                     for item in items:
                         hr_list_select.append(item.text())
 
                     for h in hr_list_select:
-                        config.df_NodeResults = read_utils.readNodeResults(main_window_instance, hr=h, input=config.arranged_rpt_file_path)
+                        config.df_NodeResults = read_utils.readNodeResults(hr=h, input=config.arranged_rpt_file_path)
                         i_hr1 = config.hr_list.index(h)
                         i_hr2 = i_hr1 + 1
 
@@ -77,7 +78,7 @@ def process1(main_window_instance: 'MainWindow'):
                             config.df_LinkResults = read_utils.readLinkResults(hr1=h, hr2='', input=config.arranged_rpt_file_path, digits=config.digit_decimal)
 
                         matchLink, matchNode = utils.matchInpRptFile()
-                        process2(main_window_instance, matchLink=matchLink, matchNode=matchNode, dxfPath=dxfPath, hr=h)
+                        process2(matchLink=matchLink, matchNode=matchNode, dxfPath=dxfPath, hr=h)
                         headloss_unreasonable_pipes, velocity_unreasonable_pipes=check_utils.filter_unreasonable_pipes()
                         low_pressure_junctions, nagavite_pressure=check_utils.check_negative_low_pressure_junctions()
                         
@@ -90,10 +91,10 @@ def process1(main_window_instance: 'MainWindow'):
 
     except Exception as e:
         msg='[Error]不明錯誤，中止匯出'
-        utils.renew_log(main_window_instance, msg, True)
+        utils.renew_log(msg, True)
         traceback.print_exc()
 
-def process2(main_window_instance: 'MainWindow', *args, **kwargs):
+def process2(*args, **kwargs):
     """
     Moved from MainWindow class - handles DXF generation and file output
     """
@@ -113,8 +114,8 @@ def process2(main_window_instance: 'MainWindow', *args, **kwargs):
 
         if matchLink and matchNode:
             msg= f'{hr_str} .rpt及.inp內容相符，開始處理'
-            utils.renew_log(main_window_instance, msg, False)
-            config.cad, config.msp = main_window_instance.createModelspace()
+            utils.renew_log(msg, False)
+            config.cad, config.msp = config.main_window.createModelspace()
 
             tankerLeaderColor = 210
             reservoirLeaderColor = 210
@@ -131,20 +132,20 @@ def process2(main_window_instance: 'MainWindow', *args, **kwargs):
             config.progress_space= 100 / config.progress_steps
             config.progress_value=0
 
-            main_window_instance.createBlocks(config.cad)
-            main_window_instance.insertBlocks(width=config.line_width)
-            main_window_instance.insertPipeLines(width=config.line_width)
-            main_window_instance.insertPipeAnnotation()
-            draw0cmd = main_window_instance.MainWindow.chk_export_0cmd.isChecked()
+            config.main_window.createBlocks(config.cad)
+            config.main_window.insertBlocks(width=config.line_width)
+            config.main_window.insertPipeLines(width=config.line_width)
+            config.main_window.insertPipeAnnotation()
             
-            main_window_instance.insertDemandLeader(color=demandColor, draw0cmd=draw0cmd)
-            main_window_instance.insertElevAnnotation(color=elevLeaderColor, width=config.line_width)
-            main_window_instance.insertHeadPressureLeader(color=headPressureLeaderColor)
-            main_window_instance.insertReservoirsLeader(color=reservoirLeaderColor, digits=config.digit_decimal)
-            main_window_instance.insertTankLeader(color=tankerLeaderColor, digits=config.digit_decimal, width=config.line_width)
-            main_window_instance.insertPumpAnnotation(color=pumpAnnotaionColor, digits=config.digit_decimal)
-            main_window_instance.insertValveAnnotation(valveAnnotaionColor)
-            main_window_instance.addTitle(hr_str=hr_str)
+            draw0cmd = config.main_window.MainWindow.chk_export_0cmd.isChecked()
+            config.main_window.insertDemandLeader(color=demandColor, draw0cmd=draw0cmd)
+            config.main_window.insertElevAnnotation(color=elevLeaderColor, width=config.line_width)
+            node_utilis.insertHeadPressureLeader(color=headPressureLeaderColor)
+            node_utilis.insertReservoirsLeader(color=reservoirLeaderColor, digits=config.digit_decimal)
+            config.main_window.insertTankLeader(color=tankerLeaderColor, digits=config.digit_decimal, width=config.line_width)
+            config.main_window.insertPumpAnnotation(color=pumpAnnotaionColor, digits=config.digit_decimal)
+            config.main_window.insertValveAnnotation(valveAnnotaionColor)
+            config.main_window.addTitle(hr_str=hr_str)
 
             hr_str = hr_str.replace(':', '-')
             if len(config.hr_list) >= 2:
@@ -153,39 +154,39 @@ def process2(main_window_instance: 'MainWindow', *args, **kwargs):
             svg_path = dxfPath.replace('.dxf', '.svg')
             png_path = dxfPath.replace('.dxf', '.png')
             
-            if main_window_instance.save_dxf(main_window_instance=main_window_instance,dxfPath=dxfPath):
+            if config.main_window.save_dxf(main_window_instance=config.main_window, dxfPath=dxfPath):
                 config.export_dxf_success=True
                 msg= f'{dxfPathWithoutExtension}.dxf 匯出完成'
             else:
                 config.export_dxf_success=False
                 msg= f'[Error]{dxfPathWithoutExtension}.dxf匯出失敗'
-            utils.renew_log(main_window_instance, msg, False)
+            utils.renew_log(msg, False)
 
-            if main_window_instance.save_svg(msp=config.msp, cad=config.cad, path=svg_path):
+            if config.main_window.save_svg(msp=config.msp, cad=config.cad, path=svg_path):
                 config.export_svg_success=True
                 msg = f'{dxfPathWithoutExtension}.svg匯出完成'
             else:
                 config.export_svg_success=False
                 msg= f'[Error]{dxfPathWithoutExtension}.svg匯出失敗'
-            utils.renew_log(main_window_instance, msg, False)
+            utils.renew_log(msg, False)
 
-            if main_window_instance.save_png(pngPath=png_path, svgPath=svg_path):
+            if config.main_window.save_png(pngPath=png_path, svgPath=svg_path):
                 config.export_png_success=True
                 msg= f'{dxfPathWithoutExtension}.png匯出完成'
             else:
                 config.export_png_success=False
                 msg= f'[Error]{dxfPathWithoutExtension}.png匯出失敗'
-            utils.renew_log(main_window_instance, msg, False)
+            utils.renew_log(msg, False)
 
             if config.export_svg_success and config.export_png_success and config.export_dxf_success and not config.any_error:
                 msg= '所有作業成功完成'
             else:
                 msg= '作業完成，但有部分錯誤發生，請查看log內容'
-            utils.renew_log(main_window_instance, msg, True)
+            utils.renew_log(msg, True)
 
         else:
             msg= f'[Error]{h}.rpt及.inp內容不符，中止匯出'
-            utils.renew_log(main_window_instance, msg, True)
+            utils.renew_log(msg, True)
 
     except Exception as e:
-        traceback.print_exc()  
+        traceback.print_exc()
