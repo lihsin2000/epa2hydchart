@@ -29,18 +29,18 @@ output_folder=None
 projName=None
 
 hr_list=[]
-df_NodeResults=pd.DataFrame()
-df_LinkResults=pd.DataFrame()
+df_NodeResults: pd.DataFrame = pd.DataFrame()
+df_LinkResults: pd.DataFrame = pd.DataFrame()
 
 arranged_rpt_file_path=None 
-df_Coords=None
-df_Junctions=None
-df_Reservoirs=None
-df_Tanks=None
-df_Pumps=None
-df_Valves=None
-df_Pipes=None
-df_Vertices=None
+df_Coords: Optional[pd.DataFrame] = None
+df_Junctions: Optional[pd.DataFrame] = None
+df_Reservoirs: Optional[pd.DataFrame] = None
+df_Tanks: Optional[pd.DataFrame] = None
+df_Pumps: Optional[pd.DataFrame] = None
+df_Valves: Optional[pd.DataFrame] = None
+df_Pipes: Optional[pd.DataFrame] = None
+df_Vertices: Optional[pd.DataFrame] = None
 
 cad: Optional['Drawing'] = None
 msp: Optional['Modelspace'] = None

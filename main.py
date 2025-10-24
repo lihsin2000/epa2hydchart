@@ -1,5 +1,7 @@
 
 import ezdxf
+from ezdxf.document import Drawing
+from ezdxf.layouts import Modelspace
 import sys, warnings, traceback
 
 # Suppress PyQt6 SIP deprecation warnings
@@ -48,8 +50,8 @@ class MainWindow(QMainWindow):
         global msp
 
         try:
-            cad = ezdxf.new()
-            msp = cad.modelspace()
+            cad: Drawing = ezdxf.new()
+            msp: Modelspace = cad.modelspace()
             cad.styles.new("epa2HydChart", dxfattribs={"font" : "Microsoft JhengHei"})
 
             return cad, msp
