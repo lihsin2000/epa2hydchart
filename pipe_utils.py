@@ -85,10 +85,10 @@ def insertPipeAnnotation():
 
             # Call annotation function once per pipe
             pipeAnnotationBlock(link_id, start_x, start_y, end_x, end_y, i)
-            msg= f'管線 {link_id} 已插入標示'
-            log.renew_log(msg, False)
-            log.setLogToButton()
-            progress_utils.setProgress()
+            # msg= f'管線 {link_id} 已插入標示'
+            # log.renew_log(msg, False)
+            # log.setLogToButton()
+            # progress_utils.setProgress(ForcedValue=None)
     except Exception as e:
         traceback.print_exc()
 
@@ -134,13 +134,13 @@ def insertPipeLines(*args, **kwargs):
                 lastVert_x=float(globals.df_Vertices.at[rows[len(rows)-1],'x'])
                 lastVert_y=float(globals.df_Vertices.at[rows[len(rows)-1],'y'])
                 globals.msp.add_polyline2d([(lastVert_x,lastVert_y), (end_x,end_y)], dxfattribs={'default_start_width': width, 'default_end_width': width})
-                msg= f'管線 {link_id} 已完成繪圖'
-                log.renew_log(msg, False)
-                log.setLogToButton()
-                progress_utils.setProgress()
             else:
                 globals.msp.add_polyline2d([(end_x,end_y), (start_x,start_y)], dxfattribs={'default_start_width': width, 'default_end_width': width})
 
+            msg= f'管線 {link_id} 已完成繪圖'
+            log.renew_log(msg, False)
+            log.setLogToButton()
+            progress_utils.setProgress(ForcedValue=None)
             QCoreApplication.processEvents()
     except Exception as e:
         traceback.print_exc()

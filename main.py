@@ -55,51 +55,6 @@ class MainWindow(QMainWindow):
         except Exception as e:
             traceback.print_exc()
 
-    def addTitle(self, *args, **kwargs):
-        try:
-            hr=kwargs.get('hr_str')
-
-            # 計算左上角座標
-            xs=globals.df_Coords['x'].tolist()+globals.df_Vertices['x'].tolist()
-            x_min=min(xs)
-
-            ys=globals.df_Coords['y'].tolist()+globals.df_Vertices['y'].tolist()
-            y_max=max(ys)
-
-            projName=self.MainWindow.l_projName.text()
-
-            # 計算Q值
-            from decimal import Decimal
-            Q=0
-            for i in range(0, len(globals.df_Junctions)):
-                id=globals.df_Junctions.at[i,'ID']
-                row=globals.df_NodeResults.index[globals.df_NodeResults['ID']==id].tolist()[0]
-                if globals.df_NodeResults.at[row, 'Demand'] != None:
-                    Q=Q+Decimal(globals.df_NodeResults.at[row, 'Demand'])
-                else:
-                    msg= f'[Error]節點 {id} Demand數值錯誤，Q值總計可能有誤'
-                    utils.renew_log(msg, False)
-
-            # 匯整C值
-            C_str=''
-            Cs=globals.df_Pipes['Roughness'].unique()
-            for c in Cs:
-                C_str=C_str+f'{c},'
-            C_str=C_str[:len(C_str)-1]
-
-            # 加入文字
-            from ezdxf.enums import TextEntityAlignment
-            globals.msp.add_text(projName, height=2*globals.text_size, dxfattribs={"style": "epa2HydChart"}).set_placement((x_min,y_max+16*globals.text_size), align=TextEntityAlignment.TOP_LEFT)
-            
-            if hr=='':
-                globals.msp.add_text(f'Q={Q} CMD', height=2*globals.text_size, dxfattribs={"style": "epa2HydChart"}).set_placement((x_min,y_max+13*globals.text_size), align=TextEntityAlignment.TOP_LEFT)
-            else:
-                globals.msp.add_text(f'{hr} Q={Q} CMD', height=2*globals.text_size, dxfattribs={"style": "epa2HydChart"}).set_placement((x_min,y_max+13*globals.text_size), align=TextEntityAlignment.TOP_LEFT)
-            
-            globals.msp.add_text(f'C={C_str}', height=2*globals.text_size, dxfattribs={"style": "epa2HydChart"}).set_placement((x_min,y_max+10*globals.text_size), align=TextEntityAlignment.TOP_LEFT)
-        except Exception as e:
-            traceback.print_exc()
-
     def save_png(self, *args, **kwargs):
         try:
             # msp=kwargs.get('msp')
@@ -221,7 +176,7 @@ class MainWindow(QMainWindow):
                         msg= f'閥件 {id} 圖塊已插入'
                         log.renew_log(msg, False)
                         log.setLogToButton()
-                        progress_utils.setProgress()
+                        progress_utils.setProgress(ForcedValue=None)
 
                 else:
                     df=df_mapping[item]
@@ -234,8 +189,9 @@ class MainWindow(QMainWindow):
                         else:
                             globals.msp.add_blockref(item, [x,y], dxfattribs={'xscale':globals.block_size, 'yscale':globals.block_size})
                         msg= f'{mapping[item]} {id} 圖塊已插入'
+                        log.renew_log(msg, False)
                         log.setLogToButton()
-                        progress_utils.setProgress()
+                        progress_utils.setProgress(ForcedValue=None)
 
         except Exception as e:
             traceback.print_exc()

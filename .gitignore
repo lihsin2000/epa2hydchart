@@ -7,3 +7,4 @@ dist
 main.build
 main.dist
 release
+tmp/*

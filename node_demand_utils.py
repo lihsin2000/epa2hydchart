@@ -21,16 +21,16 @@ def insertDemandLeader(*args, **kwargs):
 
             if draw0cmd:
                 drawDemandLeader(color, id, x, y, demand, True, globals.line_width)
-                msg= f'節點 {id} 水量引線已完成繪圖'
+                msg= f'節點 {id} 需水量已完成繪圖'
                 log.renew_log(msg, False)
                 log.setLogToButton()
-                progress_utils.setProgress()
+                progress_utils.setProgress(ForcedValue=None)
             else:
                 drawDemandLeader(color, id, x, y, demand, False, globals.line_width)
-                msg= f'節點 {id} 水量引線已完成繪圖'
+                msg= f'節點 {id} 需水量已完成繪圖'
                 log.renew_log(msg, False)
                 log.setLogToButton()
-                progress_utils.setProgress()
+                progress_utils.setProgress(ForcedValue=None)
             
             QCoreApplication.processEvents()
     except Exception as e:

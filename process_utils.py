@@ -8,8 +8,9 @@ import utils
 import check_utils
 import progress_utils
 import node_utilis
+import node_pressure_utils
 import pipe_utils
-import demand_node_utils
+import node_demand_utils
 import log
 
 from typing import TYPE_CHECKING
@@ -48,6 +49,7 @@ def process1():
                 if globals.hr_list == []:  # 單一時間結果
                     globals.df_NodeResults = read_utils.readNodeResults(hr=None, input=globals.arranged_rpt_file_path)
                     globals.df_LinkResults = read_utils.readLinkResults(hr1=None, input=globals.arranged_rpt_file_path, digits=globals.digit_decimal)
+                    progress_utils.setProgress(0)
                     (globals.df_NodeResults, globals.df_Junctions) = read_utils.changeValueByDigits(digits=globals.digit_decimal)
                     matchLink, matchNode = utils.matchInpRptFile()
                     process2(matchLink=matchLink, matchNode=matchNode, dxfPath=dxfPath, hr='')
@@ -80,6 +82,8 @@ def process1():
                         elif i_hr2 == len(globals.hr_list):
                             globals.df_LinkResults = read_utils.readLinkResults(hr1=h, hr2='', input=globals.arranged_rpt_file_path, digits=globals.digit_decimal)
 
+                        progress_utils.setProgress(0)
+                        
                         matchLink, matchNode = utils.matchInpRptFile()
                         process2(matchLink=matchLink, matchNode=matchNode, dxfPath=dxfPath, hr=h)
                         headloss_unreasonable_pipes, velocity_unreasonable_pipes=check_utils.filter_unreasonable_pipes()
@@ -132,23 +136,24 @@ def process2(*args, **kwargs):
                 [(0, 0), (0.1, -0.25), (-0.1, -0.25)], is_closed=True)
 
             globals.progress_steps = progress_utils.calculateProgressSteps()
-            globals.progress_space= 100 / globals.progress_steps
+            globals.progress_space= 95 / globals.progress_steps
             globals.progress_value=0
-
+            
             globals.main_window.createBlocks(globals.cad)
             globals.main_window.insertBlocks(width=globals.line_width)
+
             pipe_utils.insertPipeLines(width=globals.line_width)
             pipe_utils.insertPipeAnnotation()
             
             draw0cmd = globals.main_window.MainWindow.chk_export_0cmd.isChecked()
-            demand_node_utils.insertDemandLeader(color=demandColor, draw0cmd=draw0cmd)
-            node_utilis.insertElevAnnotation(color=elevLeaderColor, width=globals.line_width)
-            node_utilis.insertHeadPressureLeader(color=headPressureLeaderColor)
+            node_demand_utils.insertDemandLeader(color=demandColor, draw0cmd=draw0cmd)
+            node_pressure_utils.insertElevAnnotation(color=elevLeaderColor, width=globals.line_width)
+            node_pressure_utils.insertHeadPressureLeader(color=headPressureLeaderColor)
             node_utilis.insertReservoirsLeader(color=reservoirLeaderColor, digits=globals.digit_decimal)
             node_utilis.insertTankLeader(color=tankerLeaderColor, digits=globals.digit_decimal, width=globals.line_width)
             node_utilis.insertPumpAnnotation(color=pumpAnnotaionColor, digits=globals.digit_decimal)
             node_utilis.insertValveAnnotation(valveAnnotaionColor)
-            globals.main_window.addTitle(hr_str=hr_str)
+            utils.addTitle(hr_str=hr_str)
 
             hr_str = hr_str.replace(':', '-')
             if len(globals.hr_list) >= 2:
@@ -162,30 +167,38 @@ def process2(*args, **kwargs):
                 msg= f'{dxfPathWithoutExtension}.dxf 匯出完成'
             else:
                 globals.export_dxf_success=False
-                msg= f'[Error]{dxfPathWithoutExtension}.dxf匯出失敗'
+                msg= f'[Error]{dxfPathWithoutExtension}.dxf 匯出失敗'
             log.renew_log(msg, False)
+            log.setLogToButton()
+            progress_utils.setProgress(97)
 
             if globals.main_window.save_svg(msp=globals.msp, cad=globals.cad, path=svg_path):
                 globals.export_svg_success=True
-                msg = f'{dxfPathWithoutExtension}.svg匯出完成'
+                msg = f'{dxfPathWithoutExtension}.svg 匯出完成'
             else:
                 globals.export_svg_success=False
-                msg= f'[Error]{dxfPathWithoutExtension}.svg匯出失敗'
+                msg= f'[Error]{dxfPathWithoutExtension}.svg 匯出失敗'
             log.renew_log(msg, False)
+            log.setLogToButton()
+            progress_utils.setProgress(98)
 
             if globals.main_window.save_png(pngPath=png_path, svgPath=svg_path):
                 globals.export_png_success=True
-                msg= f'{dxfPathWithoutExtension}.png匯出完成'
+                msg= f'{dxfPathWithoutExtension}.png 匯出完成'
             else:
                 globals.export_png_success=False
-                msg= f'[Error]{dxfPathWithoutExtension}.png匯出失敗'
+                msg= f'[Error]{dxfPathWithoutExtension}.png 匯出失敗'
             log.renew_log(msg, False)
+            log.setLogToButton()
+            progress_utils.setProgress(99)
 
             if globals.export_svg_success and globals.export_png_success and globals.export_dxf_success and not globals.any_error:
                 msg= '所有作業成功完成'
             else:
                 msg= '作業完成，但有部分錯誤發生，請查看log內容'
             log.renew_log(msg, True)
+            log.setLogToButton()
+            progress_utils.setProgress(100)
 
         else:
             msg= f'[Error]{h}.rpt及.inp內容不符，中止匯出'

@@ -2,6 +2,7 @@ import globals
 import pandas as pd
 import re
 import traceback
+import utils
 import read_utils
 import progress_utils
 from PyQt6.QtCore import QCoreApplication
@@ -248,12 +249,12 @@ def inp_to_df(inpFile, showtime):
         globals.df_Pipes=read_utils.readPipes(inpFile)
         t7=time.time()
         if showtime:
-            globals.main_window.MainWindow.browser_log.append(f'管件參數讀取完畢({t7-t6:.2f}s)')
+            globals.main_window.MainWindow.browser_log.append(f'管線參數讀取完畢({t7-t6:.2f}s)')
         QCoreApplication.processEvents()
         globals.df_Vertices=read_utils.readVertices(inpFile)
         t8=time.time()
         if showtime:
-            globals.main_window.MainWindow.browser_log.append(f'管件坐標讀取完畢({t8-t7:.2f}s)')
+            globals.main_window.MainWindow.browser_log.append(f'管線坐標讀取完畢({t8-t7:.2f}s)')
         QCoreApplication.processEvents()
         return (globals.df_Coords, globals.df_Junctions, globals.df_Reservoirs,
                 globals.df_Tanks, globals.df_Pumps, globals.df_Valves, globals.df_Pipes,
@@ -278,5 +279,50 @@ def matchInpRptFile():
 
         matchNode = outputAllNode.equals(inputAllNode)
         return matchLink, matchNode
+    except Exception as e:
+        traceback.print_exc()
+
+def addTitle(*args, **kwargs):
+    try:
+        hr=kwargs.get('hr_str')
+
+        # 計算左上角座標
+        xs=globals.df_Coords['x'].tolist()+globals.df_Vertices['x'].tolist()
+        x_min=min(xs)
+
+        ys=globals.df_Coords['y'].tolist()+globals.df_Vertices['y'].tolist()
+        y_max=max(ys)
+
+        projName=globals.main_window.MainWindow.l_projName.text()
+
+        # 計算Q值
+        from decimal import Decimal
+        Q=0
+        for i in range(0, len(globals.df_Junctions)):
+            id=globals.df_Junctions.at[i,'ID']
+            row=globals.df_NodeResults.index[globals.df_NodeResults['ID']==id].tolist()[0]
+            if globals.df_NodeResults.at[row, 'Demand'] != None:
+                Q=Q+Decimal(globals.df_NodeResults.at[row, 'Demand'])
+            else:
+                msg= f'[Error]節點 {id} Demand數值錯誤，Q值總計可能有誤'
+                utils.renew_log(msg, False)
+
+        # 匯整C值
+        C_str=''
+        Cs=globals.df_Pipes['Roughness'].unique()
+        for c in Cs:
+            C_str=C_str+f'{c},'
+        C_str=C_str[:len(C_str)-1]
+
+        # 加入文字
+        from ezdxf.enums import TextEntityAlignment
+        globals.msp.add_text(projName, height=2*globals.text_size, dxfattribs={"style": "epa2HydChart"}).set_placement((x_min,y_max+16*globals.text_size), align=TextEntityAlignment.TOP_LEFT)
+        
+        if hr=='':
+            globals.msp.add_text(f'Q={Q} CMD', height=2*globals.text_size, dxfattribs={"style": "epa2HydChart"}).set_placement((x_min,y_max+13*globals.text_size), align=TextEntityAlignment.TOP_LEFT)
+        else:
+            globals.msp.add_text(f'{hr} Q={Q} CMD', height=2*globals.text_size, dxfattribs={"style": "epa2HydChart"}).set_placement((x_min,y_max+13*globals.text_size), align=TextEntityAlignment.TOP_LEFT)
+        
+        globals.msp.add_text(f'C={C_str}', height=2*globals.text_size, dxfattribs={"style": "epa2HydChart"}).set_placement((x_min,y_max+10*globals.text_size), align=TextEntityAlignment.TOP_LEFT)
     except Exception as e:
         traceback.print_exc()
