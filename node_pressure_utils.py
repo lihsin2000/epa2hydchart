@@ -37,6 +37,11 @@ def insertHeadPressureLeader(*args, **kwargs):
             Pressure_attribs={'color': PressureColor, "style": "epa2HydChart"}
             Elev_attribs={'color': ElevColor, "style": "epa2HydChart"}
 
+            boundrys=None
+
+            new_boundry=CreateBoundry(start_x=start_x, start_y=start_y, align="RightTop", id=id)
+
+
             DrawLeader(Head=Head, Elev=Elev, Pressure=Pressure,
                        start_x=start_x, start_y=start_y,
                        line_attribs=line_attribs,
@@ -51,6 +56,21 @@ def insertHeadPressureLeader(*args, **kwargs):
             progress_utils.setProgress(ForcedValue=None)
     except Exception as e:
         traceback.print_exc()
+
+def CreateBoundry(*args, **kwargs) -> dict:
+    start_x = kwargs.get('start_x')
+    start_y = kwargs.get('start_y')
+    align = kwargs.get('align')
+    id = kwargs.get('id')
+
+    end_x = start_x + globals.text_size + globals.leader_distance+6*globals.text_size
+    end_y = start_y + globals.text_size + globals.leader_distance+3*globals.text_size
+
+    dic = {'id': id, 'start_x': start_x, 'start_y': start_y, 'end_x': end_x, 'end_y': end_y}
+    return dic
+
+def CheckOverlap(new_boundry: dict, boundrys: list) -> bool:
+    pass
 
 def DrawLeader(*args, **kwargs):
     from ezdxf.enums import TextEntityAlignment
