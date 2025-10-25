@@ -72,11 +72,11 @@ def DrawLeader(*args, **kwargs):
         leader_up_end_x = leader_up_start_x + globals.leader_distance
         leader_up_end_y = leader_up_start_y + globals.leader_distance
 
-        line_x1, line_y1= leader_up_start_x, leader_up_start_y
-        line_x2, line_y2= leader_up_end_x, leader_up_end_y
-        line_x3, line_y3= leader_up_end_x+6*globals.text_size, leader_up_end_y
+        line_x1, line_y1 = leader_up_start_x, leader_up_start_y
+        line_x2, line_y2 = leader_up_end_x, leader_up_end_y
+        line_x3, line_y3 = leader_up_end_x+6*globals.text_size, leader_up_end_y
 
-        text_start_x= line_x3
+        text_start_x = line_x3
 
     elif align == "LeftTop":
         leader_up_start_x = start_x - globals.text_size
@@ -85,11 +85,11 @@ def DrawLeader(*args, **kwargs):
         leader_up_end_x = leader_up_start_x - globals.leader_distance
         leader_up_end_y = leader_up_start_y + globals.leader_distance
 
-        line_x1, line_y1= leader_up_start_x, leader_up_start_y
-        line_x2, line_y2= leader_up_end_x, leader_up_end_y
-        line_x3, line_y3= leader_up_end_x-6*globals.text_size, leader_up_end_y
+        line_x1, line_y1 = leader_up_start_x, leader_up_start_y
+        line_x2, line_y2 = leader_up_end_x, leader_up_end_y
+        line_x3, line_y3 = leader_up_end_x-6*globals.text_size, leader_up_end_y
 
-        text_start_x= line_x3+6*globals.text_size
+        text_start_x = line_x3+6*globals.text_size
 
     elif align == "LeftBottom":
         leader_up_start_x = start_x - globals.text_size
@@ -97,12 +97,12 @@ def DrawLeader(*args, **kwargs):
 
         leader_up_end_x = leader_up_start_x - globals.leader_distance
         leader_up_end_y = leader_up_start_y - globals.leader_distance
-        
-        line_x1, line_y1= leader_up_start_x, leader_up_start_y
-        line_x2, line_y2= leader_up_end_x, leader_up_end_y
-        line_x3, line_y3= leader_up_end_x-6*globals.text_size, leader_up_end_y
 
-        text_start_x= line_x3+6*globals.text_size
+        line_x1, line_y1 = leader_up_start_x, leader_up_start_y
+        line_x2, line_y2 = leader_up_end_x, leader_up_end_y
+        line_x3, line_y3 = leader_up_end_x-6*globals.text_size, leader_up_end_y
+
+        text_start_x = line_x3+6*globals.text_size
     
     Head_placement_y= leader_up_end_y + 2 * globals.text_size
     Elev_placement_y= leader_up_end_y + 0.75 * globals.text_size
