@@ -143,8 +143,11 @@ def process2(*args, **kwargs):
             pipe_utils.insertPipeAnnotation()
             
             draw0cmd = globals.main_window.MainWindow.chk_export_0cmd.isChecked()
+            autoLabelPost = globals.main_window.MainWindow.chk_autoLabelPost.isChecked()
             node_demand_utils.insertDemandLeader(color=demandColor, draw0cmd=draw0cmd)
-            node_pressure_utils.insertHeadPressureLeader(HeadColor=headPressureLeaderColor, ElevColor=elevLeaderColor, width=globals.line_width)
+            node_pressure_utils.insertHeadPressureLeader(HeadColor=headPressureLeaderColor, 
+                                                        ElevColor=elevLeaderColor, width=globals.line_width,
+                                                        autoLabelPost=autoLabelPost)
             node_utilis.insertReservoirsLeader(color=reservoirLeaderColor, digits=globals.digit_decimal)
             node_utilis.insertTankLeader(color=tankerLeaderColor, digits=globals.digit_decimal, width=globals.line_width)
             node_utilis.insertPumpAnnotation(color=pumpAnnotaionColor, digits=globals.digit_decimal)

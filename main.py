@@ -42,8 +42,9 @@ class MainWindow(QMainWindow):
         self.MainWindow.l_text_size.setText(str(globals.TEXT_SIZE_DEFAULT))
         self.MainWindow.l_leader_distance.setText(str(globals.LEADER_DISTANCE_DEFAULT))
         self.MainWindow.l_line_width.setText(str(globals.LINE_WIDTH_DEFAULT))
-        self.MainWindow.chk_export_0cmd.setChecked(True)
+        self.MainWindow.chk_export_0cmd.setChecked(False)
         self.MainWindow.chk_autoSize.setChecked(False)
+        self.MainWindow.chk_autoLabelPost.setChecked(False)
         
         self.MainWindow.l_inp_path.setText('')
         self.MainWindow.l_rpt_path.setText('')

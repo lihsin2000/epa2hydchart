@@ -11,7 +11,9 @@ def insertHeadPressureLeader(*args, **kwargs):
     HeadColor=kwargs.get('HeadColor')
     ElevColor=kwargs.get('ElevColor')
     width=kwargs.get('width')
+    autoLabelPost=kwargs.get('autoLabelPost')
 
+    boundrys:dict=[]
     try:
         for i in range(0, len(globals.df_Junctions)):
             id = globals.df_Junctions.at[i, 'ID']
@@ -37,19 +39,33 @@ def insertHeadPressureLeader(*args, **kwargs):
             Pressure_attribs={'color': PressureColor, "style": "epa2HydChart"}
             Elev_attribs={'color': ElevColor, "style": "epa2HydChart"}
 
-            boundrys=None
+            parameters={'Head':Head, 'Elev':Elev, 'Pressure':Pressure,
+                        'start_x':start_x, 'start_y':start_y,
+                        'line_attribs':line_attribs,
+                        'Head_attribs':Head_attribs,
+                        'Elev_attribs':Elev_attribs,
+                        'Pressure_attribs':Pressure_attribs}
 
-            new_boundry=CreateBoundry(start_x=start_x, start_y=start_y, align="RightTop", id=id)
+            if autoLabelPost:
+                new_boundry=CreateNewBoundry(start_x=start_x, start_y=start_y, align="RightTop", id=id)
+                isOverlap=isOverlapWithAnyBounery(new_boundry=new_boundry, boundrys=boundrys, id=id, verbose=True)
+                if isOverlap == False:
+                    DrawLeader(parameters=parameters, align="RightTop")
+                    DrawBoundry(boundry=new_boundry)
+                else:
+                    new_boundry=CreateNewBoundry(start_x=start_x, start_y=start_y, align="LeftTop", id=id)
+                    isOverlap=isOverlapWithAnyBounery(new_boundry=new_boundry, boundrys=boundrys, id=id, verbose=True)
+                    if isOverlap == False:
+                        DrawLeader(parameters=parameters, align="LeftTop")
+                        DrawBoundry(boundry=new_boundry)
+                    else:
+                        new_boundry=CreateNewBoundry(start_x=start_x, start_y=start_y, align="LeftBottom", id=id)
+                        DrawLeader(parameters=parameters, align="LeftBottom")
+                        DrawBoundry(boundry=new_boundry)
 
-
-            DrawLeader(Head=Head, Elev=Elev, Pressure=Pressure,
-                       start_x=start_x, start_y=start_y,
-                       line_attribs=line_attribs,
-                       Head_attribs=Head_attribs,
-                       Elev_attribs=Elev_attribs,
-                       Pressure_attribs=Pressure_attribs,
-                       align="RightTop")
-
+                boundrys.append(new_boundry)
+            else:
+                DrawLeader(parameters=parameters, align="RightTop")
             msg= f'節點 {id} 水頭引線已完成繪圖'
             log.renew_log(msg, False)
             log.setLogToButton()
@@ -57,76 +73,142 @@ def insertHeadPressureLeader(*args, **kwargs):
     except Exception as e:
         traceback.print_exc()
 
-def CreateBoundry(*args, **kwargs) -> dict:
-    start_x = kwargs.get('start_x')
-    start_y = kwargs.get('start_y')
+def CreateNewBoundry(*args, **kwargs) -> dict:
+    original_x = kwargs.get('start_x')
+    original_y = kwargs.get('start_y')
     align = kwargs.get('align')
     id = kwargs.get('id')
 
-    end_x = start_x + globals.text_size + globals.leader_distance+6*globals.text_size
-    end_y = start_y + globals.text_size + globals.leader_distance+3*globals.text_size
+    if align == "RightTop":
+        start_x = original_x + globals.text_size + globals.leader_distance
+        start_y = original_y + globals.text_size + globals.leader_distance-2*globals.text_size
+        end_x = original_x + globals.text_size + globals.leader_distance+6*globals.text_size
+        end_y = original_y + globals.text_size + globals.leader_distance+3*globals.text_size
+    elif align == "LeftTop":
+        start_x = original_x - globals.text_size - globals.leader_distance
+        start_y = original_y + globals.text_size + globals.leader_distance-2*globals.text_size
+        end_x = original_x - globals.text_size - globals.leader_distance - 6 * globals.text_size
+        end_y = original_y + globals.text_size + globals.leader_distance+3*globals.text_size
+    elif align == "LeftBottom":
+        start_x = original_x - globals.text_size - globals.leader_distance
+        start_y = original_y - globals.text_size - globals.leader_distance + 3 * globals.text_size
+        end_x = original_x - globals.text_size - globals.leader_distance - 6 * globals.text_size
+        end_y = original_y - globals.text_size - globals.leader_distance - 2 * globals.text_size
 
     dic = {'id': id, 'start_x': start_x, 'start_y': start_y, 'end_x': end_x, 'end_y': end_y}
+
     return dic
 
-def CheckOverlap(new_boundry: dict, boundrys: list) -> bool:
-    pass
+def DrawBoundry(*args, **kwargs):
+    start_x = kwargs.get('boundry')['start_x']
+    start_y = kwargs.get('boundry')['start_y']
+    end_x = kwargs.get('boundry')['end_x']
+    end_y = kwargs.get('boundry')['end_y']
+
+    globals.msp.add_lwpolyline([(start_x, start_y), (end_x, start_y), (end_x, end_y), (start_x, end_y), (start_x, start_y)],
+                                dxfattribs={'color': 7})
+
+def isOverlapWithAnyBounery(new_boundry: dict, boundrys: list, id, verbose) -> bool:
+    if boundrys == []:
+        return False
+    for boundry in boundrys:
+        boundry_Left_x= min(boundry['start_x'], boundry['end_x'])
+        boundry_Right_x= max(boundry['start_x'], boundry['end_x'])
+        boundry_Top_y= max(boundry['start_y'], boundry['end_y'])
+        boundry_Bottom_y= min(boundry['start_y'], boundry['end_y'])
+
+        new_boundry_Left_x= min(new_boundry['start_x'], new_boundry['end_x'])
+        new_boundry_Right_x= max(new_boundry['start_x'], new_boundry['end_x'])
+        new_boundry_Top_y= max(new_boundry['start_y'], new_boundry['end_y'])
+        new_boundry_Bottom_y= min(new_boundry['start_y'], new_boundry['end_y'])
+
+        # Left and Bottom corner
+        # Check if new boundry x min is inside existing boundry
+        isXminInsideBoundry=isValueBetweenRange(new_boundry_Left_x, boundry_Left_x, boundry_Right_x)
+        # Check if new boundry y min is inside existing boundry
+        isYminInsideBoundry=isValueBetweenRange(new_boundry_Bottom_y, boundry_Bottom_y, boundry_Top_y)
+        LeftBottom_Overlap = True if isXminInsideBoundry and isYminInsideBoundry else False
+
+        # Left and Top corner
+        # Check if new boundry x min is inside existing boundry
+        isXminInsideBoundry=isValueBetweenRange(new_boundry_Left_x, boundry_Left_x, boundry_Right_x)
+        # Check if new boundry y max is inside existing boundry
+        isYmaxInsideBoundry=isValueBetweenRange(new_boundry_Top_y, boundry_Bottom_y, boundry_Top_y)
+        LeftTop_Overlap = True if isXminInsideBoundry and isYmaxInsideBoundry else False
+
+        # Right and Bottom corner
+        # Check if new boundry x max is inside existing boundry
+        isXmaxInsideBoundry=isValueBetweenRange(new_boundry_Right_x, boundry_Left_x, boundry_Right_x)
+        # Check if new boundry y min is inside existing boundry
+        isYminInsideBoundry=isValueBetweenRange(new_boundry_Bottom_y, boundry_Bottom_y, boundry_Top_y)
+        RightBottom_Overlap = True if isXmaxInsideBoundry and isYminInsideBoundry else False
+
+        # Right and Top corner
+        # Check if new boundry x max is inside existing boundry
+        isXmaxInsideBoundry=isValueBetweenRange(new_boundry_Right_x, boundry_Left_x, boundry_Right_x)
+        # Check if new boundry y max is inside existing boundry
+        isYmaxInsideBoundry=isValueBetweenRange(new_boundry_Top_y, boundry_Bottom_y, boundry_Top_y)
+        RightTop_Overlap = True if isXmaxInsideBoundry and isYmaxInsideBoundry else False
+
+        if LeftBottom_Overlap == True \
+            or LeftTop_Overlap == True \
+            or RightBottom_Overlap == True \
+            or RightTop_Overlap == True:
+
+            if verbose:
+                print(f'{id} 與 {boundry["id"]} 節點引線重疊，改變繪圖位置')
+            return True
+    
+    # No overlap found with any boundary
+    return False
+
+def isValueBetweenRange(value, boundry1, boundry2) -> bool:
+    min_value= min(boundry1, boundry2)
+    max_value= max(boundry1, boundry2)
+    if min_value <= value <= max_value:
+        return True
+    else:
+        return False
 
 def DrawLeader(*args, **kwargs):
     from ezdxf.enums import TextEntityAlignment
-    Head = kwargs.get('Head')
-    Elev = kwargs.get('Elev')
-    Pressure = kwargs.get('Pressure')
-    start_x = kwargs.get('start_x')
-    start_y = kwargs.get('start_y')
-    line_attribs = kwargs.get('line_attribs')
-    Head_attribs = kwargs.get('Head_attribs')
-    Elev_attribs = kwargs.get('Elev_attribs')
-    Pressure_attribs = kwargs.get('Pressure_attribs')
+    Head = kwargs.get('parameters')['Head']
+    Elev = kwargs.get('parameters')['Elev']
+    Pressure = kwargs.get('parameters')['Pressure']
+    start_x = kwargs.get('parameters')['start_x']
+    start_y = kwargs.get('parameters')['start_y']
+    line_attribs = kwargs.get('parameters')['line_attribs']
+    Head_attribs = kwargs.get('parameters')['Head_attribs']
+    Elev_attribs = kwargs.get('parameters')['Elev_attribs']
+    Pressure_attribs = kwargs.get('parameters')['Pressure_attribs']
+
     align=kwargs.get('align')
 
     if align == "RightTop":
-        leader_up_start_x = start_x + globals.text_size
-        leader_up_start_y = start_y + globals.text_size
-
-        leader_up_end_x = leader_up_start_x + globals.leader_distance
-        leader_up_end_y = leader_up_start_y + globals.leader_distance
-
-        line_x1, line_y1 = leader_up_start_x, leader_up_start_y
-        line_x2, line_y2 = leader_up_end_x, leader_up_end_y
-        line_x3, line_y3 = leader_up_end_x+6*globals.text_size, leader_up_end_y
+  
+        line_x1, line_y1 = start_x + globals.text_size, start_y + globals.text_size
+        line_x2, line_y2 = line_x1+globals.leader_distance, line_y1+globals.leader_distance
+        line_x3, line_y3 = line_x2+6*globals.text_size, line_y2
 
         text_start_x = line_x3
 
     elif align == "LeftTop":
-        leader_up_start_x = start_x - globals.text_size
-        leader_up_start_y = start_y + globals.text_size
+        line_x1, line_y1 = start_x - globals.text_size, start_y + globals.text_size
+        line_x2, line_y2 = line_x1 - globals.leader_distance, line_y1 + globals.leader_distance
+        line_x3, line_y3 = line_x2 - 6 * globals.text_size, line_y2
 
-        leader_up_end_x = leader_up_start_x - globals.leader_distance
-        leader_up_end_y = leader_up_start_y + globals.leader_distance
-
-        line_x1, line_y1 = leader_up_start_x, leader_up_start_y
-        line_x2, line_y2 = leader_up_end_x, leader_up_end_y
-        line_x3, line_y3 = leader_up_end_x-6*globals.text_size, leader_up_end_y
-
-        text_start_x = line_x3+6*globals.text_size
+        text_start_x = line_x3 + 6 * globals.text_size
 
     elif align == "LeftBottom":
-        leader_up_start_x = start_x - globals.text_size
-        leader_up_start_y = start_y - globals.text_size
+        line_x1, line_y1 = start_x - globals.text_size, start_y - globals.text_size
+        line_x2, line_y2 = line_x1 - globals.leader_distance, line_y1 - globals.leader_distance
+        line_x3, line_y3 = line_x2 - 6 * globals.text_size, line_y2
 
-        leader_up_end_x = leader_up_start_x - globals.leader_distance
-        leader_up_end_y = leader_up_start_y - globals.leader_distance
-
-        line_x1, line_y1 = leader_up_start_x, leader_up_start_y
-        line_x2, line_y2 = leader_up_end_x, leader_up_end_y
-        line_x3, line_y3 = leader_up_end_x-6*globals.text_size, leader_up_end_y
-
-        text_start_x = line_x3+6*globals.text_size
+        text_start_x = line_x3 + 6 * globals.text_size
     
-    Head_placement_y= leader_up_end_y + 2 * globals.text_size
-    Elev_placement_y= leader_up_end_y + 0.75 * globals.text_size
-    Pressure_placement_y= leader_up_end_y - 0.75 * globals.text_size
+    Head_placement_y= line_y3 + 2 * globals.text_size
+    Elev_placement_y= line_y3 + 0.75 * globals.text_size
+    Pressure_placement_y= line_y3 - 0.75 * globals.text_size
 
     globals.msp.add_polyline2d([(line_x1, line_y1), (line_x2, line_y2), (line_x3, line_y3)], dxfattribs=line_attribs)
 
