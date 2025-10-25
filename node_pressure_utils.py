@@ -1,5 +1,6 @@
 import globals, progress_utils, traceback
 import log
+import SATdetect
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -74,6 +75,10 @@ def insertHeadPressureLeader(*args, **kwargs):
         traceback.print_exc()
 
 def CreateNewBoundry(*args, **kwargs) -> dict:
+    """
+    Create boundary rectangle for SAT overlap detection.
+    Returns: dict with 'id' and 'rect' tuple (cx, cy, w, h, angle_deg)
+    """
     original_x = kwargs.get('start_x')
     original_y = kwargs.get('start_y')
     align = kwargs.get('align')
@@ -95,7 +100,19 @@ def CreateNewBoundry(*args, **kwargs) -> dict:
         end_x = original_x - globals.text_size - globals.leader_distance - 6 * globals.text_size
         end_y = original_y - globals.text_size - globals.leader_distance - 2 * globals.text_size
 
-    dic = {'id': id, 'start_x': start_x, 'start_y': start_y, 'end_x': end_x, 'end_y': end_y}
+    # Convert to SAT rectangle format: (center_x, center_y, width, height, angle_deg)
+    cx = (start_x + end_x) / 2
+    cy = (start_y + end_y) / 2
+    w = abs(end_x - start_x)
+    h = abs(end_y - start_y)
+    angle_deg = 0  # Axis-aligned rectangles
+    
+    dic = {
+        'id': id, 
+        'start_x': start_x, 'start_y': start_y, 
+        'end_x': end_x, 'end_y': end_y,
+        'rect': (cx, cy, w, h, angle_deg)  # SAT format
+    }
 
     return dic
 
@@ -109,66 +126,26 @@ def DrawBoundry(*args, **kwargs):
                                 dxfattribs={'color': 7})
 
 def isOverlapWithAnyBounery(new_boundry: dict, boundrys: list, id, verbose) -> bool:
+    """
+    Check if new boundary overlaps with any existing boundaries using SAT algorithm.
+    More accurate than corner-based detection, especially for rotated rectangles.
+    """
     if boundrys == []:
         return False
+    
+    new_rect = new_boundry['rect']
+    
     for boundry in boundrys:
-        boundry_Left_x= min(boundry['start_x'], boundry['end_x'])
-        boundry_Right_x= max(boundry['start_x'], boundry['end_x'])
-        boundry_Top_y= max(boundry['start_y'], boundry['end_y'])
-        boundry_Bottom_y= min(boundry['start_y'], boundry['end_y'])
-
-        new_boundry_Left_x= min(new_boundry['start_x'], new_boundry['end_x'])
-        new_boundry_Right_x= max(new_boundry['start_x'], new_boundry['end_x'])
-        new_boundry_Top_y= max(new_boundry['start_y'], new_boundry['end_y'])
-        new_boundry_Bottom_y= min(new_boundry['start_y'], new_boundry['end_y'])
-
-        # Left and Bottom corner
-        # Check if new boundry x min is inside existing boundry
-        isXminInsideBoundry=isValueBetweenRange(new_boundry_Left_x, boundry_Left_x, boundry_Right_x)
-        # Check if new boundry y min is inside existing boundry
-        isYminInsideBoundry=isValueBetweenRange(new_boundry_Bottom_y, boundry_Bottom_y, boundry_Top_y)
-        LeftBottom_Overlap = True if isXminInsideBoundry and isYminInsideBoundry else False
-
-        # Left and Top corner
-        # Check if new boundry x min is inside existing boundry
-        isXminInsideBoundry=isValueBetweenRange(new_boundry_Left_x, boundry_Left_x, boundry_Right_x)
-        # Check if new boundry y max is inside existing boundry
-        isYmaxInsideBoundry=isValueBetweenRange(new_boundry_Top_y, boundry_Bottom_y, boundry_Top_y)
-        LeftTop_Overlap = True if isXminInsideBoundry and isYmaxInsideBoundry else False
-
-        # Right and Bottom corner
-        # Check if new boundry x max is inside existing boundry
-        isXmaxInsideBoundry=isValueBetweenRange(new_boundry_Right_x, boundry_Left_x, boundry_Right_x)
-        # Check if new boundry y min is inside existing boundry
-        isYminInsideBoundry=isValueBetweenRange(new_boundry_Bottom_y, boundry_Bottom_y, boundry_Top_y)
-        RightBottom_Overlap = True if isXmaxInsideBoundry and isYminInsideBoundry else False
-
-        # Right and Top corner
-        # Check if new boundry x max is inside existing boundry
-        isXmaxInsideBoundry=isValueBetweenRange(new_boundry_Right_x, boundry_Left_x, boundry_Right_x)
-        # Check if new boundry y max is inside existing boundry
-        isYmaxInsideBoundry=isValueBetweenRange(new_boundry_Top_y, boundry_Bottom_y, boundry_Top_y)
-        RightTop_Overlap = True if isXmaxInsideBoundry and isYmaxInsideBoundry else False
-
-        if LeftBottom_Overlap == True \
-            or LeftTop_Overlap == True \
-            or RightBottom_Overlap == True \
-            or RightTop_Overlap == True:
-
+        existing_rect = boundry['rect']
+        
+        # Use SAT algorithm for overlap detection
+        if SATdetect.rectangles_overlap(new_rect, existing_rect):
             if verbose:
                 print(f'{id} 與 {boundry["id"]} 節點引線重疊，改變繪圖位置')
             return True
     
     # No overlap found with any boundary
     return False
-
-def isValueBetweenRange(value, boundry1, boundry2) -> bool:
-    min_value= min(boundry1, boundry2)
-    max_value= max(boundry1, boundry2)
-    if min_value <= value <= max_value:
-        return True
-    else:
-        return False
 
 def DrawLeader(*args, **kwargs):
     from ezdxf.enums import TextEntityAlignment
