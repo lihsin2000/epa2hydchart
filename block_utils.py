@@ -27,8 +27,8 @@ def createBlocks(cad: 'Drawing'):
         valveBlock.add_hatch().paths.add_polyline_path([(0,0), (-0.5,0.3), (-0.5,-0.3)], is_closed=True)
 
         flowDirectionArrowBlock = cad.blocks.new(name='flowDirectionArrow')
-        flowDirectionArrowBlock.add_polyline2d([(0,0), (-1,0.4), (-1,-0.4)], close=True)
-        flowDirectionArrowBlock.add_hatch().paths.add_polyline_path([(0,0), (-1,0.4), (-1,-0.4)], is_closed=True)
+        flowDirectionArrowBlock.add_polyline2d([(0,0), (-1,0.25), (-1,-0.25)], close=True)
+        flowDirectionArrowBlock.add_hatch().paths.add_polyline_path([(0,0), (-1,0.25), (-1,-0.25)], is_closed=True)
 
         from ezdxf.enums import TextEntityAlignment
         from ezdxf.math import Vec2

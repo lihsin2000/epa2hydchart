@@ -56,8 +56,8 @@ def drawDemandLeader(*args, **kwargs):
         width = kwargs.get('width')
 
         if (export0cmd) or (export0cmd == False and float(demand) != 0.0):
-            leader_down_start_x = x+globals.text_size
-            leader_down_start_y = y-globals.text_size
+            leader_down_start_x = x+0.5*globals.text_size
+            leader_down_start_y = y-0.5*globals.text_size
 
             leader_down_end_x = leader_down_start_x+globals.leader_distance
             leader_down_end_y = leader_down_start_y-globals.leader_distance
@@ -69,7 +69,7 @@ def drawDemandLeader(*args, **kwargs):
                                        dxfattribs={'color': color, 'default_start_width': width, 'default_end_width': width})
             globals.msp.add_text(demand, height=globals.text_size,
                                  dxfattribs={'color': color, "style": "epa2HydChart"})\
-                                    .set_placement((leader_down_end_x+0.5*globals.text_size, leader_down_end_y-0.5*globals.text_size), align=TextEntityAlignment.TOP_LEFT)
+                                    .set_placement((leader_down_end_x+0.25*globals.text_size, leader_down_end_y-0.25*globals.text_size), align=TextEntityAlignment.TOP_LEFT)
         elif export0cmd == False and float(demand) == 0.0:
             pass
     except Exception as e:

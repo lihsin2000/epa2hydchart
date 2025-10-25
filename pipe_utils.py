@@ -32,7 +32,7 @@ def pipeAnnotationBlock(link_id, start_x, start_y, end_x, end_y, i):
         attrib={"char_height": globals.text_size,
                 "style": "epa2HydChart",
                 "attachment_point":5,
-                "line_spacing_factor":1.5,
+                "line_spacing_factor":1,
                 'rotation':rotation_annotaion}
 
         text=f"""{diameter}-{length}\n{abs(flow)} ({headloss})"""
