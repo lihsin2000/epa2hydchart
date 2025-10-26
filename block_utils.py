@@ -5,7 +5,7 @@ if TYPE_CHECKING:
     from main import MainWindow
     from ezdxf.document import Drawing
 
-def createBlocks(cad: 'Drawing'):
+def create_blocks(cad: 'Drawing'):
     """Create block definitions for all hydraulic components"""
     try:
         tankBlock = cad.blocks.new(name='tank')
@@ -38,7 +38,7 @@ def createBlocks(cad: 'Drawing'):
     except Exception as e:
         traceback.print_exc()
 
-def insertBlocks(*args, **kwargs):
+def insert_blocks(*args, **kwargs):
     """Insert block references for all components at their locations"""
     try:
         width = kwargs.get('width')
@@ -74,9 +74,9 @@ def insertBlocks(*args, **kwargs):
                     globals.msp.add_blockref(item, [x,y], dxfattribs={'xscale':globals.block_size, 'yscale':globals.block_size, 'rotation':rotation})
                     globals.msp.add_polyline2d([(x1,y1), (x2,y2)], dxfattribs={'default_start_width': width, 'default_end_width': width})
                     msg = f'閥件 {id} 圖塊已插入'
-                    log.renewLog(msg, False)
-                    log.setLogToButton()
-                    progress_utils.setProgress(ForcedValue=None)
+                    log.renew_log(msg, False)
+                    log.set_log_to_button()
+                    progress_utils.set_progress(ForcedValue=None)
 
             else:
                 df = df_mapping[item]
@@ -89,9 +89,9 @@ def insertBlocks(*args, **kwargs):
                     else:
                         globals.msp.add_blockref(item, [x,y], dxfattribs={'xscale':globals.block_size, 'yscale':globals.block_size})
                     msg = f'{mapping[item]} {id} 圖塊已插入'
-                    log.renewLog(msg, False)
-                    log.setLogToButton()
-                    progress_utils.setProgress(ForcedValue=None)
+                    log.renew_log(msg, False)
+                    log.set_log_to_button()
+                    progress_utils.set_progress(ForcedValue=None)
 
     except Exception as e:
         traceback.print_exc()

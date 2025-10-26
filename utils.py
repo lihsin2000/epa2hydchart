@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from main import MainWindow
 
 
-def autoSize():
+def auto_size():
     try:
         items = [globals.main_window.MainWindow.l_block_size,
                  globals.main_window.MainWindow.l_joint_size,
@@ -27,8 +27,8 @@ def autoSize():
                 item.setEnabled(True)
 
         if globals.main_window.MainWindow.chk_autoSize.isChecked() and globals.inpFile:
-            df_Vertices = read_utils.readVertices(globals.inpFile)
-            df_Coords = read_utils.readCoords(globals.inpFile)
+            df_Vertices = read_utils.read_vertices(globals.inpFile)
+            df_Coords = read_utils.read_coords(globals.inpFile)
             try:
                 coords = df_Coords[['x', 'y']]
             except:
@@ -99,7 +99,7 @@ def autoSize():
 #     except Exception as e:
 #         traceback.print_exc()
 
-def line2dict(lines, l, position):
+def parse_line_to_dictionary(lines, l, position):
     """
     Converts a line of text into a dictionary by splitting it into components.
 
@@ -120,7 +120,7 @@ def line2dict(lines, l, position):
     except Exception as e:
         traceback.print_exc()
 
-def lineStartEnd(input, startStr, endStr, start_offset, end_offset):
+def line_start_end(input, startStr, endStr, start_offset, end_offset):
     try:
         index = 0
         with open(input, 'r') as file:
@@ -186,7 +186,7 @@ def arrange_rpt_file(rptPath):
         traceback.print_exc()
 
 
-def convertPatternsToHourList(rptFile2):
+def convert_patterns_to_hour_list(rptFile2):
     try:
         rptFile2_lines = open(rptFile2).readlines()
 
@@ -209,48 +209,48 @@ def convertPatternsToHourList(rptFile2):
         traceback.print_exc()
 
 
-def inp_to_df(inpFile, showtime):
+def load_inp_file_to_dataframe(inpFile, showtime):
     import time
     from PyQt6.QtCore import QCoreApplication
 
     try:
         t0=time.time()
-        globals.df_Coords=read_utils.readCoords(inpFile)
+        globals.df_Coords=read_utils.read_coords(inpFile)
         t1=time.time()
         if showtime:
             globals.main_window.MainWindow.browser_log.append(f'節點坐標讀取完畢({t1-t0:.2f}s)')
         QCoreApplication.processEvents()
-        globals.df_Junctions=read_utils.readJunctions(inpFile)
+        globals.df_Junctions=read_utils.read_junctions(inpFile)
         t2=time.time()
         if showtime:
             globals.main_window.MainWindow.browser_log.append(f'節點參數讀取完畢({t2-t1:.2f}s)')
         QCoreApplication.processEvents()
-        globals.df_Reservoirs=read_utils.readReservoirs(inpFile)
+        globals.df_Reservoirs=read_utils.read_reservoirs(inpFile)
         t3=time.time()
         if showtime:
             globals.main_window.MainWindow.browser_log.append(f'接水點參數讀取完畢({t3-t2:.2f}s)')
         QCoreApplication.processEvents()
-        globals.df_Tanks=read_utils.readTanks(inpFile)
+        globals.df_Tanks=read_utils.read_tanks(inpFile)
         t4=time.time()
         if showtime:
             globals.main_window.MainWindow.browser_log.append(f'水池參數讀取完畢({t4-t3:.2f}s)')
         QCoreApplication.processEvents()
-        globals.df_Pumps=read_utils.readPumps(inpFile)
+        globals.df_Pumps=read_utils.read_pumps(inpFile)
         t5=time.time()
         if showtime:
             globals.main_window.MainWindow.browser_log.append(f'抽水機參數讀取完畢({t5-t4:.2f}s)')
         QCoreApplication.processEvents()
-        globals.df_Valves=read_utils.readValves(inpFile)
+        globals.df_Valves=read_utils.read_valves(inpFile)
         t6=time.time()
         if showtime:
             globals.main_window.MainWindow.browser_log.append(f'閥件參數讀取完畢({t6-t5:.2f}s)')
         QCoreApplication.processEvents()
-        globals.df_Pipes=read_utils.readPipes(inpFile)
+        globals.df_Pipes=read_utils.read_pipes(inpFile)
         t7=time.time()
         if showtime:
             globals.main_window.MainWindow.browser_log.append(f'管線參數讀取完畢({t7-t6:.2f}s)')
         QCoreApplication.processEvents()
-        globals.df_Vertices=read_utils.readVertices(inpFile)
+        globals.df_Vertices=read_utils.read_vertices(inpFile)
         t8=time.time()
         if showtime:
             globals.main_window.MainWindow.browser_log.append(f'管線坐標讀取完畢({t8-t7:.2f}s)')
@@ -262,7 +262,7 @@ def inp_to_df(inpFile, showtime):
         traceback.print_exc()
 
 
-def IsInpRptMatch():
+def verify_inp_rpt_files_match():
     try:
         inputAllLink = pd.concat([globals.df_Pipes['ID'], globals.df_Valves['ID'], globals.df_Pumps['ID']])
         inputAllLink = inputAllLink.sort_values().reset_index(drop=True)
@@ -281,7 +281,7 @@ def IsInpRptMatch():
     except Exception as e:
         traceback.print_exc()
 
-def addTitle(*args, **kwargs):
+def add_title(*args, **kwargs):
     try:
         hr=kwargs.get('hr_str')
 
@@ -304,7 +304,7 @@ def addTitle(*args, **kwargs):
                 Q=Q+Decimal(globals.df_NodeResults.at[row, 'Demand'])
             else:
                 msg= f'[Error]節點 {id} Demand數值錯誤，Q值總計可能有誤'
-                log.renewLog(msg, False)
+                log.renew_log(msg, False)
 
         # 匯整C值
         C_str=''

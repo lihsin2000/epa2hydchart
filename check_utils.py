@@ -2,7 +2,7 @@ import pandas as pd
 import globals
 import traceback
 
-def check_negative_low_pressure_junctions(*args, **kwargs):
+def find_negative_low_pressure_junctions(*args, **kwargs):
     df= globals.df_NodeResults
     reservoirs=globals.df_Reservoirs
     df=df[~df['ID'].isin(reservoirs['ID'])]
@@ -11,7 +11,7 @@ def check_negative_low_pressure_junctions(*args, **kwargs):
     return df_low_pressure_junctions, df_nagavite_pressure
 
 
-def filter_unreasonable_pipes(*args, **kwargs):
+def find_unreasonable_pipes(*args, **kwargs):
     df= globals.df_LinkResults
     pipes=globals.df_Pipes
     pumps= globals.df_Pumps

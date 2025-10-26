@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from main import MainWindow
 
 
-def insertDemandLeader(*args, **kwargs):
+def insert_demand_annotation_leader(*args, **kwargs):
     try:
         color = kwargs.get('color')
         draw0cmd = kwargs.get('draw0cmd')
@@ -24,26 +24,26 @@ def insertDemandLeader(*args, **kwargs):
             demand = globals.df_NodeResults.at[l, 'Demand']
 
             if draw0cmd:
-                drawDemandLeader(color=color, id=id, x=x, y=y, demand=demand,
+                draw_demand_leader(color=color, id=id, x=x, y=y, demand=demand,
                                  export0cmd=True, width=globals.line_width)
                 msg = f'節點 {id} 需水量已完成繪圖'
-                log.renewLog(msg, False)
-                log.setLogToButton()
-                progress_utils.setProgress(ForcedValue=None)
+                log.renew_log(msg, False)
+                log.set_log_to_button()
+                progress_utils.set_progress(ForcedValue=None)
             else:
-                drawDemandLeader(color=color, id=id, x=x, y=y, demand=demand,
+                draw_demand_leader(color=color, id=id, x=x, y=y, demand=demand,
                                  export0cmd=False, width=globals.line_width)
                 msg = f'節點 {id} 需水量已完成繪圖'
-                log.renewLog(msg, False)
-                log.setLogToButton()
-                progress_utils.setProgress(ForcedValue=None)
+                log.renew_log(msg, False)
+                log.set_log_to_button()
+                progress_utils.set_progress(ForcedValue=None)
 
             QCoreApplication.processEvents()
     except Exception as e:
         traceback.print_exc()
 
 
-def drawDemandLeader(*args, **kwargs):
+def draw_demand_leader(*args, **kwargs):
     from ezdxf.enums import TextEntityAlignment
 
     try:

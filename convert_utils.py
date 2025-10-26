@@ -86,7 +86,7 @@ def save_dxf(*args, **kwargs):
                 continue
             elif msg_box.clickedButton() == cancel_button:
                 msg = f'[Error]無法儲存 {dxfPath}，中止匯出'
-                log.renewLog(msg, True)
+                log.renew_log(msg, True)
                 return False
 
 def save_svg(*args, **kwargs):

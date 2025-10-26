@@ -26,7 +26,7 @@ class MainWindow(QMainWindow):
         # Setup all UI elements, connections, and default values
         setup_ui_elements()
         
-    def createModelspace(self, *args, **kwargs):
+    def create_modelspace(self, *args, **kwargs):
         try:
             cad: Drawing = ezdxf.new()
             msp: Modelspace = cad.modelspace()
@@ -36,7 +36,7 @@ class MainWindow(QMainWindow):
         except Exception as e:
             traceback.print_exc()
 
-    def resetButton(self):
+    def reset_form_to_defaults(self):
         self.MainWindow.l_block_size.setText(str(globals.BLOCK_SIZE_DEFAULT))
         self.MainWindow.l_joint_size.setText(str(globals.JOINT_SIZE_DEFAULT))
         self.MainWindow.l_text_size.setText(str(globals.TEXT_SIZE_DEFAULT))
@@ -54,7 +54,7 @@ class MainWindow(QMainWindow):
         globals.rptFile=None
         globals.projName=None
 
-    def processButton(self):
+    def start_processing(self):
         try:
             globals.block_size=float(self.MainWindow.l_block_size.text())
             globals.joint_size=float(self.MainWindow.l_joint_size.text())

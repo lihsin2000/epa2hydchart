@@ -4,10 +4,10 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from main import MainWindow
 
-def setLogToButton(*args, **kwargs):
+def set_log_to_button(*args, **kwargs):
     globals.main_window.MainWindow.browser_log.verticalScrollBar().setValue(globals.main_window.MainWindow.browser_log.verticalScrollBar().maximum())
 
-def renewLog(msg, seperate:bool):
+def renew_log(msg, seperate:bool):
     """
     Display an error message in the main window's log and set the log to the button.
     """

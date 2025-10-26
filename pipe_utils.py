@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from main import MainWindow
 
-def pipeAnnotationBlock(link_id, start_x, start_y, end_x, end_y, i, pipe_boundaries):
+def pipe_annotation_block(link_id, start_x, start_y, end_x, end_y, i, pipe_boundaries):
     try:
         center_x=(start_x+end_x)/2
         center_y=(start_y+end_y)/2
@@ -64,10 +64,10 @@ def pipeAnnotationBlock(link_id, start_x, start_y, end_x, end_y, i, pipe_boundar
     except Exception as e:
         print(e)
         msg=f'[Error]管線 {link_id} 錯誤，請重新匯出inp及rpt檔後重試'
-        log.renewLog(msg, True)
+        log.renew_log(msg, True)
         traceback.print_exc()
 
-def insertPipeAnnotation():
+def insert_pipe_annotation():
     """
     Insert pipe annotations and collect their boundaries for overlap detection.
     Returns list of pipe annotation boundaries in SAT format.
@@ -107,7 +107,7 @@ def insertPipeAnnotation():
                 end_x, end_y = float(row['Node2_x']), float(row['Node2_y'])
 
             # Call annotation function once per pipe
-            pipeAnnotationBlock(link_id, start_x, start_y, end_x, end_y, i, pipe_boundaries)
+            pipe_annotation_block(link_id, start_x, start_y, end_x, end_y, i, pipe_boundaries)
             # msg= f'管線 {link_id} 已插入標示'
             # log.renew_log(msg, False)
             # log.setLogToButton()
@@ -118,7 +118,7 @@ def insertPipeAnnotation():
     # Always return a list, even if empty
     return pipe_boundaries if pipe_boundaries else []
 
-def rotation_text(start_x, start_y, end_x, end_y):
+def calculate_text_rotation_angle(start_x, start_y, end_x, end_y):
     import math
     try:
         rotation = math.atan2(end_y-start_y, end_x-start_x)
@@ -133,7 +133,7 @@ def rotation_text(start_x, start_y, end_x, end_y):
     except Exception as e:
         traceback.print_exc()
 
-def insertPipeLines(*args, **kwargs):
+def draw_pipe_polylines(*args, **kwargs):
     from PyQt6.QtCore import QCoreApplication
     try:
         width=kwargs.get('width')
@@ -164,9 +164,9 @@ def insertPipeLines(*args, **kwargs):
                 globals.msp.add_polyline2d([(end_x,end_y), (start_x,start_y)], dxfattribs={'default_start_width': width, 'default_end_width': width})
 
             msg= f'管線 {link_id} 已完成繪圖'
-            log.renewLog(msg, False)
-            log.setLogToButton()
-            progress_utils.setProgress(ForcedValue=None)
+            log.renew_log(msg, False)
+            log.set_log_to_button()
+            progress_utils.set_progress(ForcedValue=None)
             QCoreApplication.processEvents()
     except Exception as e:
         traceback.print_exc()

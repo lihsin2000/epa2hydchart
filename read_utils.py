@@ -9,14 +9,14 @@ if TYPE_CHECKING:
     from main import MainWindow
 
 
-def readVertices(inpFile):
+def read_vertices(inpFile):
     try:
-        start, end = utils.lineStartEnd(inpFile, '[VERTICES]', '[LABELS]', 2, 2)
+        start, end = utils.line_start_end(inpFile, '[VERTICES]', '[LABELS]', 2, 2)
         lines = open(inpFile).readlines()
 
         data = []
         for l in range(start-1, end):
-            d = utils.line2dict(lines=lines, l=l, position=2)
+            d = utils.parse_line_to_dictionary(lines=lines, l=l, position=2)
             data.append([d[0], float(d[1]), float(d[2])])
         df = pd.DataFrame(data, columns=['LINK', 'x', 'y'])
         return df
@@ -24,14 +24,14 @@ def readVertices(inpFile):
         traceback.print_exc()
 
 
-def readPipes(inpFile):
+def read_pipes(inpFile):
     try:
-        start, end = utils.lineStartEnd(inpFile, '[PIPES]', '[PUMPS]', 2, 2)
+        start, end = utils.line_start_end(inpFile, '[PIPES]', '[PUMPS]', 2, 2)
         lines = open(inpFile).readlines()
 
         data = []
         for l in range(start - 1, end):
-            d = utils.line2dict(lines=lines, l=l, position=4)
+            d = utils.parse_line_to_dictionary(lines=lines, l=l, position=4)
             data.append([d[1], d[2], d[3], d[4], d[5], d[6]])
         df = pd.DataFrame(
             data, columns=['ID', 'Node1', 'Node2', 'Length', 'Diameter', 'Roughness'])
@@ -51,13 +51,13 @@ def readPipes(inpFile):
         traceback.print_exc()
 
 
-def readCoords(inpFile):
+def read_coords(inpFile):
     try:
-        start, end = utils.lineStartEnd(inpFile, '[COORDINATES]', '[VERTICES]', 2, 2)
+        start, end = utils.line_start_end(inpFile, '[COORDINATES]', '[VERTICES]', 2, 2)
         lines = open(inpFile).readlines()
         df = pd.DataFrame(columns=['ID', 'x', 'y'])
         for l in range(start-1, end):
-            d = utils.line2dict(lines=lines, l=l, position=2)
+            d = utils.parse_line_to_dictionary(lines=lines, l=l, position=2)
             data = {
                 'ID': d[0],
                 'x': d[1],
@@ -73,13 +73,13 @@ def readCoords(inpFile):
         traceback.print_exc()
 
 
-def readJunctions(inpFile):
+def read_junctions(inpFile):
     try:
-        start, end = utils.lineStartEnd(inpFile, '[JUNCTIONS]', '[RESERVOIRS]', 2, 2)
+        start, end = utils.line_start_end(inpFile, '[JUNCTIONS]', '[RESERVOIRS]', 2, 2)
         lines = open(inpFile).readlines()
         df = pd.DataFrame(columns=['ID', 'Elev', 'BaseDemand', 'x', 'y'])
         for l in range(start-1, end):
-            d = utils.line2dict(lines=lines, l=l, position=2)
+            d = utils.parse_line_to_dictionary(lines=lines, l=l, position=2)
             data = {
                 'ID': d[1],
                 'Elev': d[2],
@@ -90,19 +90,19 @@ def readJunctions(inpFile):
             else:
                 df.loc[len(df)] = data
         df = df.reset_index(drop=True)
-        df = appendCoords(df)
+        df = merge_coordinates_to_dataframe(df)
         return df
     except Exception as e:
         traceback.print_exc()
 
 
-def readReservoirs(inpFile):
+def read_reservoirs(inpFile):
     try:
-        start, end = utils.lineStartEnd(inpFile, '[RESERVOIRS]', '[TANKS]', 2, 2)
+        start, end = utils.line_start_end(inpFile, '[RESERVOIRS]', '[TANKS]', 2, 2)
         lines = open(inpFile).readlines()
         df = pd.DataFrame(columns=['ID', 'Head', 'x', 'y'])
         for l in range(start-1, end):
-            d = utils.line2dict(lines=lines, l=l, position=2)
+            d = utils.parse_line_to_dictionary(lines=lines, l=l, position=2)
             data = {
                 'ID': d[1],
                 'Head': d[2]
@@ -112,19 +112,19 @@ def readReservoirs(inpFile):
             else:
                 df.loc[len(df)] = data
         df = df.reset_index(drop=True)
-        df = appendCoords(df)
+        df = merge_coordinates_to_dataframe(df)
         return df
     except Exception as e:
         traceback.print_exc()
 
 
-def readTanks(inpFile):
+def read_tanks(inpFile):
     try:
-        start, end = utils.lineStartEnd(inpFile, '[TANKS]', '[PIPES]', 2, 2)
+        start, end = utils.line_start_end(inpFile, '[TANKS]', '[PIPES]', 2, 2)
         lines = open(inpFile).readlines()
         df = pd.DataFrame(columns=['ID', 'Elev', 'MinLevel', 'MaxLevel', 'MinElev', 'MaxElev', 'x', 'y'])
         for l in range(start-1, end):
-            d = utils.line2dict(lines=lines, l=l, position=2)
+            d = utils.parse_line_to_dictionary(lines=lines, l=l, position=2)
             elev = float(d[2])
             MinLevel = float(d[4])
             MaxLevel = float(d[5])
@@ -143,19 +143,19 @@ def readTanks(inpFile):
             else:
                 df.loc[len(df)] = data
         df = df.reset_index(drop=True)
-        df = appendCoords(df)
+        df = merge_coordinates_to_dataframe(df)
         return df
     except Exception as e:
         traceback.print_exc()
 
 
-def readValves(inpFile):
+def read_valves(inpFile):
     try:
-        start, end = utils.lineStartEnd(inpFile, '[VALVES]', '[TAGS]', 2, 2)
+        start, end = utils.line_start_end(inpFile, '[VALVES]', '[TAGS]', 2, 2)
         lines = open(inpFile).readlines()
         df = pd.DataFrame(columns=['ID', 'Node1', 'Node2', 'Node1_x', 'Node1_y', 'Node2_x', 'Node2_y', 'Type', 'Setting'])
         for l in range(start-1, end):
-            d = utils.line2dict(lines=lines, l=l, position=2)
+            d = utils.parse_line_to_dictionary(lines=lines, l=l, position=2)
 
             id = d[1]
             Node1 = d[2]
@@ -190,11 +190,11 @@ def readValves(inpFile):
         traceback.print_exc()
 
 
-def readPumps(inpFile):
+def read_pumps(inpFile):
     try:
         lines = open(inpFile).readlines()
 
-        start_curve, end_curve = utils.lineStartEnd(inpFile, '[CURVES]', '[CONTROLS]', 2, 1)
+        start_curve, end_curve = utils.line_start_end(inpFile, '[CURVES]', '[CONTROLS]', 2, 1)
         df_pumpCurves = pd.DataFrame(columns=['ID', 'Q', 'H'])
         for l in range(start_curve-1, end_curve):
             if 'PUMP' in lines[l]:
@@ -202,7 +202,7 @@ def readPumps(inpFile):
             elif '\n' == lines[l]:
                 continue
             else:
-                d = utils.line2dict(lines=lines, l=l, position=2)
+                d = utils.parse_line_to_dictionary(lines=lines, l=l, position=2)
                 ID = d[1]
                 Q = d[2]
                 H = d[3]
@@ -217,10 +217,10 @@ def readPumps(inpFile):
                 df_pumpCurves.loc[len(df_pumpCurves)] = data_curve
         df_pumpCurves = df_pumpCurves.reset_index(drop=True)
 
-        start, end = utils.lineStartEnd(inpFile, '[PUMPS]', '[VALVES]', 2, 2)
+        start, end = utils.line_start_end(inpFile, '[PUMPS]', '[VALVES]', 2, 2)
         df = pd.DataFrame(columns=['ID', 'Node1', 'Node2', 'Node1_x', 'Node1_y', 'Node2_x', 'Node2_y', 'x', 'y', 'Q', 'H'])
         for l in range(start-1, end):
-            d = utils.line2dict(lines=lines, l=l, position=2)
+            d = utils.parse_line_to_dictionary(lines=lines, l=l, position=2)
             ID = [d[1]][0]
             Node1 = [d[2]][0]
             Node2 = [d[3]][0]
@@ -261,7 +261,7 @@ def readPumps(inpFile):
         traceback.print_exc()
 
 
-def readNodeResults(*args, **kwargs):
+def read_node_results(*args, **kwargs):
     try:
         hr = kwargs.get('hr')
         rptFile = kwargs.get('input')
@@ -272,11 +272,11 @@ def readNodeResults(*args, **kwargs):
         else:
             start_str = f'Node Results at {hr} Hrs:'
             end_str = f'Link Results at {hr} Hrs:'
-        start, end = utils.lineStartEnd(rptFile, start_str, end_str, 5, 2)
+        start, end = utils.line_start_end(rptFile, start_str, end_str, 5, 2)
         lines = open(rptFile).readlines()
         df = pd.DataFrame(columns=['ID', 'Demand', 'Head', 'Pressure'])
         for l in range(start-1, end):
-            d = utils.line2dict(lines=lines, l=l, position=2)
+            d = utils.parse_line_to_dictionary(lines=lines, l=l, position=2)
             try:
                 id = d[1]
                 demand = d[2]
@@ -312,7 +312,7 @@ def readNodeResults(*args, **kwargs):
         traceback.print_exc()
 
 
-def readLinkResults(*args, **kwargs):
+def read_link_results(*args, **kwargs):
     try:
         hr1 = kwargs.get('hr1')
         hr2 = kwargs.get('hr2')
@@ -328,11 +328,11 @@ def readLinkResults(*args, **kwargs):
         elif hr1 != '' and hr2 != '':
             start_str = f'Link Results at {hr1} Hrs:'
             end_str = f'Node Results at {hr2} Hrs:'
-        start, end = utils.lineStartEnd(rptFile, start_str, end_str, 5, 2)
+        start, end = utils.line_start_end(rptFile, start_str, end_str, 5, 2)
         lines = open(rptFile).readlines()
         df = pd.DataFrame(columns=['ID', 'Flow', 'Velocity', 'unitHeadloss', 'Headloss'])
         for l in range(start-1, end):
-            d = utils.line2dict(lines=lines, l=l, position=2)
+            d = utils.parse_line_to_dictionary(lines=lines, l=l, position=2)
             pipe_id = d[1]
             flow = d[2]
             velocity = d[3]
@@ -378,7 +378,7 @@ def readLinkResults(*args, **kwargs):
         traceback.print_exc()
 
 
-def changeValueByDigits(*args, **kwargs):
+def change_value_by_digits(*args, **kwargs):
 
     digits= kwargs.get('digits')
     
@@ -410,7 +410,7 @@ def changeValueByDigits(*args, **kwargs):
     except Exception as e:
         traceback.print_exc()
 
-def appendCoords(df):
+def merge_coordinates_to_dataframe(df):
     '''
     從config.df_Coords讀取Tank, Reservoir的座標
     '''

@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from main import MainWindow
 
-def calculateProgressSteps():
+def calculate_progress_steps():
     # number steps for "insertBlocks"
     steps_insertBlocks = len(globals.df_Tanks) + len(globals.df_Reservoirs) + len(globals.df_Junctions)+ len(globals.df_Pumps) + len(globals.df_Valves)
 
@@ -48,7 +48,7 @@ def calculateProgressSteps():
     # print(f'steps_insertValveAnnotation:{steps_insertValveAnnotation}')
     return total_steps
 
-def setProgress(ForcedValue):
+def set_progress(ForcedValue):
     if ForcedValue==None:
         globals.progress_value += globals.progress_space
         value=int(round(globals.progress_value,0))

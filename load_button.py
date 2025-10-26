@@ -7,7 +7,7 @@ if TYPE_CHECKING:
     from main import MainWindow
 
 
-def loadinpButton():
+def handle_inp_file_selection():
     file, type = QFileDialog.getOpenFileName(
         globals.main_window, '開啟inp檔', filter='inp (*.inp)')
 
@@ -24,7 +24,7 @@ def loadinpButton():
         globals.projName = os.path.splitext(os.path.basename(file))[0]
         globals.main_window.MainWindow.l_projName.setText(globals.projName)
 
-def loadrptButton():
+def handle_rpt_file_selection():
     file, type = QFileDialog.getOpenFileName(
         globals.main_window, '開啟rpt檔', filter='rpt (*.rpt)')
 
@@ -37,9 +37,9 @@ def loadrptButton():
         try:
             globals.arranged_rpt_file_path = utils.arrange_rpt_file(file)
             globals.main_window.MainWindow.browser_log.append('.rpt前處理完成')
-            log.setLogToButton()
+            log.set_log_to_button()
 
-            globals.hr_list = utils.convertPatternsToHourList(
+            globals.hr_list = utils.convert_patterns_to_hour_list(
                 globals.arranged_rpt_file_path)
 
             if globals.hr_list == []:
@@ -54,7 +54,7 @@ def loadrptButton():
 
         except Exception as e:
             globals.main_window.MainWindow.browser_log.append(f'[Error] 處理rpt檔時發生錯誤: {str(e)}')
-            log.setLogToButton()
+            log.set_log_to_button()
 
     elif globals.main_window.MainWindow.l_rpt_path.text():
         # If no file selected but there's already a path, use the existing one
