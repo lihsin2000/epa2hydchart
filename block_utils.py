@@ -74,7 +74,7 @@ def insertBlocks(*args, **kwargs):
                     globals.msp.add_blockref(item, [x,y], dxfattribs={'xscale':globals.block_size, 'yscale':globals.block_size, 'rotation':rotation})
                     globals.msp.add_polyline2d([(x1,y1), (x2,y2)], dxfattribs={'default_start_width': width, 'default_end_width': width})
                     msg = f'閥件 {id} 圖塊已插入'
-                    log.renew_log(msg, False)
+                    log.renewLog(msg, False)
                     log.setLogToButton()
                     progress_utils.setProgress(ForcedValue=None)
 
@@ -89,7 +89,7 @@ def insertBlocks(*args, **kwargs):
                     else:
                         globals.msp.add_blockref(item, [x,y], dxfattribs={'xscale':globals.block_size, 'yscale':globals.block_size})
                     msg = f'{mapping[item]} {id} 圖塊已插入'
-                    log.renew_log(msg, False)
+                    log.renewLog(msg, False)
                     log.setLogToButton()
                     progress_utils.setProgress(ForcedValue=None)
 

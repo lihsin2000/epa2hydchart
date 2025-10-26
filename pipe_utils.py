@@ -1,11 +1,12 @@
 import globals, progress_utils, traceback
 import log
+import math
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from main import MainWindow
 
-def pipeAnnotationBlock(link_id, start_x, start_y, end_x, end_y, i):
+def pipeAnnotationBlock(link_id, start_x, start_y, end_x, end_y, i, pipe_boundaries):
     try:
         center_x=(start_x+end_x)/2
         center_y=(start_y+end_y)/2
@@ -39,6 +40,22 @@ def pipeAnnotationBlock(link_id, start_x, start_y, end_x, end_y, i):
 
         globals.msp.add_mtext(text, dxfattribs=attrib).set_location(insert=(center_x, center_y))
 
+        # Calculate approximate text bounding box (2 lines of text)
+        line1_len = len(f"{diameter}-{length}")
+        line2_len = len(f"{abs(flow)} ({headloss})")
+        max_chars = max(line1_len, line2_len)
+        
+        # Approximate dimensions (character width ~0.6 * text_size, 2 lines with spacing)
+        text_width = max_chars * 0.6 * globals.text_size
+        text_height = 2.5 * globals.text_size  # 2 lines plus spacing
+        
+        # Store pipe annotation boundary in SAT format
+        pipe_boundary = {
+            'id': link_id,
+            'rect': (center_x, center_y, text_width, text_height, rotation_annotaion)
+        }
+        pipe_boundaries.append(pipe_boundary)
+
         if flow>=0:
             globals.msp.add_blockref('flowDirectionArrow', [center_x,center_y], dxfattribs={'xscale':globals.text_size, 'yscale':globals.text_size, 'rotation':rotation})
         else:
@@ -47,10 +64,16 @@ def pipeAnnotationBlock(link_id, start_x, start_y, end_x, end_y, i):
     except Exception as e:
         print(e)
         msg=f'[Error]管線 {link_id} 錯誤，請重新匯出inp及rpt檔後重試'
-        log.renew_log(msg, True)
+        log.renewLog(msg, True)
         traceback.print_exc()
 
 def insertPipeAnnotation():
+    """
+    Insert pipe annotations and collect their boundaries for overlap detection.
+    Returns list of pipe annotation boundaries in SAT format.
+    """
+    pipe_boundaries = []
+    
     try:
         # Convert LINK column to set for O(1) lookups
         link_ids = set(globals.df_Vertices['LINK'])
@@ -84,13 +107,16 @@ def insertPipeAnnotation():
                 end_x, end_y = float(row['Node2_x']), float(row['Node2_y'])
 
             # Call annotation function once per pipe
-            pipeAnnotationBlock(link_id, start_x, start_y, end_x, end_y, i)
+            pipeAnnotationBlock(link_id, start_x, start_y, end_x, end_y, i, pipe_boundaries)
             # msg= f'管線 {link_id} 已插入標示'
             # log.renew_log(msg, False)
             # log.setLogToButton()
             # progress_utils.setProgress(ForcedValue=None)
     except Exception as e:
         traceback.print_exc()
+    
+    # Always return a list, even if empty
+    return pipe_boundaries if pipe_boundaries else []
 
 def rotation_text(start_x, start_y, end_x, end_y):
     import math
@@ -138,7 +164,7 @@ def insertPipeLines(*args, **kwargs):
                 globals.msp.add_polyline2d([(end_x,end_y), (start_x,start_y)], dxfattribs={'default_start_width': width, 'default_end_width': width})
 
             msg= f'管線 {link_id} 已完成繪圖'
-            log.renew_log(msg, False)
+            log.renewLog(msg, False)
             log.setLogToButton()
             progress_utils.setProgress(ForcedValue=None)
             QCoreApplication.processEvents()

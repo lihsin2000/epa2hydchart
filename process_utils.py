@@ -95,7 +95,7 @@ def process1():
 
     except Exception as e:
         msg='[Error]不明錯誤，中止匯出'
-        log.renew_log(msg, True)
+        log.renewLog(msg, True)
         traceback.print_exc()
 
 def process2(*args, **kwargs):
@@ -118,7 +118,7 @@ def process2(*args, **kwargs):
 
         if matchLink and matchNode:
             msg= f'{hr_str} .rpt及.inp內容相符，開始處理'
-            log.renew_log(msg, False)
+            log.renewLog(msg, False)
             globals.cad, globals.msp = globals.main_window.createModelspace()
 
             tankerLeaderColor = 210
@@ -140,14 +140,17 @@ def process2(*args, **kwargs):
             block_utils.insertBlocks(width=globals.line_width)
 
             pipe_utils.insertPipeLines(width=globals.line_width)
-            pipe_utils.insertPipeAnnotation()
+            # Collect pipe annotation boundaries for overlap detection
+            pipe_boundaries = pipe_utils.insertPipeAnnotation()
             
             draw0cmd = globals.main_window.MainWindow.chk_export_0cmd.isChecked()
             autoLabelPost = globals.main_window.MainWindow.chk_autoLabelPost.isChecked()
             node_demand_utils.insertDemandLeader(color=demandColor, draw0cmd=draw0cmd)
+            # Pass pipe boundaries to check for overlaps with node pressure annotations
             node_pressure_utils.insertHeadPressureLeader(HeadColor=headPressureLeaderColor, 
                                                         ElevColor=elevLeaderColor, width=globals.line_width,
-                                                        autoLabelPost=autoLabelPost)
+                                                        autoLabelPost=autoLabelPost,
+                                                        pipe_boundaries=pipe_boundaries)
             node_utilis.insertReservoirsLeader(color=reservoirLeaderColor, digits=globals.digit_decimal)
             node_utilis.insertTankLeader(color=tankerLeaderColor, digits=globals.digit_decimal, width=globals.line_width)
             node_utilis.insertPumpAnnotation(color=pumpAnnotaionColor, digits=globals.digit_decimal)
@@ -167,7 +170,7 @@ def process2(*args, **kwargs):
             else:
                 globals.export_dxf_success=False
                 msg= f'[Error]{dxfPathWithoutExtension}.dxf 匯出失敗'
-            log.renew_log(msg, False)
+            log.renewLog(msg, False)
             log.setLogToButton()
             progress_utils.setProgress(97)
 
@@ -177,7 +180,7 @@ def process2(*args, **kwargs):
             else:
                 globals.export_svg_success=False
                 msg= f'[Error]{dxfPathWithoutExtension}.svg 匯出失敗'
-            log.renew_log(msg, False)
+            log.renewLog(msg, False)
             log.setLogToButton()
             progress_utils.setProgress(98)
 
@@ -189,7 +192,7 @@ def process2(*args, **kwargs):
                 else:
                     globals.export_png_success = False
                     msg = f'[Error]{dxfPathWithoutExtension}.png 匯出失敗'
-                log.renew_log(msg, False)
+                log.renewLog(msg, False)
                 log.setLogToButton()
                 progress_utils.setProgress(99)
                 
@@ -198,7 +201,7 @@ def process2(*args, **kwargs):
                     final_msg = '所有作業成功完成'
                 else:
                     final_msg = '作業完成，但有部分錯誤發生，請查看log內容'
-                log.renew_log(final_msg, True)
+                log.renewLog(final_msg, True)
                 log.setLogToButton()
                 progress_utils.setProgress(100)
             
@@ -207,7 +210,7 @@ def process2(*args, **kwargs):
 
         else:
             msg= f'[Error]{h}.rpt及.inp內容不符，中止匯出'
-            log.renew_log(msg, True)
+            log.renewLog(msg, True)
 
     except Exception as e:
         traceback.print_exc()

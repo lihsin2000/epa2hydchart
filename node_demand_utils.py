@@ -27,14 +27,14 @@ def insertDemandLeader(*args, **kwargs):
                 drawDemandLeader(color=color, id=id, x=x, y=y, demand=demand,
                                  export0cmd=True, width=globals.line_width)
                 msg = f'節點 {id} 需水量已完成繪圖'
-                log.renew_log(msg, False)
+                log.renewLog(msg, False)
                 log.setLogToButton()
                 progress_utils.setProgress(ForcedValue=None)
             else:
                 drawDemandLeader(color=color, id=id, x=x, y=y, demand=demand,
                                  export0cmd=False, width=globals.line_width)
                 msg = f'節點 {id} 需水量已完成繪圖'
-                log.renew_log(msg, False)
+                log.renewLog(msg, False)
                 log.setLogToButton()
                 progress_utils.setProgress(ForcedValue=None)
 

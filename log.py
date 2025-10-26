@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 def setLogToButton(*args, **kwargs):
     globals.main_window.MainWindow.browser_log.verticalScrollBar().setValue(globals.main_window.MainWindow.browser_log.verticalScrollBar().maximum())
 
-def renew_log(msg, seperate:bool):
+def renewLog(msg, seperate:bool):
     """
     Display an error message in the main window's log and set the log to the button.
     """

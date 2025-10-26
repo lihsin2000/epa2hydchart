@@ -13,6 +13,7 @@ def insertHeadPressureLeader(*args, **kwargs):
     ElevColor=kwargs.get('ElevColor')
     width=kwargs.get('width')
     autoLabelPost=kwargs.get('autoLabelPost')
+    pipe_boundaries=kwargs.get('pipe_boundaries', [])  # Get pipe annotation boundaries
 
     boundrys:dict=[]
     try:
@@ -49,26 +50,27 @@ def insertHeadPressureLeader(*args, **kwargs):
 
             if autoLabelPost:
                 new_boundry=CreateNewBoundry(start_x=start_x, start_y=start_y, align="RightTop", id=id)
-                isOverlap=isOverlapWithAnyBounery(new_boundry=new_boundry, boundrys=boundrys, id=id, verbose=True)
+                # Check overlap with both node boundaries and pipe annotations
+                isOverlap=isPressureAnnoOverlapWithAnyBounery(new_boundry=new_boundry, boundrys=boundrys, pipe_boundaries=pipe_boundaries, id=id, verbose=True)
                 if isOverlap == False:
-                    DrawLeader(parameters=parameters, align="RightTop")
-                    DrawBoundry(boundry=new_boundry)
+                    DrawPressureLeader(parameters=parameters, align="RightTop")
+                    DrawPressureBoundry(boundry=new_boundry)
                 else:
                     new_boundry=CreateNewBoundry(start_x=start_x, start_y=start_y, align="LeftTop", id=id)
-                    isOverlap=isOverlapWithAnyBounery(new_boundry=new_boundry, boundrys=boundrys, id=id, verbose=True)
+                    isOverlap=isPressureAnnoOverlapWithAnyBounery(new_boundry=new_boundry, boundrys=boundrys, pipe_boundaries=pipe_boundaries, id=id, verbose=True)
                     if isOverlap == False:
-                        DrawLeader(parameters=parameters, align="LeftTop")
-                        DrawBoundry(boundry=new_boundry)
+                        DrawPressureLeader(parameters=parameters, align="LeftTop")
+                        DrawPressureBoundry(boundry=new_boundry)
                     else:
                         new_boundry=CreateNewBoundry(start_x=start_x, start_y=start_y, align="LeftBottom", id=id)
-                        DrawLeader(parameters=parameters, align="LeftBottom")
-                        DrawBoundry(boundry=new_boundry)
+                        DrawPressureLeader(parameters=parameters, align="LeftBottom")
+                        DrawPressureBoundry(boundry=new_boundry)
 
                 boundrys.append(new_boundry)
             else:
-                DrawLeader(parameters=parameters, align="RightTop")
+                DrawPressureLeader(parameters=parameters, align="RightTop")
             msg= f'節點 {id} 水頭引線已完成繪圖'
-            log.renew_log(msg, False)
+            log.renewLog(msg, False)
             log.setLogToButton()
             progress_utils.setProgress(ForcedValue=None)
     except Exception as e:
@@ -116,7 +118,7 @@ def CreateNewBoundry(*args, **kwargs) -> dict:
 
     return dic
 
-def DrawBoundry(*args, **kwargs):
+def DrawPressureBoundry(*args, **kwargs):
     start_x = kwargs.get('boundry')['start_x']
     start_y = kwargs.get('boundry')['start_y']
     end_x = kwargs.get('boundry')['end_x']
@@ -125,29 +127,37 @@ def DrawBoundry(*args, **kwargs):
     globals.msp.add_lwpolyline([(start_x, start_y), (end_x, start_y), (end_x, end_y), (start_x, end_y), (start_x, start_y)],
                                 dxfattribs={'color': 7})
 
-def isOverlapWithAnyBounery(new_boundry: dict, boundrys: list, id, verbose) -> bool:
+def isPressureAnnoOverlapWithAnyBounery(new_boundry: dict, boundrys: list, pipe_boundaries: list, id, verbose) -> bool:
     """
-    Check if new boundary overlaps with any existing boundaries using SAT algorithm.
+    Check if new boundary overlaps with any existing boundaries (nodes and pipes) using SAT algorithm.
     More accurate than corner-based detection, especially for rotated rectangles.
     """
-    if boundrys == []:
-        return False
-    
     new_rect = new_boundry['rect']
     
+    # Check overlap with node pressure boundaries
     for boundry in boundrys:
         existing_rect = boundry['rect']
         
         # Use SAT algorithm for overlap detection
         if SATdetect.rectangles_overlap(new_rect, existing_rect):
             if verbose:
-                print(f'{id} 與 {boundry["id"]} 節點引線重疊，改變繪圖位置')
+                print(f'節點{id} 標示與節點 {boundry["id"]} 引線重疊，改變繪圖位置')
+            return True
+    
+    # Check overlap with pipe annotation boundaries
+    for pipe_boundary in pipe_boundaries:
+        pipe_rect = pipe_boundary['rect']
+        
+        # Use SAT algorithm for overlap detection
+        if SATdetect.rectangles_overlap(new_rect, pipe_rect):
+            if verbose:
+                print(f'節點 {id} 標示與管線 {pipe_boundary["id"]} 標註重疊，改變繪圖位置')
             return True
     
     # No overlap found with any boundary
     return False
 
-def DrawLeader(*args, **kwargs):
+def DrawPressureLeader(*args, **kwargs):
     from ezdxf.enums import TextEntityAlignment
     Head = kwargs.get('parameters')['Head']
     Elev = kwargs.get('parameters')['Elev']
