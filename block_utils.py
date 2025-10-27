@@ -8,33 +8,33 @@ if TYPE_CHECKING:
 def create_blocks(cad: 'Drawing'):
     """Create block definitions for all hydraulic components"""
     try:
-        tankBlock = cad.blocks.new(name='tank')
-        tankBlock.add_polyline2d([(0.5,0), (0.5,0.5), (-0.5,0.5), (-0.5,0), (-0.25,0), (-0.25,-0.5), (0.25,-0.5), (0.25,0)], close=True)
-        tankBlock.add_hatch().paths.add_polyline_path([(0.5,0), (0.5,0.5), (-0.5,0.5), (-0.5,0), (-0.25,0), (-0.25,-0.5), (0.25,-0.5), (0.25,0)], is_closed=True)
+        tank_block = cad.blocks.new(name='tank')
+        tank_block.add_polyline2d([(0.5,0), (0.5,0.5), (-0.5,0.5), (-0.5,0), (-0.25,0), (-0.25,-0.5), (0.25,-0.5), (0.25,0)], close=True)
+        tank_block.add_hatch().paths.add_polyline_path([(0.5,0), (0.5,0.5), (-0.5,0.5), (-0.5,0), (-0.25,0), (-0.25,-0.5), (0.25,-0.5), (0.25,0)], is_closed=True)
 
-        reservoirBlock = cad.blocks.new(name='reservoir')
-        reservoirBlock.add_polyline2d([(0.5,-0.25), (0.5,0.5), (0.4,0.5), (0.4,0.25), (-0.4,0.25), (-0.4,0.5), (-0.5,0.5), (-0.5,-0.25)], close=True)
-        reservoirBlock.add_hatch().paths.add_polyline_path([(0.5,-0.25), (0.5,0.5), (0.4,0.5), (0.4,0.25), (-0.4,0.25), (-0.4,0.5), (-0.5,0.5), (-0.5,-0.25)], is_closed=True)
+        reservoir_block = cad.blocks.new(name='reservoir')
+        reservoir_block.add_polyline2d([(0.5,-0.25), (0.5,0.5), (0.4,0.5), (0.4,0.25), (-0.4,0.25), (-0.4,0.5), (-0.5,0.5), (-0.5,-0.25)], close=True)
+        reservoir_block.add_hatch().paths.add_polyline_path([(0.5,-0.25), (0.5,0.5), (0.4,0.5), (0.4,0.25), (-0.4,0.25), (-0.4,0.5), (-0.5,0.5), (-0.5,-0.25)], is_closed=True)
 
-        junctionBlock = cad.blocks.new(name='junction')
-        junctionBlock.add_ellipse((0,0), major_axis=(0,0.5), ratio=1)
-        junctionBlock.add_hatch().paths.add_edge_path().add_ellipse((0,0), major_axis=(0,0.5), ratio=1)
+        junction_block = cad.blocks.new(name='junction')
+        junction_block.add_ellipse((0,0), major_axis=(0,0.5), ratio=1)
+        junction_block.add_hatch().paths.add_edge_path().add_ellipse((0,0), major_axis=(0,0.5), ratio=1)
 
-        valveBlock = cad.blocks.new(name='valve')
-        valveBlock.add_polyline2d([(0,0), (0.5,0.3), (0.5,-0.3)], close=True)
-        valveBlock.add_polyline2d([(0,0), (-0.5,0.3), (-0.5,-0.3)], close=True)
-        valveBlock.add_hatch().paths.add_polyline_path([(0,0), (0.5,0.3), (0.5,-0.3)], is_closed=True)
-        valveBlock.add_hatch().paths.add_polyline_path([(0,0), (-0.5,0.3), (-0.5,-0.3)], is_closed=True)
+        valve_block = cad.blocks.new(name='valve')
+        valve_block.add_polyline2d([(0,0), (0.5,0.3), (0.5,-0.3)], close=True)
+        valve_block.add_polyline2d([(0,0), (-0.5,0.3), (-0.5,-0.3)], close=True)
+        valve_block.add_hatch().paths.add_polyline_path([(0,0), (0.5,0.3), (0.5,-0.3)], is_closed=True)
+        valve_block.add_hatch().paths.add_polyline_path([(0,0), (-0.5,0.3), (-0.5,-0.3)], is_closed=True)
 
-        flowDirectionArrowBlock = cad.blocks.new(name='flowDirectionArrow')
-        flowDirectionArrowBlock.add_polyline2d([(0,0), (-1,0.25), (-1,-0.25)], close=True)
-        flowDirectionArrowBlock.add_hatch().paths.add_polyline_path([(0,0), (-1,0.25), (-1,-0.25)], is_closed=True)
+        flow_direction_arrow_block = cad.blocks.new(name='flowDirectionArrow')
+        flow_direction_arrow_block.add_polyline2d([(0,0), (-1,0.25), (-1,-0.25)], close=True)
+        flow_direction_arrow_block.add_hatch().paths.add_polyline_path([(0,0), (-1,0.25), (-1,-0.25)], is_closed=True)
 
         from ezdxf.enums import TextEntityAlignment
         from ezdxf.math import Vec2
-        pumpBlock = cad.blocks.new(name='pump')
-        pumpBlock.add_circle(Vec2(0,0), 0.5)
-        pumpBlock.add_text("P", height=0.8, dxfattribs={"style": "epa2HydChart"}).set_placement((0,0), align=TextEntityAlignment.MIDDLE_CENTER)
+        pump_block = cad.blocks.new(name='pump')
+        pump_block.add_circle(Vec2(0,0), 0.5)
+        pump_block.add_text("P", height=0.8, dxfattribs={"style": "epa2HydChart"}).set_placement((0,0), align=TextEntityAlignment.MIDDLE_CENTER)
     except Exception as e:
         traceback.print_exc()
 
@@ -76,7 +76,7 @@ def insert_blocks(*args, **kwargs):
                     msg = f'閥件 {id} 圖塊已插入'
                     log.renew_log(msg, False)
                     log.set_log_to_button()
-                    progress_utils.set_progress(ForcedValue=None)
+                    progress_utils.set_progress(forced_value=None)
 
             else:
                 df = df_mapping[item]
@@ -91,7 +91,7 @@ def insert_blocks(*args, **kwargs):
                     msg = f'{mapping[item]} {id} 圖塊已插入'
                     log.renew_log(msg, False)
                     log.set_log_to_button()
-                    progress_utils.set_progress(ForcedValue=None)
+                    progress_utils.set_progress(forced_value=None)
 
     except Exception as e:
         traceback.print_exc()

@@ -126,17 +126,17 @@ def read_tanks(inpFile):
         for l in range(start-1, end):
             d = utils.parse_line_to_dictionary(lines=lines, l=l, position=2)
             elev = float(d[2])
-            MinLevel = float(d[4])
-            MaxLevel = float(d[5])
-            MinElev = elev+MinLevel
-            MaxElev = elev+MaxLevel
+            min_level = float(d[4])
+            max_level = float(d[5])
+            min_elev = elev+min_level
+            max_elev = elev+max_level
             data = {
                 'ID': d[1],
                 'Elev': elev,
-                'MinLevel': MinLevel,
-                'MaxLevel': MaxLevel,
-                'MinElev': MinElev,
-                'MaxElev': MaxElev
+                'MinLevel': min_level,
+                'MaxLevel': max_level,
+                'MinElev': min_elev,
+                'MaxElev': max_elev
             }
             if df.empty:
                 df.loc[0] = data
@@ -195,7 +195,7 @@ def read_pumps(inpFile):
         lines = open(inpFile).readlines()
 
         start_curve, end_curve = utils.line_start_end(inpFile, '[CURVES]', '[CONTROLS]', 2, 1)
-        df_pumpCurves = pd.DataFrame(columns=['ID', 'Q', 'H'])
+        df_pump_curves = pd.DataFrame(columns=['ID', 'Q', 'H'])
         for l in range(start_curve-1, end_curve):
             if 'PUMP' in lines[l]:
                 continue
@@ -211,11 +211,11 @@ def read_pumps(inpFile):
                 'Q': Q,
                 'H': H
             }
-            if df_pumpCurves.empty:
-                df_pumpCurves.loc[0] = data_curve
+            if df_pump_curves.empty:
+                df_pump_curves.loc[0] = data_curve
             else:
-                df_pumpCurves.loc[len(df_pumpCurves)] = data_curve
-        df_pumpCurves = df_pumpCurves.reset_index(drop=True)
+                df_pump_curves.loc[len(df_pump_curves)] = data_curve
+        df_pump_curves = df_pump_curves.reset_index(drop=True)
 
         start, end = utils.line_start_end(inpFile, '[PUMPS]', '[VALVES]', 2, 2)
         df = pd.DataFrame(columns=['ID', 'Node1', 'Node2', 'Node1_x', 'Node1_y', 'Node2_x', 'Node2_y', 'x', 'y', 'Q', 'H'])
@@ -233,10 +233,10 @@ def read_pumps(inpFile):
             x = 0.5*(float(Node1_x)+float(Node2_x))
             y = 0.5*(float(Node1_y)+float(Node2_y))
 
-            curveID = d[5]
-            i = int(df_pumpCurves.index[df_pumpCurves['ID'] == curveID][0])
-            Q = df_pumpCurves.at[i, 'Q']
-            H = df_pumpCurves.at[i, 'H']
+            curve_id = d[5]
+            i = int(df_pump_curves.index[df_pump_curves['ID'] == curve_id][0])
+            Q = df_pump_curves.at[i, 'Q']
+            H = df_pump_curves.at[i, 'H']
 
             data = {
                 'ID': ID,
@@ -264,7 +264,7 @@ def read_pumps(inpFile):
 def read_node_results(*args, **kwargs):
     try:
         hr = kwargs.get('hr')
-        rptFile = kwargs.get('input')
+        rpt_file = kwargs.get('input')
 
         if hr == None:
             start_str = 'Node Results:'
@@ -272,8 +272,8 @@ def read_node_results(*args, **kwargs):
         else:
             start_str = f'Node Results at {hr} Hrs:'
             end_str = f'Link Results at {hr} Hrs:'
-        start, end = utils.line_start_end(rptFile, start_str, end_str, 5, 2)
-        lines = open(rptFile).readlines()
+        start, end = utils.line_start_end(rpt_file, start_str, end_str, 5, 2)
+        lines = open(rpt_file).readlines()
         df = pd.DataFrame(columns=['ID', 'Demand', 'Head', 'Pressure'])
         for l in range(start-1, end):
             d = utils.parse_line_to_dictionary(lines=lines, l=l, position=2)
@@ -316,7 +316,7 @@ def read_link_results(*args, **kwargs):
     try:
         hr1 = kwargs.get('hr1')
         hr2 = kwargs.get('hr2')
-        rptFile = kwargs.get('input')
+        rpt_file = kwargs.get('input')
         digits= kwargs.get('digits')
 
         if hr1 == None:     # without patteren
@@ -328,15 +328,15 @@ def read_link_results(*args, **kwargs):
         elif hr1 != '' and hr2 != '':
             start_str = f'Link Results at {hr1} Hrs:'
             end_str = f'Node Results at {hr2} Hrs:'
-        start, end = utils.line_start_end(rptFile, start_str, end_str, 5, 2)
-        lines = open(rptFile).readlines()
+        start, end = utils.line_start_end(rpt_file, start_str, end_str, 5, 2)
+        lines = open(rpt_file).readlines()
         df = pd.DataFrame(columns=['ID', 'Flow', 'Velocity', 'unitHeadloss', 'Headloss'])
         for l in range(start-1, end):
             d = utils.parse_line_to_dictionary(lines=lines, l=l, position=2)
             pipe_id = d[1]
             flow = d[2]
             velocity = d[3]
-            unitHeadloss = d[4]
+            unit_headloss = d[4]
 
             # calculate headloss number:
             # 2 side in link are node:
@@ -364,7 +364,7 @@ def read_link_results(*args, **kwargs):
                 'ID': pipe_id,
                 'Flow': flow,
                 'Velocity': velocity,
-                'unitHeadloss': unitHeadloss,
+                'unitHeadloss': unit_headloss,
                 'Headloss': Headloss_str
             }
             if df.empty:

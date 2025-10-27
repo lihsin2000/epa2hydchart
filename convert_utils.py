@@ -32,12 +32,12 @@ def save_png(*args, **kwargs):
     """
     Convert SVG to PNG using a separate thread to prevent UI freezing
     """
-    pngPath = kwargs.get('pngPath')
-    svgPath = kwargs.get('svgPath')
+    png_path = kwargs.get('pngPath')
+    svg_path = kwargs.get('svgPath')
     callback = kwargs.get('callback')  # Optional callback for when conversion completes
     
     # Create and start the converter thread
-    png_thread = PngConverterThread(svgPath, pngPath)
+    png_thread = PngConverterThread(svg_path, png_path)
     
     def on_conversion_finished(success, error_msg):
         if success:
@@ -64,12 +64,12 @@ def save_dxf(*args, **kwargs):
     """
     Save DXF file with retry mechanism for file access errors
     """
-    dxfPath = kwargs.get('dxfPath')
+    dxf_path = kwargs.get('dxfPath')
     main_window_instance = kwargs.get('main_window_instance')
     
     while True:
         try:
-            globals.cad.saveas(dxfPath)
+            globals.cad.saveas(dxf_path)
             return True
         except:
             traceback.print_exc()
@@ -77,7 +77,7 @@ def save_dxf(*args, **kwargs):
             msg_box = QMessageBox(QApplication.activeWindow())
             msg_box.setIcon(QMessageBox.Icon.Critical)
             msg_box.setWindowTitle("錯誤")
-            msg_box.setText(f'無法儲存 {dxfPath}，請關閉相關檔案後重試')
+            msg_box.setText(f'無法儲存 {dxf_path}，請關閉相關檔案後重試')
             retry_button = msg_box.addButton("重試", msg_box.ButtonRole.ActionRole)
             cancel_button = msg_box.addButton("取消", msg_box.ButtonRole.ActionRole)
             msg_box.exec()
@@ -85,7 +85,7 @@ def save_dxf(*args, **kwargs):
             if msg_box.clickedButton() == retry_button:
                 continue
             elif msg_box.clickedButton() == cancel_button:
-                msg = f'[Error]無法儲存 {dxfPath}，中止匯出'
+                msg = f'[Error]無法儲存 {dxf_path}，中止匯出'
                 log.renew_log(msg, True)
                 return False
 
@@ -96,7 +96,7 @@ def save_svg(*args, **kwargs):
     try:
         msp = kwargs.get('msp')
         cad = kwargs.get('cad')
-        svgPath = kwargs.get('path')
+        svg_path = kwargs.get('path')
         
         from ezdxf.addons.drawing import Frontend, RenderContext, svg, layout, config
         msp = cad.modelspace()
@@ -112,7 +112,7 @@ def save_svg(*args, **kwargs):
             page, settings=layout.Settings(scale=1, fit_page=False)
         )
 
-        with open(svgPath, "wt", encoding="utf8") as fp:
+        with open(svg_path, "wt", encoding="utf8") as fp:
             fp.write(svg_string)
         return True
     except Exception as e:

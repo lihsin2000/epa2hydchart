@@ -9,12 +9,12 @@ if TYPE_CHECKING:
 
 def insert_pressure_annotation_leader(*args, **kwargs):
     from ezdxf.enums import TextEntityAlignment
-    HeadColor=kwargs.get('HeadColor')
-    ElevColor=kwargs.get('ElevColor')
+    head_color=kwargs.get('HeadColor')
+    elev_color=kwargs.get('ElevColor')
     width=kwargs.get('width')
-    autoLabelPost=kwargs.get('autoLabelPost')
-    pipe_boundaries=kwargs.get('pipe_boundaries', [])  # Get pipe annotation boundaries
-    drawBoundaries=kwargs.get('drawBoundaries')
+    auto_label_post=kwargs.get('autoLabelPost')
+    pipe_boundaries=kwargs.get('pipe_boundaries', [])
+    draw_boundaries=kwargs.get('drawBoundaries')
 
     boundrys:dict=[]
     try:
@@ -28,19 +28,19 @@ def insert_pressure_annotation_leader(*args, **kwargs):
             Pressure = globals.df_node_results.at[result_row, 'Pressure']
 
             if (Pressure == None) or (float(Pressure)<0):
-                PressureColor=1
+                pressure_color=1
             else:
-                PressureColor=HeadColor
+                pressure_color=head_color
 
             if (Head == None) or (float(Head)<0):
-                HeadColor=1
+                head_color_used=1
             else:
-                HeadColor=HeadColor
+                head_color_used=head_color
 
-            line_attribs={'color': HeadColor, 'default_start_width': width, 'default_end_width': width}
-            Head_attribs={'color': HeadColor, "style": "epa2HydChart"}
-            Pressure_attribs={'color': PressureColor, "style": "epa2HydChart"}
-            Elev_attribs={'color': ElevColor, "style": "epa2HydChart"}
+            line_attribs={'color': head_color_used, 'default_start_width': width, 'default_end_width': width}
+            Head_attribs={'color': head_color_used, "style": "epa2HydChart"}
+            Pressure_attribs={'color': pressure_color, "style": "epa2HydChart"}
+            Elev_attribs={'color': elev_color, "style": "epa2HydChart"}
 
             parameters={'Head':Head, 'Elev':Elev, 'Pressure':Pressure,
                         'start_x':start_x, 'start_y':start_y,
@@ -49,23 +49,23 @@ def insert_pressure_annotation_leader(*args, **kwargs):
                         'Elev_attribs':Elev_attribs,
                         'Pressure_attribs':Pressure_attribs}
 
-            if autoLabelPost:
+            if auto_label_post:
                 new_boundry=create_new_boundary(start_x=start_x, start_y=start_y, align="RightTop", id=id)
                 # Check overlap with both node boundaries and pipe annotations
-                isOverlap=is_pressure_annotation_overlapping_any_boundary(new_boundry=new_boundry, boundrys=boundrys, pipe_boundaries=pipe_boundaries, id=id, verbose=True)
-                if isOverlap == False:
+                is_overlap=is_pressure_annotation_overlapping_any_boundary(new_boundry=new_boundry, boundrys=boundrys, pipe_boundaries=pipe_boundaries, id=id, verbose=True)
+                if is_overlap == False:
                     draw_pressure_annotation_leader(parameters=parameters, align="RightTop")
-                    draw_pressure_boundary(boundry=new_boundry) if drawBoundaries else None
+                    draw_pressure_boundary(boundry=new_boundry) if draw_boundaries else None
                 else:
                     new_boundry=create_new_boundary(start_x=start_x, start_y=start_y, align="LeftTop", id=id)
-                    isOverlap=is_pressure_annotation_overlapping_any_boundary(new_boundry=new_boundry, boundrys=boundrys, pipe_boundaries=pipe_boundaries, id=id, verbose=True)
-                    if isOverlap == False:
+                    is_overlap=is_pressure_annotation_overlapping_any_boundary(new_boundry=new_boundry, boundrys=boundrys, pipe_boundaries=pipe_boundaries, id=id, verbose=True)
+                    if is_overlap == False:
                         draw_pressure_annotation_leader(parameters=parameters, align="LeftTop")
-                        draw_pressure_boundary(boundry=new_boundry) if drawBoundaries else None
+                        draw_pressure_boundary(boundry=new_boundry) if draw_boundaries else None
                     else:
                         new_boundry=create_new_boundary(start_x=start_x, start_y=start_y, align="LeftBottom", id=id)
                         draw_pressure_annotation_leader(parameters=parameters, align="LeftBottom")
-                        draw_pressure_boundary(boundry=new_boundry) if drawBoundaries else None
+                        draw_pressure_boundary(boundry=new_boundry) if draw_boundaries else None
 
                 boundrys.append(new_boundry)
             else:
@@ -73,7 +73,7 @@ def insert_pressure_annotation_leader(*args, **kwargs):
             msg= f'節點 {id} 水頭引線已完成繪圖'
             log.renew_log(msg, False)
             log.set_log_to_button()
-            progress_utils.set_progress(ForcedValue=None)
+            progress_utils.set_progress(forced_value=None)
     except Exception as e:
         traceback.print_exc()
 

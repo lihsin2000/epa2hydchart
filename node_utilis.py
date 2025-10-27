@@ -35,7 +35,7 @@ def insert_reservoir_annotation_leader(*args, **kwargs):
             msg=f'接水點 {id} 引線已完成繪圖'
             log.renew_log(msg, False)
             log.set_log_to_button()
-            progress_utils.set_progress(ForcedValue=None)
+            progress_utils.set_progress(forced_value=None)
     except Exception as e:
         traceback.print_exc()
 
@@ -63,7 +63,7 @@ def insert_pump_annotation(*args, **kwargs):
             msg= f'抽水機 {id} 已完成繪圖'
             log.renew_log(msg, False)
             log.set_log_to_button()
-            progress_utils.set_progress(ForcedValue=None)
+            progress_utils.set_progress(forced_value=None)
     except Exception as e:
         traceback.print_exc()
 
@@ -93,7 +93,7 @@ def insert_valve_annotation(color):
             msg= f'閥件 {id} 已完成繪圖'
             log.renew_log(msg, False)
             log.set_log_to_button()
-            progress_utils.set_progress(ForcedValue=None)
+            progress_utils.set_progress(forced_value=None)
     except Exception as e:
         traceback.print_exc()
 
@@ -112,11 +112,11 @@ def insert_tank_annotation_leader(*args, **kwargs):
             elev=float(globals.df_tanks.at[i,'Elev'])
             elev=f'{elev:.{digits}f}'
 
-            minElev=float(globals.df_tanks.at[i,'MinElev'])
-            minElev=f'{minElev:.{digits}f}'
+            min_elev=float(globals.df_tanks.at[i,'MinElev'])
+            min_elev=f'{min_elev:.{digits}f}'
 
-            maxElev=float(globals.df_tanks.at[i,'MaxElev'])
-            maxElev=f'{maxElev:.{digits}f}'
+            max_elev=float(globals.df_tanks.at[i,'MaxElev'])
+            max_elev=f'{max_elev:.{digits}f}'
 
             leader_up_start_x=x+globals.text_size
             leader_up_start_y=y+globals.text_size
@@ -128,12 +128,12 @@ def insert_tank_annotation_leader(*args, **kwargs):
                                 (leader_up_end_x,leader_up_end_y),
                                 (leader_up_end_x+10*globals.text_size,leader_up_end_y)], dxfattribs={'color': 210, 'default_start_width': width, 'default_end_width': width})
             globals.msp.add_text(f'___T', height=globals.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((leader_up_end_x+10*globals.text_size,leader_up_end_y+3.25*globals.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
-            globals.msp.add_text(f'Hwl:{maxElev}', height=globals.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((leader_up_end_x+10*globals.text_size,leader_up_end_y+2*globals.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
-            globals.msp.add_text(f'Mwl:{minElev}', height=globals.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((leader_up_end_x+10*globals.text_size,leader_up_end_y+0.75*globals.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
+            globals.msp.add_text(f'Hwl:{max_elev}', height=globals.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((leader_up_end_x+10*globals.text_size,leader_up_end_y+2*globals.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
+            globals.msp.add_text(f'Mwl:{min_elev}', height=globals.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((leader_up_end_x+10*globals.text_size,leader_up_end_y+0.75*globals.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
             globals.msp.add_text(f'Elev:{elev}', height=globals.text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement((leader_up_end_x+10*globals.text_size,leader_up_end_y-0.75*globals.text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
             msg= f'水池 {id} 引線已完成繪圖'
             log.renew_log(msg, False)
             log.set_log_to_button()
-            progress_utils.set_progress(ForcedValue=None)
+            progress_utils.set_progress(forced_value=None)
     except Exception as e:
         traceback.print_exc()

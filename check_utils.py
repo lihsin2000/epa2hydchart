@@ -23,11 +23,11 @@ def find_unreasonable_pipes(*args, **kwargs):
         pipe_id=row['ID']
         Node1=pipes.loc[pipes['ID']==pipe_id, 'Node1'].values[0]
         Node2=pipes.loc[pipes['ID']==pipe_id, 'Node2'].values[0]
-        Diameter=pipes.loc[pipes['ID']==pipe_id, 'Diameter'].values[0]
+        diameter=pipes.loc[pipes['ID']==pipe_id, 'Diameter'].values[0]
         Length=pipes.loc[pipes['ID']==pipe_id, 'Length'].values[0]
         links.at[index , 'Node1']=Node1
         links.at[index , 'Node2']=Node2
-        links.at[index , 'Diameter']=Diameter
+        links.at[index , 'Diameter']=diameter
         links.at[index , 'Length']=Length
         # df.at[index , 'Reason']='Too high headloss (>|{:.2f}|)'.format(config.UNIT_HEADLOSS_THRESHOLD)
     
@@ -37,12 +37,12 @@ def find_unreasonable_pipes(*args, **kwargs):
     df_headloss_unreasonable = links[abs(links['unitHeadloss'].astype(float))>=globals.UNIT_HEADLOSS_THRESHOLD].copy()
 
     for index, row in df_headloss_unreasonable.iterrows():
-        unitHeadloss=float(row['unitHeadloss'])
-        Diameter=float(row['Diameter'])
-        if Diameter >=100:
-            Diameter_suggest=((unitHeadloss/globals.UNIT_HEADLOSS_THRESHOLD)*(Diameter ** 4.8704)) ** (1/4.8704)
-            Diameter_suggest=50*(int(Diameter_suggest/50)+1)
-            df_headloss_unreasonable.loc[index , 'Diameter_suggest']=f'{Diameter_suggest:.0f}'
+        unit_headloss=float(row['unitHeadloss'])
+        diameter=float(row['Diameter'])
+        if diameter >=100:
+            diameter_suggest=((unit_headloss/globals.UNIT_HEADLOSS_THRESHOLD)*(diameter ** 4.8704)) ** (1/4.8704)
+            diameter_suggest=50*(int(diameter_suggest/50)+1)
+            df_headloss_unreasonable.loc[index , 'Diameter_suggest']=f'{diameter_suggest:.0f}'
         pass
 
     df_velocity_unreasonable = links[abs(links['Velocity'].astype(float))<globals.UNIT_VELOCITY_THRESHOLD]

@@ -47,18 +47,18 @@ def auto_size():
             x_min = min(min_xs)
             x_max = max(max_xs)
 
-            blockSizeEstimate = float(int((x_max-x_min)/1000)*10)
-            if blockSizeEstimate == 0:
-                blockSizeEstimate = 10
+            block_size_estimate = float(int((x_max-x_min)/1000)*10)
+            if block_size_estimate == 0:
+                block_size_estimate = 10
 
             globals.main_window.ui.l_block_size.setText(
-                str(blockSizeEstimate))
+                str(block_size_estimate))
             globals.main_window.ui.l_joint_size.setText(
-                str(blockSizeEstimate/4))
+                str(block_size_estimate/4))
             globals.main_window.ui.l_text_size.setText(
-                str(blockSizeEstimate/4))
+                str(block_size_estimate/4))
             globals.main_window.ui.l_leader_distance.setText(
-                str(blockSizeEstimate/2))
+                str(block_size_estimate/2))
     except Exception as e:
         traceback.print_exc()
 
@@ -228,20 +228,20 @@ def load_inp_file_to_dataframe(inpFile, showtime):
 
 def verify_inp_rpt_files_match():
     try:
-        inputAllLink = pd.concat([globals.df_pipes['ID'], globals.df_valves['ID'], globals.df_pumps['ID']])
-        inputAllLink = inputAllLink.sort_values().reset_index(drop=True)
-        outputAllLink = globals.df_link_results['ID']
-        outputAllLink = outputAllLink.sort_values().reset_index(drop=True)
+        input_all_link = pd.concat([globals.df_pipes['ID'], globals.df_valves['ID'], globals.df_pumps['ID']])
+        input_all_link = input_all_link.sort_values().reset_index(drop=True)
+        output_all_link = globals.df_link_results['ID']
+        output_all_link = output_all_link.sort_values().reset_index(drop=True)
 
-        matchLink = outputAllLink.equals(outputAllLink)
+        match_link = output_all_link.equals(output_all_link)
 
-        inputAllNode = pd.concat([globals.df_junctions['ID'], globals.df_tanks['ID'], globals.df_reservoirs['ID']])
-        inputAllNode = inputAllNode.sort_values().reset_index(drop=True)
-        outputAllNode = globals.df_node_results['ID']
-        outputAllNode = outputAllNode.sort_values().reset_index(drop=True)
+        input_all_node = pd.concat([globals.df_junctions['ID'], globals.df_tanks['ID'], globals.df_reservoirs['ID']])
+        input_all_node = input_all_node.sort_values().reset_index(drop=True)
+        output_all_node = globals.df_node_results['ID']
+        output_all_node = output_all_node.sort_values().reset_index(drop=True)
 
-        matchNode = outputAllNode.equals(inputAllNode)
-        return matchLink, matchNode
+        match_node = output_all_node.equals(input_all_node)
+        return match_link, match_node
     except Exception as e:
         traceback.print_exc()
 
@@ -256,7 +256,7 @@ def add_title(*args, **kwargs):
         ys=globals.df_coords['y'].tolist()+globals.df_vertices['y'].tolist()
         y_max=max(ys)
 
-        projName=globals.main_window.ui.l_projName.text()
+        proj_name=globals.main_window.ui.l_projName.text()
 
         # 計算Q值
         from decimal import Decimal
@@ -279,7 +279,7 @@ def add_title(*args, **kwargs):
 
         # 加入文字
         from ezdxf.enums import TextEntityAlignment
-        globals.msp.add_text(projName, height=2*globals.text_size, dxfattribs={"style": "epa2HydChart"}).set_placement((x_min,y_max+16*globals.text_size), align=TextEntityAlignment.TOP_LEFT)
+        globals.msp.add_text(proj_name, height=2*globals.text_size, dxfattribs={"style": "epa2HydChart"}).set_placement((x_min,y_max+16*globals.text_size), align=TextEntityAlignment.TOP_LEFT)
         
         if hr=='':
             globals.msp.add_text(f'Q={Q} CMD', height=2*globals.text_size, dxfattribs={"style": "epa2HydChart"}).set_placement((x_min,y_max+13*globals.text_size), align=TextEntityAlignment.TOP_LEFT)

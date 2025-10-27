@@ -25,20 +25,20 @@ def process1():
     """
 
     try:
-        inpFile = globals.inp_file
-        rptFile = globals.rpt_file
+        inp_file = globals.inp_file
+        rpt_file = globals.rpt_file
 
         digits=globals.main_window.ui.comboBox_digits.currentText()
         globals.digit_decimal=digits.count('0')-1
 
-        if inpFile and rptFile:
-            dxfPath, _ = QFileDialog.getSaveFileName(globals.main_window, "儲存", "", filter='dxf (*.dxf)')
-            file_name = os.path.basename(dxfPath)
+        if inp_file and rpt_file:
+            dxf_path, _ = QFileDialog.getSaveFileName(globals.main_window, "儲存", "", filter='dxf (*.dxf)')
+            file_name = os.path.basename(dxf_path)
 
-            if dxfPath != '':
+            if dxf_path != '':
 
-                utils.load_inp_file_to_dataframe(inpFile, showtime=True)
-                globals.output_folder=os.path.dirname(dxfPath)
+                utils.load_inp_file_to_dataframe(inp_file, showtime=True)
+                globals.output_folder=os.path.dirname(dxf_path)
                 check_utils.write_report_header()
                 pipe_dimension=check_utils.list_pipe_dimension()
                 check_utils.write_report_pipe_dimension(pipe_dimension=pipe_dimension)
@@ -48,8 +48,8 @@ def process1():
                     globals.df_link_results = read_utils.read_link_results(hr1=None, input=globals.arranged_rpt_file_path, digits=globals.digit_decimal)
                     progress_utils.set_progress(0)
                     (globals.df_node_results, globals.df_junctions) = read_utils.change_value_by_digits(digits=globals.digit_decimal)
-                    matchLink, matchNode = utils.verify_inp_rpt_files_match()
-                    process2(matchLink=matchLink, matchNode=matchNode, dxfPath=dxfPath, hr='')
+                    match_link, match_node = utils.verify_inp_rpt_files_match()
+                    process2(matchLink=match_link, matchNode=match_node, dxfPath=dxf_path, hr='')
                     
                     headloss_unreasonable_pipes, velocity_unreasonable_pipes=check_utils.find_unreasonable_pipes()
                     low_pressure_junctions, nagavite_pressure=check_utils.find_negative_low_pressure_junctions()
@@ -81,8 +81,8 @@ def process1():
 
                         progress_utils.set_progress(0)
                         
-                        matchLink, matchNode = utils.verify_inp_rpt_files_match()
-                        process2(matchLink=matchLink, matchNode=matchNode, dxfPath=dxfPath, hr=h)
+                        match_link, match_node = utils.verify_inp_rpt_files_match()
+                        process2(matchLink=match_link, matchNode=match_node, dxfPath=dxf_path, hr=h)
                         headloss_unreasonable_pipes, velocity_unreasonable_pipes=check_utils.find_unreasonable_pipes()
                         low_pressure_junctions, nagavite_pressure=check_utils.find_negative_low_pressure_junctions()
                         
@@ -103,9 +103,9 @@ def process2(*args, **kwargs):
     Moved from MainWindow class - handles DXF generation and file output
     """
     try:
-        matchLink = kwargs.get('matchLink')
-        matchNode = kwargs.get('matchNode')
-        dxfPath = kwargs.get('dxfPath')
+        match_link = kwargs.get('matchLink')
+        match_node = kwargs.get('matchNode')
+        dxf_path = kwargs.get('dxfPath')
         h = kwargs.get('hr')
 
         if h == '':
@@ -113,23 +113,23 @@ def process2(*args, **kwargs):
         else:
             hr_str = h
 
-        dictionary = os.path.dirname(dxfPath)
-        file = os.path.splitext(os.path.basename(dxfPath))[0]
+        dictionary = os.path.dirname(dxf_path)
+        file = os.path.splitext(os.path.basename(dxf_path))[0]
 
-        if matchLink and matchNode:
+        if match_link and match_node:
             msg= f'{hr_str} .rpt及.inp內容相符，開始處理'
             log.renew_log(msg, False)
             globals.cad, globals.msp = globals.main_window.create_modelspace()
 
-            tankerLeaderColor = 210
-            reservoirLeaderColor = 210
-            elevLeaderColor = headPressureLeaderColor = pumpAnnotaionColor = valveAnnotaionColor = 210
-            demandColor = 74
+            tanker_leader_color = 210
+            reservoir_leader_color = 210
+            elev_leader_color = head_pressure_leader_color = pump_annotaion_color = valve_annotaion_color = 210
+            demand_color = 74
 
-            drmandArrowBlock = globals.cad.blocks.new(name='demandArrow')
-            drmandArrowBlock.add_polyline2d(
-                [(0, 0), (0.1, -0.25), (-0.1, -0.25)], close=True, dxfattribs={'color': demandColor})
-            drmandArrowBlock.add_hatch(color=demandColor).paths.add_polyline_path(
+            drmand_arrow_block = globals.cad.blocks.new(name='demandArrow')
+            drmand_arrow_block.add_polyline2d(
+                [(0, 0), (0.1, -0.25), (-0.1, -0.25)], close=True, dxfattribs={'color': demand_color})
+            drmand_arrow_block.add_hatch(color=demand_color).paths.add_polyline_path(
                 [(0, 0), (0.1, -0.25), (-0.1, -0.25)], is_closed=True)
 
             globals.progress_steps = progress_utils.calculate_progress_steps()
@@ -143,43 +143,43 @@ def process2(*args, **kwargs):
             # Collect pipe annotation boundaries for overlap detection
             pipe_boundaries = pipe_utils.insert_pipe_annotation()
             
-            draw0cmd = globals.main_window.ui.chk_export_0cmd.isChecked()
-            autoLabelPost = globals.main_window.ui.chk_autoLabelPost.isChecked()
-            node_demand_utils.insert_demand_annotation_leader(color=demandColor, draw0cmd=draw0cmd)
+            draw_0cmd = globals.main_window.ui.chk_export_0cmd.isChecked()
+            auto_label_post = globals.main_window.ui.chk_autoLabelPost.isChecked()
+            node_demand_utils.insert_demand_annotation_leader(color=demand_color, draw0cmd=draw_0cmd)
             # Pass pipe boundaries to check for overlaps with node pressure annotations
-            node_pressure_utils.insert_pressure_annotation_leader(HeadColor=headPressureLeaderColor, 
-                                                        ElevColor=elevLeaderColor, width=globals.line_width,
-                                                        autoLabelPost=autoLabelPost,
+            node_pressure_utils.insert_pressure_annotation_leader(HeadColor=head_pressure_leader_color, 
+                                                        ElevColor=elev_leader_color, width=globals.line_width,
+                                                        autoLabelPost=auto_label_post,
                                                         pipe_boundaries=pipe_boundaries)
-            node_utilis.insert_reservoir_annotation_leader(color=reservoirLeaderColor, digits=globals.digit_decimal)
-            node_utilis.insert_tank_annotation_leader(color=tankerLeaderColor, digits=globals.digit_decimal, width=globals.line_width)
-            node_utilis.insert_pump_annotation(color=pumpAnnotaionColor, digits=globals.digit_decimal)
-            node_utilis.insert_valve_annotation(valveAnnotaionColor)
+            node_utilis.insert_reservoir_annotation_leader(color=reservoir_leader_color, digits=globals.digit_decimal)
+            node_utilis.insert_tank_annotation_leader(color=tanker_leader_color, digits=globals.digit_decimal, width=globals.line_width)
+            node_utilis.insert_pump_annotation(color=pump_annotaion_color, digits=globals.digit_decimal)
+            node_utilis.insert_valve_annotation(valve_annotaion_color)
             utils.add_title(hr_str=hr_str)
 
             hr_str = hr_str.replace(':', '-')
             if len(globals.hr_list) >= 2:
-                dxfPath = f'{dictionary}/{file}_{hr_str}.dxf'
-            dxfPathWithoutExtension = dxfPath.replace('.dxf', '')
-            svg_path = dxfPath.replace('.dxf', '.svg')
-            png_path = dxfPath.replace('.dxf', '.png')
+                dxf_path = f'{dictionary}/{file}_{hr_str}.dxf'
+            dxf_path_without_extension = dxf_path.replace('.dxf', '')
+            svg_path = dxf_path.replace('.dxf', '.svg')
+            png_path = dxf_path.replace('.dxf', '.png')
             
-            if convert_utils.save_dxf(main_window_instance=globals.main_window, dxfPath=dxfPath):
+            if convert_utils.save_dxf(main_window_instance=globals.main_window, dxfPath=dxf_path):
                 globals.export_dxf_success=True
-                msg= f'{dxfPathWithoutExtension}.dxf 匯出完成'
+                msg= f'{dxf_path_without_extension}.dxf 匯出完成'
             else:
                 globals.export_dxf_success=False
-                msg= f'[Error]{dxfPathWithoutExtension}.dxf 匯出失敗'
+                msg= f'[Error]{dxf_path_without_extension}.dxf 匯出失敗'
             log.renew_log(msg, False)
             log.set_log_to_button()
             progress_utils.set_progress(97)
 
             if convert_utils.save_svg(msp=globals.msp, cad=globals.cad, path=svg_path):
                 globals.export_svg_success=True
-                msg = f'{dxfPathWithoutExtension}.svg 匯出完成'
+                msg = f'{dxf_path_without_extension}.svg 匯出完成'
             else:
                 globals.export_svg_success=False
-                msg= f'[Error]{dxfPathWithoutExtension}.svg 匯出失敗'
+                msg= f'[Error]{dxf_path_without_extension}.svg 匯出失敗'
             log.renew_log(msg, False)
             log.set_log_to_button()
             progress_utils.set_progress(98)
@@ -188,10 +188,10 @@ def process2(*args, **kwargs):
             def on_png_complete(success):
                 if success:
                     globals.export_png_success = True
-                    msg = f'{dxfPathWithoutExtension}.png 匯出完成'
+                    msg = f'{dxf_path_without_extension}.png 匯出完成'
                 else:
                     globals.export_png_success = False
-                    msg = f'[Error]{dxfPathWithoutExtension}.png 匯出失敗'
+                    msg = f'[Error]{dxf_path_without_extension}.png 匯出失敗'
                 log.renew_log(msg, False)
                 log.set_log_to_button()
                 progress_utils.set_progress(99)
