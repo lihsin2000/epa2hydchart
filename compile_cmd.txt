@@ -1,0 +1,14 @@
+# OPTIMIZED BUILD COMMANDS - Fast First Run
+# These commands disable UPX compression which significantly improves first-run speed
+# Trade-off: Slightly larger EXE size but much faster startup time
+
+# Recommended: Use this command (no UPX, optimized)
+pyinstaller main.spec
+
+# Alternative with UPX directory (if you still want to use UPX, not recommended for speed)
+# pyinstaller --upx-dir "D:\Work\code\upx-4.1.0-win64" main.spec
+# pyinstaller --upx-dir "C:\Users\user\Downloads\code\upx-5.0.2-win64" main.spec
+
+# Nuitka alternative (optional)
+python -m nuitka  --standalone --windows-icon-from-ico=icon.ico --windows-console-mode=disable --enable-plugin=pyqt5 main.py
+python -m nuitka --follow-imports main.py --include-data-dir=example=example --include-data-dir=fonts=fonts --standalone --windows-icon-from-ico=icon.ico --windows-console-mode=disable --enable-plugin=pyqt5 --output-filename=epa2HydChart.exe --product-version=0.1.0.3

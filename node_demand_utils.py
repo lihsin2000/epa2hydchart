@@ -14,14 +14,14 @@ def insert_demand_annotation_leader(*args, **kwargs):
         color = kwargs.get('color')
         draw0cmd = kwargs.get('draw0cmd')
 
-        for i in range(0, len(globals.df_Junctions)):
-            id = globals.df_Junctions.at[i, 'ID']
-            x = float(globals.df_Junctions.at[i, 'x'])
-            y = float(globals.df_Junctions.at[i, 'y'])
+        for i in range(0, len(globals.df_junctions)):
+            id = globals.df_junctions.at[i, 'ID']
+            x = float(globals.df_junctions.at[i, 'x'])
+            y = float(globals.df_junctions.at[i, 'y'])
 
-            l = globals.df_NodeResults.index[globals.df_NodeResults['ID'] == id].tolist()[
+            l = globals.df_node_results.index[globals.df_node_results['ID'] == id].tolist()[
                 0]
-            demand = globals.df_NodeResults.at[l, 'Demand']
+            demand = globals.df_node_results.at[l, 'Demand']
 
             if draw0cmd:
                 draw_demand_leader(color=color, id=id, x=x, y=y, demand=demand,

@@ -25,10 +25,10 @@ def process1():
     """
 
     try:
-        inpFile = globals.inpFile
-        rptFile = globals.rptFile
+        inpFile = globals.inp_file
+        rptFile = globals.rpt_file
 
-        digits=globals.main_window.MainWindow.comboBox_digits.currentText()
+        digits=globals.main_window.ui.comboBox_digits.currentText()
         globals.digit_decimal=digits.count('0')-1
 
         if inpFile and rptFile:
@@ -44,10 +44,10 @@ def process1():
                 check_utils.write_report_pipe_dimension(pipe_dimension=pipe_dimension)
                 
                 if globals.hr_list == []:  # 單一時間結果
-                    globals.df_NodeResults = read_utils.read_node_results(hr=None, input=globals.arranged_rpt_file_path)
-                    globals.df_LinkResults = read_utils.read_link_results(hr1=None, input=globals.arranged_rpt_file_path, digits=globals.digit_decimal)
+                    globals.df_node_results = read_utils.read_node_results(hr=None, input=globals.arranged_rpt_file_path)
+                    globals.df_link_results = read_utils.read_link_results(hr1=None, input=globals.arranged_rpt_file_path, digits=globals.digit_decimal)
                     progress_utils.set_progress(0)
-                    (globals.df_NodeResults, globals.df_Junctions) = read_utils.change_value_by_digits(digits=globals.digit_decimal)
+                    (globals.df_node_results, globals.df_junctions) = read_utils.change_value_by_digits(digits=globals.digit_decimal)
                     matchLink, matchNode = utils.verify_inp_rpt_files_match()
                     process2(matchLink=matchLink, matchNode=matchNode, dxfPath=dxfPath, hr='')
                     
@@ -64,20 +64,20 @@ def process1():
 
                 else:   # 多時段結果
                     hr_list_select = []
-                    items = globals.main_window.MainWindow.list_hrs.selectedItems()
+                    items = globals.main_window.ui.list_hrs.selectedItems()
                     for item in items:
                         hr_list_select.append(item.text())
 
                     for h in hr_list_select:
-                        globals.df_NodeResults = read_utils.read_node_results(hr=h, input=globals.arranged_rpt_file_path)
+                        globals.df_node_results = read_utils.read_node_results(hr=h, input=globals.arranged_rpt_file_path)
                         i_hr1 = globals.hr_list.index(h)
                         i_hr2 = i_hr1 + 1
 
                         if 1 <= i_hr2 <= len(globals.hr_list) - 1:
                             hr2 = globals.hr_list[i_hr2]
-                            globals.df_LinkResults = read_utils.read_link_results(hr1=h, hr2=hr2, input=globals.arranged_rpt_file_path, digits=globals.digit_decimal)
+                            globals.df_link_results = read_utils.read_link_results(hr1=h, hr2=hr2, input=globals.arranged_rpt_file_path, digits=globals.digit_decimal)
                         elif i_hr2 == len(globals.hr_list):
-                            globals.df_LinkResults = read_utils.read_link_results(hr1=h, hr2='', input=globals.arranged_rpt_file_path, digits=globals.digit_decimal)
+                            globals.df_link_results = read_utils.read_link_results(hr1=h, hr2='', input=globals.arranged_rpt_file_path, digits=globals.digit_decimal)
 
                         progress_utils.set_progress(0)
                         
@@ -143,8 +143,8 @@ def process2(*args, **kwargs):
             # Collect pipe annotation boundaries for overlap detection
             pipe_boundaries = pipe_utils.insert_pipe_annotation()
             
-            draw0cmd = globals.main_window.MainWindow.chk_export_0cmd.isChecked()
-            autoLabelPost = globals.main_window.MainWindow.chk_autoLabelPost.isChecked()
+            draw0cmd = globals.main_window.ui.chk_export_0cmd.isChecked()
+            autoLabelPost = globals.main_window.ui.chk_autoLabelPost.isChecked()
             node_demand_utils.insert_demand_annotation_leader(color=demandColor, draw0cmd=draw0cmd)
             # Pass pipe boundaries to check for overlaps with node pressure annotations
             node_pressure_utils.insert_pressure_annotation_leader(HeadColor=headPressureLeaderColor, 

@@ -14,17 +14,18 @@ def insert_pressure_annotation_leader(*args, **kwargs):
     width=kwargs.get('width')
     autoLabelPost=kwargs.get('autoLabelPost')
     pipe_boundaries=kwargs.get('pipe_boundaries', [])  # Get pipe annotation boundaries
+    drawBoundaries=kwargs.get('drawBoundaries')
 
     boundrys:dict=[]
     try:
-        for i in range(0, len(globals.df_Junctions)):
-            id = globals.df_Junctions.at[i, 'ID']
-            start_x = float(globals.df_Junctions.at[i, 'x'])
-            start_y = float(globals.df_Junctions.at[i, 'y'])
-            result_row = globals.df_NodeResults.index[globals.df_NodeResults['ID'] == str(id)].tolist()[0]
-            Head = globals.df_NodeResults.at[result_row, 'Head']
-            Elev = globals.df_Junctions.at[i, 'Elev']
-            Pressure = globals.df_NodeResults.at[result_row, 'Pressure']
+        for i in range(0, len(globals.df_junctions)):
+            id = globals.df_junctions.at[i, 'ID']
+            start_x = float(globals.df_junctions.at[i, 'x'])
+            start_y = float(globals.df_junctions.at[i, 'y'])
+            result_row = globals.df_node_results.index[globals.df_node_results['ID'] == str(id)].tolist()[0]
+            Head = globals.df_node_results.at[result_row, 'Head']
+            Elev = globals.df_junctions.at[i, 'Elev']
+            Pressure = globals.df_node_results.at[result_row, 'Pressure']
 
             if (Pressure == None) or (float(Pressure)<0):
                 PressureColor=1
@@ -54,17 +55,17 @@ def insert_pressure_annotation_leader(*args, **kwargs):
                 isOverlap=is_pressure_annotation_overlapping_any_boundary(new_boundry=new_boundry, boundrys=boundrys, pipe_boundaries=pipe_boundaries, id=id, verbose=True)
                 if isOverlap == False:
                     draw_pressure_annotation_leader(parameters=parameters, align="RightTop")
-                    draw_pressure_boundary(boundry=new_boundry)
+                    draw_pressure_boundary(boundry=new_boundry) if drawBoundaries else None
                 else:
                     new_boundry=create_new_boundary(start_x=start_x, start_y=start_y, align="LeftTop", id=id)
                     isOverlap=is_pressure_annotation_overlapping_any_boundary(new_boundry=new_boundry, boundrys=boundrys, pipe_boundaries=pipe_boundaries, id=id, verbose=True)
                     if isOverlap == False:
                         draw_pressure_annotation_leader(parameters=parameters, align="LeftTop")
-                        draw_pressure_boundary(boundry=new_boundry)
+                        draw_pressure_boundary(boundry=new_boundry) if drawBoundaries else None
                     else:
                         new_boundry=create_new_boundary(start_x=start_x, start_y=start_y, align="LeftBottom", id=id)
                         draw_pressure_annotation_leader(parameters=parameters, align="LeftBottom")
-                        draw_pressure_boundary(boundry=new_boundry)
+                        draw_pressure_boundary(boundry=new_boundry) if drawBoundaries else None
 
                 boundrys.append(new_boundry)
             else:

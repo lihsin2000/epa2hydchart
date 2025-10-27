@@ -7,28 +7,28 @@ if TYPE_CHECKING:
 
 def calculate_progress_steps():
     # number steps for "insertBlocks"
-    steps_insertBlocks = len(globals.df_Tanks) + len(globals.df_Reservoirs) + len(globals.df_Junctions)+ len(globals.df_Pumps) + len(globals.df_Valves)
+    steps_insertBlocks = len(globals.df_tanks) + len(globals.df_reservoirs) + len(globals.df_junctions)+ len(globals.df_pumps) + len(globals.df_valves)
 
     # number steps for "insertPipeLines"
-    steps_insertPipeLines = len(globals.df_Pipes)
+    steps_insertPipeLines = len(globals.df_pipes)
 
     # number steps for "insertDemandLeader"
-    steps_insertDemandLeader = len(globals.df_Junctions)
+    steps_insertDemandLeader = len(globals.df_junctions)
 
     # number steps for "insertHeadPressureLeader"
-    steps_insertHeadPressureLeader = len(globals.df_Junctions)
+    steps_insertHeadPressureLeader = len(globals.df_junctions)
 
     # number steps for "insertReservoirsLeader"
-    steps_insertReservoirsLeader = len(globals.df_Reservoirs)
+    steps_insertReservoirsLeader = len(globals.df_reservoirs)
 
     # number steps for "insertTankLeader"
-    steps_insertTankLeader = len(globals.df_Tanks)
+    steps_insertTankLeader = len(globals.df_tanks)
 
     # number steps for "insertPumpAnnotation"
-    steps_insertPumpAnnotation = len(globals.df_Pumps)
+    steps_insertPumpAnnotation = len(globals.df_pumps)
 
     # number steps for "insertValveAnnotation"
-    steps_insertValveAnnotation = len(globals.df_Valves)
+    steps_insertValveAnnotation = len(globals.df_valves)
 
     # numbers steps for exporting files
     # steps_exportingFiles = 3  # dxf, svg, png
@@ -52,6 +52,6 @@ def set_progress(ForcedValue):
     if ForcedValue==None:
         globals.progress_value += globals.progress_space
         value=int(round(globals.progress_value,0))
-        globals.main_window.MainWindow.progressBar.setValue(value)
+        globals.main_window.ui.progressBar.setValue(value)
     else:
-        globals.main_window.MainWindow.progressBar.setValue(ForcedValue)
+        globals.main_window.ui.progressBar.setValue(ForcedValue)

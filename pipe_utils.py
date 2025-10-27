@@ -10,11 +10,11 @@ def pipe_annotation_block(link_id, start_x, start_y, end_x, end_y, i, pipe_bound
     try:
         center_x=(start_x+end_x)/2
         center_y=(start_y+end_y)/2
-        diameter=globals.df_Pipes.at[i, 'Diameter']
-        length=globals.df_Pipes.at[i, 'Length']
+        diameter=globals.df_pipes.at[i, 'Diameter']
+        length=globals.df_pipes.at[i, 'Length']
 
-        link_row=globals.df_LinkResults.index[globals.df_LinkResults['ID']==link_id].tolist()[0]
-        flow=float(globals.df_LinkResults.at[link_row, 'Flow'])
+        link_row=globals.df_link_results.index[globals.df_link_results['ID']==link_id].tolist()[0]
+        flow=float(globals.df_link_results.at[link_row, 'Flow'])
 
         import math
         rotation=math.atan2(end_y-start_y, end_x-start_x)
@@ -28,7 +28,7 @@ def pipe_annotation_block(link_id, start_x, start_y, end_x, end_y, i, pipe_bound
         else:
             rotation_annotaion=rotation
 
-        headloss=globals.df_LinkResults.at[link_row, 'Headloss']
+        headloss=globals.df_link_results.at[link_row, 'Headloss']
 
         attrib={"char_height": globals.text_size,
                 "style": "epa2HydChart",
@@ -76,12 +76,12 @@ def insert_pipe_annotation():
     
     try:
         # Convert LINK column to set for O(1) lookups
-        link_ids = set(globals.df_Vertices['LINK'])
+        link_ids = set(globals.df_vertices['LINK'])
 
         # Group by LINK for fast access
-        vertices_dict = globals.df_Vertices.groupby('LINK')[['x', 'y']].apply(lambda g: list(zip(g['x'], g['y']))).to_dict()
+        vertices_dict = globals.df_vertices.groupby('LINK')[['x', 'y']].apply(lambda g: list(zip(g['x'], g['y']))).to_dict()
 
-        for i, row in globals.df_Pipes.iterrows():
+        for i, row in globals.df_pipes.iterrows():
             link_id = row['ID']
 
             if link_id in link_ids:
@@ -138,27 +138,27 @@ def draw_pipe_polylines(*args, **kwargs):
     try:
         width=kwargs.get('width')
 
-        for i in range(0, len(globals.df_Pipes)):
-            start_x=float(globals.df_Pipes.at[i, 'Node1_x'])
-            start_y=float(globals.df_Pipes.at[i, 'Node1_y'])
-            end_x=float(globals.df_Pipes.at[i, 'Node2_x'])
-            end_y=float(globals.df_Pipes.at[i, 'Node2_y'])
+        for i in range(0, len(globals.df_pipes)):
+            start_x=float(globals.df_pipes.at[i, 'Node1_x'])
+            start_y=float(globals.df_pipes.at[i, 'Node1_y'])
+            end_x=float(globals.df_pipes.at[i, 'Node2_x'])
+            end_y=float(globals.df_pipes.at[i, 'Node2_y'])
 
-            link_id=globals.df_Pipes.at[i, 'ID']
-            if link_id in globals.df_Vertices['LINK'].tolist():
-                rows=globals.df_Vertices.index[globals.df_Vertices['LINK']==link_id].tolist()
-                firstVert_x=float(globals.df_Vertices.at[rows[0],'x'])
-                firstVert_y=float(globals.df_Vertices.at[rows[0],'y'])
+            link_id=globals.df_pipes.at[i, 'ID']
+            if link_id in globals.df_vertices['LINK'].tolist():
+                rows=globals.df_vertices.index[globals.df_vertices['LINK']==link_id].tolist()
+                firstVert_x=float(globals.df_vertices.at[rows[0],'x'])
+                firstVert_y=float(globals.df_vertices.at[rows[0],'y'])
                 globals.msp.add_polyline2d([(start_x,start_y), (firstVert_x,firstVert_y)], dxfattribs={'default_start_width': width, 'default_end_width': width})
                 for j in rows[:len(rows)-1]:
-                    x1=float(globals.df_Vertices.at[j,'x'])
-                    y1=float(globals.df_Vertices.at[j,'y'])
-                    x2=float(globals.df_Vertices.at[j+1,'x'])
-                    y2=float(globals.df_Vertices.at[j+1,'y'])
+                    x1=float(globals.df_vertices.at[j,'x'])
+                    y1=float(globals.df_vertices.at[j,'y'])
+                    x2=float(globals.df_vertices.at[j+1,'x'])
+                    y2=float(globals.df_vertices.at[j+1,'y'])
                     globals.msp.add_polyline2d([(x1,y1), (x2,y2)], dxfattribs={'default_start_width': width, 'default_end_width': width})
             
-                lastVert_x=float(globals.df_Vertices.at[rows[len(rows)-1],'x'])
-                lastVert_y=float(globals.df_Vertices.at[rows[len(rows)-1],'y'])
+                lastVert_x=float(globals.df_vertices.at[rows[len(rows)-1],'x'])
+                lastVert_y=float(globals.df_vertices.at[rows[len(rows)-1],'y'])
                 globals.msp.add_polyline2d([(lastVert_x,lastVert_y), (end_x,end_y)], dxfattribs={'default_start_width': width, 'default_end_width': width})
             else:
                 globals.msp.add_polyline2d([(end_x,end_y), (start_x,start_y)], dxfattribs={'default_start_width': width, 'default_end_width': width})

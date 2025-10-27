@@ -1,4 +1,0 @@
-pyinstaller --upx-dir "D:\Work\code\upx-4.1.0-win64" main.spec
-
-python -m nuitka  --standalone --windows-icon-from-ico=icon.ico --windows-console-mode=disable --enable-plugin=pyqt5 main.py
-python -m nuitka --follow-imports main.py --include-data-dir=example=example --include-data-dir=fonts=fonts --standalone --windows-icon-from-ico=icon.ico --windows-console-mode=disable --enable-plugin=pyqt5 --output-filename=epa2HydChart.exe --product-version=0.1.0.3

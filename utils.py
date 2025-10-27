@@ -14,21 +14,21 @@ if TYPE_CHECKING:
 
 def auto_size():
     try:
-        items = [globals.main_window.MainWindow.l_block_size,
-                 globals.main_window.MainWindow.l_joint_size,
-                 globals.main_window.MainWindow.l_text_size,
-                 globals.main_window.MainWindow.l_leader_distance]
+        items = [globals.main_window.ui.l_block_size,
+                 globals.main_window.ui.l_joint_size,
+                 globals.main_window.ui.l_text_size,
+                 globals.main_window.ui.l_leader_distance]
 
-        if globals.main_window.MainWindow.chk_autoSize.isChecked():
+        if globals.main_window.ui.chk_autoSize.isChecked():
             for item in items:
                 item.setEnabled(False)
         else:
             for item in items:
                 item.setEnabled(True)
 
-        if globals.main_window.MainWindow.chk_autoSize.isChecked() and globals.inpFile:
-            df_Vertices = read_utils.read_vertices(globals.inpFile)
-            df_Coords = read_utils.read_coords(globals.inpFile)
+        if globals.main_window.ui.chk_autoSize.isChecked() and globals.inp_file:
+            df_Vertices = read_utils.read_vertices(globals.inp_file)
+            df_Coords = read_utils.read_coords(globals.inp_file)
             try:
                 coords = df_Coords[['x', 'y']]
             except:
@@ -51,53 +51,17 @@ def auto_size():
             if blockSizeEstimate == 0:
                 blockSizeEstimate = 10
 
-            globals.main_window.MainWindow.l_block_size.setText(
+            globals.main_window.ui.l_block_size.setText(
                 str(blockSizeEstimate))
-            globals.main_window.MainWindow.l_joint_size.setText(
+            globals.main_window.ui.l_joint_size.setText(
                 str(blockSizeEstimate/4))
-            globals.main_window.MainWindow.l_text_size.setText(
+            globals.main_window.ui.l_text_size.setText(
                 str(blockSizeEstimate/4))
-            globals.main_window.MainWindow.l_leader_distance.setText(
+            globals.main_window.ui.l_leader_distance.setText(
                 str(blockSizeEstimate/2))
     except Exception as e:
         traceback.print_exc()
 
-# def line2dict(lines, l, position):
-#     """
-#     Converts a line of text into a dictionary by splitting it into components.
-
-#     Args:
-#         lines (list): A list of strings, typically read from a file
-#         l (int): The index of the line to process from the lines list
-#         position (int): The position in the split line to start processing for special dash handling
-
-#     Returns:
-#         list: A list of values split from the processed line
-#     """
-#     try:
-#         dash_in_string=False
-#         text = lines[l].replace('\n', '')
-#         # text=text.replace('-', ' -')
-#         text = re.sub(r'\s+', ',', text)
-#         # text = text[:len(text)-1]
-#         d = text.split(',')
-#         for i in range(position,len(d)):
-#             item=d[i]
-#             position_for_dash=item.find('-')
-#             if '-' in item and position_for_dash != 0:
-#                 dash_in_string=True
-#                 break
-
-#         if dash_in_string:
-#             text_after_position=','.join(d[position:])
-#             text_after_position=text_after_position.replace('-', ',-')
-#             text_new=','.join(d[0:position])+','+text_after_position
-#             d = text_new.split(',')
-#             return d
-#         else:
-#             return d
-#     except Exception as e:
-#         traceback.print_exc()
 
 def parse_line_to_dictionary(lines, l, position):
     """
@@ -215,65 +179,65 @@ def load_inp_file_to_dataframe(inpFile, showtime):
 
     try:
         t0=time.time()
-        globals.df_Coords=read_utils.read_coords(inpFile)
+        globals.df_coords=read_utils.read_coords(inpFile)
         t1=time.time()
         if showtime:
-            globals.main_window.MainWindow.browser_log.append(f'節點坐標讀取完畢({t1-t0:.2f}s)')
+            globals.main_window.ui.browser_log.append(f'節點坐標讀取完畢({t1-t0:.2f}s)')
         QCoreApplication.processEvents()
-        globals.df_Junctions=read_utils.read_junctions(inpFile)
+        globals.df_junctions=read_utils.read_junctions(inpFile)
         t2=time.time()
         if showtime:
-            globals.main_window.MainWindow.browser_log.append(f'節點參數讀取完畢({t2-t1:.2f}s)')
+            globals.main_window.ui.browser_log.append(f'節點參數讀取完畢({t2-t1:.2f}s)')
         QCoreApplication.processEvents()
-        globals.df_Reservoirs=read_utils.read_reservoirs(inpFile)
+        globals.df_reservoirs=read_utils.read_reservoirs(inpFile)
         t3=time.time()
         if showtime:
-            globals.main_window.MainWindow.browser_log.append(f'接水點參數讀取完畢({t3-t2:.2f}s)')
+            globals.main_window.ui.browser_log.append(f'接水點參數讀取完畢({t3-t2:.2f}s)')
         QCoreApplication.processEvents()
-        globals.df_Tanks=read_utils.read_tanks(inpFile)
+        globals.df_tanks=read_utils.read_tanks(inpFile)
         t4=time.time()
         if showtime:
-            globals.main_window.MainWindow.browser_log.append(f'水池參數讀取完畢({t4-t3:.2f}s)')
+            globals.main_window.ui.browser_log.append(f'水池參數讀取完畢({t4-t3:.2f}s)')
         QCoreApplication.processEvents()
-        globals.df_Pumps=read_utils.read_pumps(inpFile)
+        globals.df_pumps=read_utils.read_pumps(inpFile)
         t5=time.time()
         if showtime:
-            globals.main_window.MainWindow.browser_log.append(f'抽水機參數讀取完畢({t5-t4:.2f}s)')
+            globals.main_window.ui.browser_log.append(f'抽水機參數讀取完畢({t5-t4:.2f}s)')
         QCoreApplication.processEvents()
-        globals.df_Valves=read_utils.read_valves(inpFile)
+        globals.df_valves=read_utils.read_valves(inpFile)
         t6=time.time()
         if showtime:
-            globals.main_window.MainWindow.browser_log.append(f'閥件參數讀取完畢({t6-t5:.2f}s)')
+            globals.main_window.ui.browser_log.append(f'閥件參數讀取完畢({t6-t5:.2f}s)')
         QCoreApplication.processEvents()
-        globals.df_Pipes=read_utils.read_pipes(inpFile)
+        globals.df_pipes=read_utils.read_pipes(inpFile)
         t7=time.time()
         if showtime:
-            globals.main_window.MainWindow.browser_log.append(f'管線參數讀取完畢({t7-t6:.2f}s)')
+            globals.main_window.ui.browser_log.append(f'管線參數讀取完畢({t7-t6:.2f}s)')
         QCoreApplication.processEvents()
-        globals.df_Vertices=read_utils.read_vertices(inpFile)
+        globals.df_vertices=read_utils.read_vertices(inpFile)
         t8=time.time()
         if showtime:
-            globals.main_window.MainWindow.browser_log.append(f'管線坐標讀取完畢({t8-t7:.2f}s)')
+            globals.main_window.ui.browser_log.append(f'管線坐標讀取完畢({t8-t7:.2f}s)')
         QCoreApplication.processEvents()
-        # return (globals.df_Coords, globals.df_Junctions, globals.df_Reservoirs,
-        #         globals.df_Tanks, globals.df_Pumps, globals.df_Valves, globals.df_Pipes,
-        #         globals.df_Vertices)
+        # return (globals.df_coords, globals.df_junctions, globals.df_reservoirs,
+        #         globals.df_tanks, globals.df_pumps, globals.df_valves, globals.df_pipes,
+        #         globals.df_vertices)
     except Exception as e:
         traceback.print_exc()
 
 
 def verify_inp_rpt_files_match():
     try:
-        inputAllLink = pd.concat([globals.df_Pipes['ID'], globals.df_Valves['ID'], globals.df_Pumps['ID']])
+        inputAllLink = pd.concat([globals.df_pipes['ID'], globals.df_valves['ID'], globals.df_pumps['ID']])
         inputAllLink = inputAllLink.sort_values().reset_index(drop=True)
-        outputAllLink = globals.df_LinkResults['ID']
+        outputAllLink = globals.df_link_results['ID']
         outputAllLink = outputAllLink.sort_values().reset_index(drop=True)
 
         matchLink = outputAllLink.equals(outputAllLink)
 
-        inputAllNode = pd.concat([globals.df_Junctions['ID'], globals.df_Tanks['ID'], globals.df_Reservoirs['ID']])
+        inputAllNode = pd.concat([globals.df_junctions['ID'], globals.df_tanks['ID'], globals.df_reservoirs['ID']])
         inputAllNode = inputAllNode.sort_values().reset_index(drop=True)
-        outputAllNode = globals.df_NodeResults['ID']
+        outputAllNode = globals.df_node_results['ID']
         outputAllNode = outputAllNode.sort_values().reset_index(drop=True)
 
         matchNode = outputAllNode.equals(inputAllNode)
@@ -286,29 +250,29 @@ def add_title(*args, **kwargs):
         hr=kwargs.get('hr_str')
 
         # 計算左上角座標
-        xs=globals.df_Coords['x'].tolist()+globals.df_Vertices['x'].tolist()
+        xs=globals.df_coords['x'].tolist()+globals.df_vertices['x'].tolist()
         x_min=min(xs)
 
-        ys=globals.df_Coords['y'].tolist()+globals.df_Vertices['y'].tolist()
+        ys=globals.df_coords['y'].tolist()+globals.df_vertices['y'].tolist()
         y_max=max(ys)
 
-        projName=globals.main_window.MainWindow.l_projName.text()
+        projName=globals.main_window.ui.l_projName.text()
 
         # 計算Q值
         from decimal import Decimal
         Q=0
-        for i in range(0, len(globals.df_Junctions)):
-            id=globals.df_Junctions.at[i,'ID']
-            row=globals.df_NodeResults.index[globals.df_NodeResults['ID']==id].tolist()[0]
-            if globals.df_NodeResults.at[row, 'Demand'] != None:
-                Q=Q+Decimal(globals.df_NodeResults.at[row, 'Demand'])
+        for i in range(0, len(globals.df_junctions)):
+            id=globals.df_junctions.at[i,'ID']
+            row=globals.df_node_results.index[globals.df_node_results['ID']==id].tolist()[0]
+            if globals.df_node_results.at[row, 'Demand'] != None:
+                Q=Q+Decimal(globals.df_node_results.at[row, 'Demand'])
             else:
                 msg= f'[Error]節點 {id} Demand數值錯誤，Q值總計可能有誤'
                 log.renew_log(msg, False)
 
         # 匯整C值
         C_str=''
-        Cs=globals.df_Pipes['Roughness'].unique()
+        Cs=globals.df_pipes['Roughness'].unique()
         for c in Cs:
             C_str=C_str+f'{c},'
         C_str=C_str[:len(C_str)-1]

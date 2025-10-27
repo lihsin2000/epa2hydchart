@@ -3,8 +3,8 @@ import globals
 import traceback
 
 def find_negative_low_pressure_junctions(*args, **kwargs):
-    df= globals.df_NodeResults
-    reservoirs=globals.df_Reservoirs
+    df= globals.df_node_results
+    reservoirs=globals.df_reservoirs
     df=df[~df['ID'].isin(reservoirs['ID'])]
     df_nagavite_pressure = df[df['Pressure'].astype(float)<globals.NAGAVITE_PRESSURE_THRESHOLD]
     df_low_pressure_junctions = df[df['Pressure'].astype(float)<globals.LOW_PRESSURE_THRESHOLD]
@@ -12,29 +12,29 @@ def find_negative_low_pressure_junctions(*args, **kwargs):
 
 
 def find_unreasonable_pipes(*args, **kwargs):
-    df= globals.df_LinkResults
-    pipes=globals.df_Pipes
-    pumps= globals.df_Pumps
-    valves= globals.df_Valves
-    df=df[~df['ID'].isin(pumps['ID'])]
-    df=df[~df['ID'].isin(valves['ID'])]
+    links= globals.df_link_results
+    pipes=globals.df_pipes
+    pumps= globals.df_pumps
+    valves= globals.df_valves
+    links=links[~links['ID'].isin(pumps['ID'])]
+    links=links[~links['ID'].isin(valves['ID'])]
 
-    for index, row in df.iterrows():
+    for index, row in links.iterrows():
         pipe_id=row['ID']
         Node1=pipes.loc[pipes['ID']==pipe_id, 'Node1'].values[0]
         Node2=pipes.loc[pipes['ID']==pipe_id, 'Node2'].values[0]
         Diameter=pipes.loc[pipes['ID']==pipe_id, 'Diameter'].values[0]
         Length=pipes.loc[pipes['ID']==pipe_id, 'Length'].values[0]
-        df.at[index , 'Node1']=Node1
-        df.at[index , 'Node2']=Node2
-        df.at[index , 'Diameter']=Diameter
-        df.at[index , 'Length']=Length
+        links.at[index , 'Node1']=Node1
+        links.at[index , 'Node2']=Node2
+        links.at[index , 'Diameter']=Diameter
+        links.at[index , 'Length']=Length
         # df.at[index , 'Reason']='Too high headloss (>|{:.2f}|)'.format(config.UNIT_HEADLOSS_THRESHOLD)
     
     # df=df.drop(columns=['index'])
-    df=df.reset_index(drop=True)
+    links=links.reset_index(drop=True)
 
-    df_headloss_unreasonable = df[abs(df['unitHeadloss'].astype(float))>=globals.UNIT_HEADLOSS_THRESHOLD].copy()
+    df_headloss_unreasonable = links[abs(links['unitHeadloss'].astype(float))>=globals.UNIT_HEADLOSS_THRESHOLD].copy()
 
     for index, row in df_headloss_unreasonable.iterrows():
         unitHeadloss=float(row['unitHeadloss'])
@@ -45,13 +45,13 @@ def find_unreasonable_pipes(*args, **kwargs):
             df_headloss_unreasonable.loc[index , 'Diameter_suggest']=f'{Diameter_suggest:.0f}'
         pass
 
-    df_velocity_unreasonable = df[abs(df['Velocity'].astype(float))<globals.UNIT_VELOCITY_THRESHOLD]
-    df_velocity_unreasonable = df[(df['Diameter'].astype(int))>100]
+    df_velocity_unreasonable = links[abs(links['Velocity'].astype(float))<globals.UNIT_VELOCITY_THRESHOLD]
+    df_velocity_unreasonable = links[(links['Diameter'].astype(int))>100]
     return df_headloss_unreasonable, df_velocity_unreasonable
 
 def list_pipe_dimension(*args, **kwargs):
     df=pd.DataFrame(columns=['Diameter', 'Amount'])
-    pipes=globals.df_Pipes
+    pipes=globals.df_pipes
     unique_diameters=pipes['Diameter'].unique().tolist()
     unique_diameters.sort()
     # unique_diameters=[int(x) for x in unique_diameters]

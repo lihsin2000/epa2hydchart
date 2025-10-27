@@ -13,11 +13,11 @@ def insert_reservoir_annotation_leader(*args, **kwargs):
     digits= kwargs.get('digits')
 
     try:
-        for i in range(0, len(globals.df_Reservoirs)):
-            id=globals.df_Reservoirs.at[i,'ID']
-            x=float(globals.df_Reservoirs.at[i,'x'])
-            y=float(globals.df_Reservoirs.at[i,'y'])
-            head=float(globals.df_Reservoirs.at[i,'Head'])
+        for i in range(0, len(globals.df_reservoirs)):
+            id=globals.df_reservoirs.at[i,'ID']
+            x=float(globals.df_reservoirs.at[i,'x'])
+            y=float(globals.df_reservoirs.at[i,'y'])
+            head=float(globals.df_reservoirs.at[i,'Head'])
             head=f'{head:.{digits}f}'
 
             leader_up_start_x=x+globals.text_size
@@ -44,13 +44,13 @@ def insert_pump_annotation(*args, **kwargs):
     color=kwargs.get('color')
     digits=kwargs.get('digits')
     try:
-        for i in range(0, len(globals.df_Pumps)):
-            id=globals.df_Pumps.at[i,'ID']
-            x=float(globals.df_Pumps.at[i,'x'])
-            y=float(globals.df_Pumps.at[i,'y'])
+        for i in range(0, len(globals.df_pumps)):
+            id=globals.df_pumps.at[i,'ID']
+            x=float(globals.df_pumps.at[i,'x'])
+            y=float(globals.df_pumps.at[i,'y'])
 
-            Q=float(globals.df_Pumps.at[i,'Q'])
-            H=float(globals.df_Pumps.at[i,'H'])
+            Q=float(globals.df_pumps.at[i,'Q'])
+            H=float(globals.df_pumps.at[i,'H'])
 
             Q_str=f"{Q:.{digits}f}"
             H_str=f"{H:.{digits}f}"
@@ -70,20 +70,20 @@ def insert_pump_annotation(*args, **kwargs):
 def insert_valve_annotation(color):
     from ezdxf.enums import TextEntityAlignment
     try:
-        for i in range(0, len(globals.df_Valves)):
-            id=globals.df_Valves.at[i,'ID']
+        for i in range(0, len(globals.df_valves)):
+            id=globals.df_valves.at[i,'ID']
 
-            x1=float(globals.df_Valves.at[i,'Node1_x'])
-            y1=float(globals.df_Valves.at[i,'Node1_y'])
+            x1=float(globals.df_valves.at[i,'Node1_x'])
+            y1=float(globals.df_valves.at[i,'Node1_y'])
 
-            x2=float(globals.df_Valves.at[i,'Node2_x'])
-            y2=float(globals.df_Valves.at[i,'Node2_y'])
+            x2=float(globals.df_valves.at[i,'Node2_x'])
+            y2=float(globals.df_valves.at[i,'Node2_y'])
 
             x=0.5*(x1+x2)
             y=0.5*(y1+y2)
 
-            Type=globals.df_Valves.at[i,'Type']
-            Setting=globals.df_Valves.at[i,'Setting']
+            Type=globals.df_valves.at[i,'Type']
+            Setting=globals.df_valves.at[i,'Setting']
 
             offset=[globals.block_size+0.75*globals.text_size,
                     globals.block_size+2*globals.text_size]
@@ -104,18 +104,18 @@ def insert_tank_annotation_leader(*args, **kwargs):
     digits= kwargs.get('digits')
     width=kwargs.get('width')
     try:
-        for i in range(0, len(globals.df_Tanks)):
-            id=globals.df_Tanks.at[i,'ID']
-            x=float(globals.df_Tanks.at[i,'x'])
-            y=float(globals.df_Tanks.at[i,'y'])
+        for i in range(0, len(globals.df_tanks)):
+            id=globals.df_tanks.at[i,'ID']
+            x=float(globals.df_tanks.at[i,'x'])
+            y=float(globals.df_tanks.at[i,'y'])
 
-            elev=float(globals.df_Tanks.at[i,'Elev'])
+            elev=float(globals.df_tanks.at[i,'Elev'])
             elev=f'{elev:.{digits}f}'
 
-            minElev=float(globals.df_Tanks.at[i,'MinElev'])
+            minElev=float(globals.df_tanks.at[i,'MinElev'])
             minElev=f'{minElev:.{digits}f}'
 
-            maxElev=float(globals.df_Tanks.at[i,'MaxElev'])
+            maxElev=float(globals.df_tanks.at[i,'MaxElev'])
             maxElev=f'{maxElev:.{digits}f}'
 
             leader_up_start_x=x+globals.text_size

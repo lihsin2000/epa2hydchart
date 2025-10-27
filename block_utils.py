@@ -48,16 +48,16 @@ def insert_blocks(*args, **kwargs):
                 'pump': '抽水機',
                 'valve': '閥件'}
 
-        df_mapping = {'tank': globals.df_Tanks,
-                    'reservoir': globals.df_Reservoirs,
-                    'junction': globals.df_Junctions,
-                    'pump': globals.df_Pumps,
-                    'valve': globals.df_Valves}
+        df_mapping = {'tank': globals.df_tanks,
+                    'reservoir': globals.df_reservoirs,
+                    'junction': globals.df_junctions,
+                    'pump': globals.df_pumps,
+                    'valve': globals.df_valves}
         
         for item in ['tank', 'reservoir', 'junction', 'pump', 'valve']:
             if item == 'valve':
                 import math
-                df = globals.df_Valves
+                df = globals.df_valves
                 for i in range(0, len(df)):
                     id = df.at[i,'ID']
                     x1 = float(df.at[i,'Node1_x'])
