@@ -1,6 +1,9 @@
-import pandas as pd
 import globals
 import traceback
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 def find_negative_low_pressure_junctions(*args, **kwargs):
     df= globals.df_node_results
@@ -50,6 +53,7 @@ def find_unreasonable_pipes(*args, **kwargs):
     return df_headloss_unreasonable, df_velocity_unreasonable
 
 def list_pipe_dimension(*args, **kwargs):
+    import pandas as pd
     df=pd.DataFrame(columns=['Diameter', 'Amount'])
     pipes=globals.df_pipes
     unique_diameters=pipes['Diameter'].unique().tolist()

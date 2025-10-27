@@ -24,9 +24,7 @@ def lazy_import_process():
 
 def lazy_import_ezdxf():
     import ezdxf
-    from ezdxf.document import Drawing
-    from ezdxf.layouts import Modelspace
-    return ezdxf, Drawing, Modelspace
+    return ezdxf
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -44,14 +42,15 @@ class MainWindow(QMainWindow):
         
     def create_modelspace(self, *args, **kwargs):
         try:
-            ezdxf, Drawing, Modelspace = lazy_import_ezdxf()
-            cad: Drawing = ezdxf.new()
-            msp: Modelspace = cad.modelspace()
+            ezdxf = lazy_import_ezdxf()
+            cad = ezdxf.new()
+            msp = cad.modelspace()
             cad.styles.new("epa2HydChart", dxfattribs={"font": "Microsoft JhengHei"})
 
             return cad, msp
         except Exception as e:
             traceback.print_exc()
+            return None, None
 
     def reset_form_to_defaults(self):
         self.ui.l_block_size.setText(str(globals.BLOCK_SIZE_DEFAULT))

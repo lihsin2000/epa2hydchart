@@ -1,5 +1,4 @@
 import traceback
-import pandas as pd
 import globals
 import utils
 from PyQt6.QtWidgets import QMessageBox
@@ -7,9 +6,11 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from main import MainWindow
+    import pandas as pd
 
 
 def read_vertices(inpFile):
+    import pandas as pd
     try:
         start, end = utils.line_start_end(inpFile, '[VERTICES]', '[LABELS]', 2, 2)
         lines = open(inpFile).readlines()
@@ -25,6 +26,7 @@ def read_vertices(inpFile):
 
 
 def read_pipes(inpFile):
+    import pandas as pd
     try:
         start, end = utils.line_start_end(inpFile, '[PIPES]', '[PUMPS]', 2, 2)
         lines = open(inpFile).readlines()
@@ -52,6 +54,7 @@ def read_pipes(inpFile):
 
 
 def read_coords(inpFile):
+    import pandas as pd
     try:
         start, end = utils.line_start_end(inpFile, '[COORDINATES]', '[VERTICES]', 2, 2)
         lines = open(inpFile).readlines()
@@ -74,6 +77,7 @@ def read_coords(inpFile):
 
 
 def read_junctions(inpFile):
+    import pandas as pd
     try:
         start, end = utils.line_start_end(inpFile, '[JUNCTIONS]', '[RESERVOIRS]', 2, 2)
         lines = open(inpFile).readlines()
@@ -97,6 +101,7 @@ def read_junctions(inpFile):
 
 
 def read_reservoirs(inpFile):
+    import pandas as pd
     try:
         start, end = utils.line_start_end(inpFile, '[RESERVOIRS]', '[TANKS]', 2, 2)
         lines = open(inpFile).readlines()
@@ -119,6 +124,7 @@ def read_reservoirs(inpFile):
 
 
 def read_tanks(inpFile):
+    import pandas as pd
     try:
         start, end = utils.line_start_end(inpFile, '[TANKS]', '[PIPES]', 2, 2)
         lines = open(inpFile).readlines()
@@ -150,6 +156,7 @@ def read_tanks(inpFile):
 
 
 def read_valves(inpFile):
+    import pandas as pd
     try:
         start, end = utils.line_start_end(inpFile, '[VALVES]', '[TAGS]', 2, 2)
         lines = open(inpFile).readlines()
@@ -191,6 +198,7 @@ def read_valves(inpFile):
 
 
 def read_pumps(inpFile):
+    import pandas as pd
     try:
         lines = open(inpFile).readlines()
 
@@ -262,6 +270,7 @@ def read_pumps(inpFile):
 
 
 def read_node_results(*args, **kwargs):
+    import pandas as pd
     try:
         hr = kwargs.get('hr')
         rpt_file = kwargs.get('input')
@@ -313,6 +322,7 @@ def read_node_results(*args, **kwargs):
 
 
 def read_link_results(*args, **kwargs):
+    import pandas as pd
     try:
         hr1 = kwargs.get('hr1')
         hr2 = kwargs.get('hr2')

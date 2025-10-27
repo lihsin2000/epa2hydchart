@@ -1,11 +1,11 @@
 
-import pandas as pd
 from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from main import MainWindow
     from ezdxf.document import Drawing
     from ezdxf.layouts import Modelspace
+    import pandas as pd
 
 # main window instance
 main_window: Optional['MainWindow'] = None
@@ -29,18 +29,18 @@ output_folder = None
 proj_name = None
 
 hr_list = []
-df_node_results: pd.DataFrame = pd.DataFrame()
-df_link_results: pd.DataFrame = pd.DataFrame()
+df_node_results = None  # Will be initialized as pd.DataFrame when needed
+df_link_results = None  # Will be initialized as pd.DataFrame when needed
 
 arranged_rpt_file_path = None
-df_coords: Optional[pd.DataFrame] = None
-df_junctions: Optional[pd.DataFrame] = None
-df_reservoirs: Optional[pd.DataFrame] = None
-df_tanks: Optional[pd.DataFrame] = None
-df_pumps: Optional[pd.DataFrame] = None
-df_valves: Optional[pd.DataFrame] = None
-df_pipes: Optional[pd.DataFrame] = None
-df_vertices: Optional[pd.DataFrame] = None
+df_coords = None  # Optional[pd.DataFrame]
+df_junctions = None  # Optional[pd.DataFrame]
+df_reservoirs = None  # Optional[pd.DataFrame]
+df_tanks = None  # Optional[pd.DataFrame]
+df_pumps = None  # Optional[pd.DataFrame]
+df_valves = None  # Optional[pd.DataFrame]
+df_pipes = None  # Optional[pd.DataFrame]
+df_vertices = None  # Optional[pd.DataFrame]
 
 cad: Optional['Drawing'] = None
 msp: Optional['Modelspace'] = None

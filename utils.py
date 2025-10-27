@@ -1,5 +1,4 @@
 import globals
-import pandas as pd
 import re
 import traceback
 import read_utils
@@ -10,9 +9,11 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from main import MainWindow
+    import pandas as pd
 
 
 def auto_size():
+    import pandas as pd
     try:
         items = [globals.main_window.ui.l_block_size,
                  globals.main_window.ui.l_joint_size,
@@ -227,6 +228,7 @@ def load_inp_file_to_dataframe(inpFile, showtime):
 
 
 def verify_inp_rpt_files_match():
+    import pandas as pd
     try:
         input_all_link = pd.concat([globals.df_pipes['ID'], globals.df_valves['ID'], globals.df_pumps['ID']])
         input_all_link = input_all_link.sort_values().reset_index(drop=True)
