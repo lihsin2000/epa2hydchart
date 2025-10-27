@@ -48,7 +48,7 @@ def calculate_progress_steps():
     # print(f'steps_insertValveAnnotation:{steps_insertValveAnnotation}')
     return total_steps
 
-def set_progress(forced_value):
+def set_progress_bar(forced_value):
     if forced_value==None:
         globals.progress_value += globals.progress_space
         value=int(round(globals.progress_value,0))

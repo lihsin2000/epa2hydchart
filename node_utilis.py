@@ -35,7 +35,7 @@ def insert_reservoir_annotation_leader(*args, **kwargs):
             msg=f'接水點 {id} 引線已完成繪圖'
             log.renew_log(msg, False)
             log.set_log_to_button()
-            progress_utils.set_progress(forced_value=None)
+            progress_utils.set_progress_bar(forced_value=None)
     except Exception as e:
         traceback.print_exc()
 
@@ -63,7 +63,7 @@ def insert_pump_annotation(*args, **kwargs):
             msg= f'抽水機 {id} 已完成繪圖'
             log.renew_log(msg, False)
             log.set_log_to_button()
-            progress_utils.set_progress(forced_value=None)
+            progress_utils.set_progress_bar(forced_value=None)
     except Exception as e:
         traceback.print_exc()
 
@@ -93,7 +93,7 @@ def insert_valve_annotation(color):
             msg= f'閥件 {id} 已完成繪圖'
             log.renew_log(msg, False)
             log.set_log_to_button()
-            progress_utils.set_progress(forced_value=None)
+            progress_utils.set_progress_bar(forced_value=None)
     except Exception as e:
         traceback.print_exc()
 
@@ -134,6 +134,6 @@ def insert_tank_annotation_leader(*args, **kwargs):
             msg= f'水池 {id} 引線已完成繪圖'
             log.renew_log(msg, False)
             log.set_log_to_button()
-            progress_utils.set_progress(forced_value=None)
+            progress_utils.set_progress_bar(forced_value=None)
     except Exception as e:
         traceback.print_exc()

@@ -46,7 +46,7 @@ def process1():
                 if globals.hr_list == []:  # 單一時間結果
                     globals.df_node_results = read_utils.read_node_results(hr=None, input=globals.arranged_rpt_file_path)
                     globals.df_link_results = read_utils.read_link_results(hr1=None, input=globals.arranged_rpt_file_path, digits=globals.digit_decimal)
-                    progress_utils.set_progress(0)
+                    progress_utils.set_progress_bar(0)
                     (globals.df_node_results, globals.df_junctions) = read_utils.change_value_by_digits(digits=globals.digit_decimal)
                     match_link, match_node = utils.verify_inp_rpt_files_match()
                     process2(matchLink=match_link, matchNode=match_node, dxfPath=dxf_path, hr='')
@@ -79,7 +79,7 @@ def process1():
                         elif i_hr2 == len(globals.hr_list):
                             globals.df_link_results = read_utils.read_link_results(hr1=h, hr2='', input=globals.arranged_rpt_file_path, digits=globals.digit_decimal)
 
-                        progress_utils.set_progress(0)
+                        progress_utils.set_progress_bar(0)
                         
                         match_link, match_node = utils.verify_inp_rpt_files_match()
                         process2(matchLink=match_link, matchNode=match_node, dxfPath=dxf_path, hr=h)
@@ -133,13 +133,13 @@ def process2(*args, **kwargs):
                 [(0, 0), (0.1, -0.25), (-0.1, -0.25)], is_closed=True)
 
             globals.progress_steps = progress_utils.calculate_progress_steps()
-            globals.progress_space= 95 / globals.progress_steps
-            globals.progress_value=0
+            globals.progress_space = 95 / globals.progress_steps
+            globals.progress_value = 0
             
             block_utils.create_blocks(globals.cad)
-            block_utils.insert_blocks(width=globals.line_width)
+            block_utils.insert_blocks(width = globals.line_width)
 
-            pipe_utils.draw_pipe_polylines(width=globals.line_width)
+            pipe_utils.draw_pipe_polylines(width = globals.line_width)
             # Collect pipe annotation boundaries for overlap detection
             pipe_boundaries = pipe_utils.insert_pipe_annotation()
             
@@ -172,7 +172,7 @@ def process2(*args, **kwargs):
                 msg= f'[Error]{dxf_path_without_extension}.dxf 匯出失敗'
             log.renew_log(msg, False)
             log.set_log_to_button()
-            progress_utils.set_progress(97)
+            progress_utils.set_progress_bar(97)
 
             if convert_utils.save_svg(msp=globals.msp, cad=globals.cad, path=svg_path):
                 globals.export_svg_success=True
@@ -182,7 +182,7 @@ def process2(*args, **kwargs):
                 msg= f'[Error]{dxf_path_without_extension}.svg 匯出失敗'
             log.renew_log(msg, False)
             log.set_log_to_button()
-            progress_utils.set_progress(98)
+            progress_utils.set_progress_bar(98)
 
             # PNG conversion callback to handle async completion
             def on_png_complete(success):
@@ -194,7 +194,7 @@ def process2(*args, **kwargs):
                     msg = f'[Error]{dxf_path_without_extension}.png 匯出失敗'
                 log.renew_log(msg, False)
                 log.set_log_to_button()
-                progress_utils.set_progress(99)
+                progress_utils.set_progress_bar(99)
                 
                 # Final completion message
                 if globals.export_svg_success and globals.export_png_success and globals.export_dxf_success and not globals.any_error:
@@ -203,7 +203,7 @@ def process2(*args, **kwargs):
                     final_msg = '作業完成，但有部分錯誤發生，請查看log內容'
                 log.renew_log(final_msg, True)
                 log.set_log_to_button()
-                progress_utils.set_progress(100)
+                progress_utils.set_progress_bar(100)
             
             # Start async PNG conversion with callback
             convert_utils.save_png(pngPath=png_path, svgPath=svg_path, callback=on_png_complete)

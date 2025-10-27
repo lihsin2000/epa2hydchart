@@ -166,7 +166,7 @@ def draw_pipe_polylines(*args, **kwargs):
             msg= f'管線 {link_id} 已完成繪圖'
             log.renew_log(msg, False)
             log.set_log_to_button()
-            progress_utils.set_progress(forced_value=None)
+            progress_utils.set_progress_bar(forced_value=None)
             QCoreApplication.processEvents()
     except Exception as e:
         traceback.print_exc()

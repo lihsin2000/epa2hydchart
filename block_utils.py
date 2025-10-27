@@ -76,7 +76,7 @@ def insert_blocks(*args, **kwargs):
                     msg = f'閥件 {id} 圖塊已插入'
                     log.renew_log(msg, False)
                     log.set_log_to_button()
-                    progress_utils.set_progress(forced_value=None)
+                    progress_utils.set_progress_bar(forced_value=None)
 
             else:
                 df = df_mapping[item]
@@ -91,7 +91,7 @@ def insert_blocks(*args, **kwargs):
                     msg = f'{mapping[item]} {id} 圖塊已插入'
                     log.renew_log(msg, False)
                     log.set_log_to_button()
-                    progress_utils.set_progress(forced_value=None)
+                    progress_utils.set_progress_bar(forced_value=None)
 
     except Exception as e:
         traceback.print_exc()

@@ -29,14 +29,14 @@ def insert_demand_annotation_leader(*args, **kwargs):
                 msg = f'節點 {id} 需水量已完成繪圖'
                 log.renew_log(msg, False)
                 log.set_log_to_button()
-                progress_utils.set_progress(forced_value=None)
+                progress_utils.set_progress_bar(forced_value=None)
             else:
                 draw_demand_leader(color=color, id=id, x=x, y=y, demand=demand,
                                  export0cmd=False, width=globals.line_width)
                 msg = f'節點 {id} 需水量已完成繪圖'
                 log.renew_log(msg, False)
                 log.set_log_to_button()
-                progress_utils.set_progress(forced_value=None)
+                progress_utils.set_progress_bar(forced_value=None)
 
             QCoreApplication.processEvents()
     except Exception as e:
