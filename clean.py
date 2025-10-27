@@ -1,13 +1,8 @@
 import os
 
-def delete_files(base_directory, extensions):
-    """
-    Deletes files with specified extensions in the given directory and its subdirectories.
 
-    Args:
-        base_directory (str): Path to the base directory.
-        extensions (list): List of file extensions to delete (e.g., ['.dxf', '.svg']).
-    """
+def delete_files(base_directory, extensions):
+    """Deletes files with specified extensions in the given directory and its subdirectories."""
     deleted_files = 0
 
     # Walk through the directory
@@ -23,6 +18,7 @@ def delete_files(base_directory, extensions):
                     print(f"Failed to delete {file_path}: {e}")
 
     print(f"Total deleted files: {deleted_files}")
+
 
 # Example usage
 base_directory = "example/"  # Replace with your directory

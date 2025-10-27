@@ -1,10 +1,11 @@
 import os
 import shutil
 
+
 def delete_all_files(base_directory):
     """
     Deletes all files in the specified directory and its subdirectories.
-    
+
     Args:
         base_directory (str): Path to the base directory.
     """
@@ -23,13 +24,9 @@ def delete_all_files(base_directory):
 
     print(f"Total deleted files: {deleted_files}")
 
+
 def delete_empty_directories(base_directory):
-    """
-    Deletes all empty directories in the specified directory and its subdirectories.
-    
-    Args:
-        base_directory (str): Path to the base directory.
-    """
+    """Deletes all empty directories in the specified directory and its subdirectories."""
     for root, dirs, _ in os.walk(base_directory, topdown=False):
         for dir_name in dirs:
             dir_path = os.path.join(root, dir_name)
@@ -39,6 +36,7 @@ def delete_empty_directories(base_directory):
                     print(f"Deleted empty directory: {dir_path}")
             except Exception as e:
                 print(f"Failed to delete directory {dir_path}: {e}")
+
 
 # Example usage
 base_directory = "temp/"  # Replace with your directory path

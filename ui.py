@@ -17,7 +17,8 @@ class Ui_MainWindow(object):
         MainWindow.setMinimumSize(QtCore.QSize(0, 0))
         MainWindow.setMaximumSize(QtCore.QSize(16777215, 16777215))
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("c:\\Users\\user\\Downloads\\code\\epa2hydchart\\../../li2021/.designer/backup/icon.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        icon.addPixmap(QtGui.QPixmap("c:\\Users\\user\\Downloads\\code\\epa2hydchart\\../../li2021/.designer/backup/icon.ico"),
+                       QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         MainWindow.setWindowIcon(icon)
         MainWindow.setDocumentMode(False)
         self.centralwidget = QtWidgets.QWidget(parent=MainWindow)
@@ -35,7 +36,8 @@ class Ui_MainWindow(object):
         self.label.setObjectName("label")
         self.gridLayout_2.addWidget(self.label, 0, 0, 1, 1)
         self.l_projName = QtWidgets.QLineEdit(parent=self.centralwidget)
-        self.l_projName.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeading|QtCore.Qt.AlignmentFlag.AlignLeft|QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.l_projName.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeading |
+                                     QtCore.Qt.AlignmentFlag.AlignLeft | QtCore.Qt.AlignmentFlag.AlignVCenter)
         self.l_projName.setObjectName("l_projName")
         self.gridLayout_2.addWidget(self.l_projName, 2, 1, 1, 2)
         self.b_browser_inp = QtWidgets.QPushButton(parent=self.centralwidget)
@@ -74,7 +76,8 @@ class Ui_MainWindow(object):
         self.gridLayout_2.setRowStretch(0, 1)
         self.horizontalLayout.addLayout(self.gridLayout_2)
         self.gridLayout = QtWidgets.QGridLayout()
-        self.gridLayout.setSizeConstraint(QtWidgets.QLayout.SizeConstraint.SetMaximumSize)
+        self.gridLayout.setSizeConstraint(
+            QtWidgets.QLayout.SizeConstraint.SetMaximumSize)
         self.gridLayout.setContentsMargins(5, 5, 5, 5)
         self.gridLayout.setSpacing(5)
         self.gridLayout.setObjectName("gridLayout")
@@ -93,7 +96,8 @@ class Ui_MainWindow(object):
         self.chk_autoSize.setObjectName("chk_autoSize")
         self.gridLayout.addWidget(self.chk_autoSize, 3, 0, 1, 2)
         self.list_hrs = QtWidgets.QListWidget(parent=self.centralwidget)
-        self.list_hrs.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.MultiSelection)
+        self.list_hrs.setSelectionMode(
+            QtWidgets.QAbstractItemView.SelectionMode.MultiSelection)
         self.list_hrs.setObjectName("list_hrs")
         self.gridLayout.addWidget(self.list_hrs, 6, 1, 1, 3)
         self.label_5 = QtWidgets.QLabel(parent=self.centralwidget)
@@ -170,13 +174,13 @@ class Ui_MainWindow(object):
         self.b_browser_inp.setText(_translate("MainWindow", "瀏覽"))
         self.label_4.setText(_translate("MainWindow", "工程名稱"))
         self.browser_log.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><meta charset=\"utf-8\" /><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"hr { height: 1px; border-width: 0; }\n"
-"li.unchecked::marker { content: \"\\2610\"; }\n"
-"li.checked::marker { content: \"\\2612\"; }\n"
-"</style></head><body style=\" font-family:\'Microsoft JhengHei UI\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:\'PMingLiU\';\"><br /></p></body></html>"))
+                                            "<html><head><meta name=\"qrichtext\" content=\"1\" /><meta charset=\"utf-8\" /><style type=\"text/css\">\n"
+                                            "p, li { white-space: pre-wrap; }\n"
+                                            "hr { height: 1px; border-width: 0; }\n"
+                                            "li.unchecked::marker { content: \"\\2610\"; }\n"
+                                            "li.checked::marker { content: \"\\2612\"; }\n"
+                                            "</style></head><body style=\" font-family:\'Microsoft JhengHei UI\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
+                                            "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:\'PMingLiU\';\"><br /></p></body></html>"))
         self.b_browser_rpt.setText(_translate("MainWindow", "瀏覽"))
         self.label_2.setText(_translate("MainWindow", "rpt 檔案"))
         self.b_draw.setText(_translate("MainWindow", "開始處理"))

@@ -52,10 +52,10 @@ export_dxf_success = None
 export_svg_success = None
 export_png_success = None
 
-UNIT_HEADLOSS_THRESHOLD = 1.0
-UNIT_VELOCITY_THRESHOLD = 0.3
-NAGAVITE_PRESSURE_THRESHOLD = 0.0
-LOW_PRESSURE_THRESHOLD = 10.0
+unit_headloss_threshold = 1.0
+unit_velocity_threshold = 0.3
+nagaive_pressure_threshold = 0.0
+low_pressure_threshold = 10.0
 
 any_error = False
 

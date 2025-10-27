@@ -9,10 +9,9 @@ if TYPE_CHECKING:
     from main import MainWindow
 
 
-def insert_demand_annotation_leader(*args, **kwargs):
+def insert_demand_annotation_leader(color, draw0cmd):
+    """Insert demand annotation leaders for all junctions."""
     try:
-        color = kwargs.get('color')
-        draw0cmd = kwargs.get('draw0cmd')
 
         for i in range(0, len(globals.df_junctions)):
             id = globals.df_junctions.at[i, 'ID']
@@ -25,14 +24,14 @@ def insert_demand_annotation_leader(*args, **kwargs):
 
             if draw0cmd:
                 draw_demand_leader(color=color, id=id, x=x, y=y, demand=demand,
-                                 export0cmd=True, width=globals.line_width)
+                                   export0cmd=True, width=globals.line_width)
                 msg = f'節點 {id} 需水量已完成繪圖'
                 log.renew_log(msg, False)
                 log.set_log_to_button()
                 progress_utils.set_progress_bar(forced_value=None)
             else:
                 draw_demand_leader(color=color, id=id, x=x, y=y, demand=demand,
-                                 export0cmd=False, width=globals.line_width)
+                                   export0cmd=False, width=globals.line_width)
                 msg = f'節點 {id} 需水量已完成繪圖'
                 log.renew_log(msg, False)
                 log.set_log_to_button()
@@ -43,17 +42,22 @@ def insert_demand_annotation_leader(*args, **kwargs):
         traceback.print_exc()
 
 
-def draw_demand_leader(*args, **kwargs):
+def draw_demand_leader(color, id, x, y, demand, export0cmd, width):
+    """
+    Draw a demand leader annotation arrow with text label showing water demand value.
+
+    Args:
+        color (int): Color code for the leader line and text
+        id: Node identification
+        x (float): X coordinate of the node
+        y (float): Y coordinate of the node
+        demand: Water demand value to display
+        export0cmd (bool): Whether to export zero demand commands
+        width (float): Width of the leader line
+    """
     from ezdxf.enums import TextEntityAlignment
 
     try:
-        color = kwargs.get('color')
-        id = kwargs.get('id')
-        x = kwargs.get('x')
-        y = kwargs.get('y')
-        demand = kwargs.get('demand')
-        export0cmd: bool = kwargs.get('export0cmd')
-        width = kwargs.get('width')
 
         if (export0cmd) or (export0cmd == False and float(demand) != 0.0):
             leader_down_start_x = x+0.5*globals.text_size
@@ -69,7 +73,7 @@ def draw_demand_leader(*args, **kwargs):
                                        dxfattribs={'color': color, 'default_start_width': width, 'default_end_width': width})
             globals.msp.add_text(demand, height=globals.text_size,
                                  dxfattribs={'color': color, "style": "epa2HydChart"})\
-                                    .set_placement((leader_down_end_x+0.25*globals.text_size, leader_down_end_y-0.25*globals.text_size), align=TextEntityAlignment.TOP_LEFT)
+                .set_placement((leader_down_end_x+0.25*globals.text_size, leader_down_end_y-0.25*globals.text_size), align=TextEntityAlignment.TOP_LEFT)
         elif export0cmd == False and float(demand) == 0.0:
             pass
     except Exception as e:

@@ -10,9 +10,11 @@ if TYPE_CHECKING:
 
 
 def read_vertices(inpFile):
+    """Read pipe vertices data from INP file."""
     import pandas as pd
     try:
-        start, end = utils.line_start_end(inpFile, '[VERTICES]', '[LABELS]', 2, 2)
+        start, end = utils.line_start_end(
+            inpFile, '[VERTICES]', '[LABELS]', 2, 2)
         lines = open(inpFile).readlines()
 
         data = []
@@ -26,6 +28,7 @@ def read_vertices(inpFile):
 
 
 def read_pipes(inpFile):
+    """Read pipe data from INP file and merge with coordinates."""
     import pandas as pd
     try:
         start, end = utils.line_start_end(inpFile, '[PIPES]', '[PUMPS]', 2, 2)
@@ -40,12 +43,14 @@ def read_pipes(inpFile):
 
         for i in range(0, len(df)):
             Node1 = df.at[i, 'Node1']
-            row = globals.df_coords.index[globals.df_coords['ID'] == str(Node1)].tolist()[0]
+            row = globals.df_coords.index[globals.df_coords['ID'] == str(Node1)].tolist()[
+                0]
             df.at[i, 'Node1_x'] = globals.df_coords.at[row, 'x']
             df.at[i, 'Node1_y'] = globals.df_coords.at[row, 'y']
 
             Node2 = df.at[i, 'Node2']
-            row = globals.df_coords.index[globals.df_coords['ID'] == str(Node2)].tolist()[0]
+            row = globals.df_coords.index[globals.df_coords['ID'] == str(Node2)].tolist()[
+                0]
             df.at[i, 'Node2_x'] = globals.df_coords.at[row, 'x']
             df.at[i, 'Node2_y'] = globals.df_coords.at[row, 'y']
         return df
@@ -54,9 +59,11 @@ def read_pipes(inpFile):
 
 
 def read_coords(inpFile):
+    """Read node coordinates from INP file."""
     import pandas as pd
     try:
-        start, end = utils.line_start_end(inpFile, '[COORDINATES]', '[VERTICES]', 2, 2)
+        start, end = utils.line_start_end(
+            inpFile, '[COORDINATES]', '[VERTICES]', 2, 2)
         lines = open(inpFile).readlines()
         df = pd.DataFrame(columns=['ID', 'x', 'y'])
         for l in range(start-1, end):
@@ -77,9 +84,11 @@ def read_coords(inpFile):
 
 
 def read_junctions(inpFile):
+    """Read junction data from INP file."""
     import pandas as pd
     try:
-        start, end = utils.line_start_end(inpFile, '[JUNCTIONS]', '[RESERVOIRS]', 2, 2)
+        start, end = utils.line_start_end(
+            inpFile, '[JUNCTIONS]', '[RESERVOIRS]', 2, 2)
         lines = open(inpFile).readlines()
         df = pd.DataFrame(columns=['ID', 'Elev', 'BaseDemand', 'x', 'y'])
         for l in range(start-1, end):
@@ -101,9 +110,11 @@ def read_junctions(inpFile):
 
 
 def read_reservoirs(inpFile):
+    """Read reservoir data from INP file."""
     import pandas as pd
     try:
-        start, end = utils.line_start_end(inpFile, '[RESERVOIRS]', '[TANKS]', 2, 2)
+        start, end = utils.line_start_end(
+            inpFile, '[RESERVOIRS]', '[TANKS]', 2, 2)
         lines = open(inpFile).readlines()
         df = pd.DataFrame(columns=['ID', 'Head', 'x', 'y'])
         for l in range(start-1, end):
@@ -124,11 +135,13 @@ def read_reservoirs(inpFile):
 
 
 def read_tanks(inpFile):
+    """Read tank data from INP file."""
     import pandas as pd
     try:
         start, end = utils.line_start_end(inpFile, '[TANKS]', '[PIPES]', 2, 2)
         lines = open(inpFile).readlines()
-        df = pd.DataFrame(columns=['ID', 'Elev', 'MinLevel', 'MaxLevel', 'MinElev', 'MaxElev', 'x', 'y'])
+        df = pd.DataFrame(
+            columns=['ID', 'Elev', 'MinLevel', 'MaxLevel', 'MinElev', 'MaxElev', 'x', 'y'])
         for l in range(start-1, end):
             d = utils.parse_line_to_dictionary(lines=lines, l=l, position=2)
             elev = float(d[2])
@@ -156,11 +169,13 @@ def read_tanks(inpFile):
 
 
 def read_valves(inpFile):
+    """Read valve data from INP file."""
     import pandas as pd
     try:
         start, end = utils.line_start_end(inpFile, '[VALVES]', '[TAGS]', 2, 2)
         lines = open(inpFile).readlines()
-        df = pd.DataFrame(columns=['ID', 'Node1', 'Node2', 'Node1_x', 'Node1_y', 'Node2_x', 'Node2_y', 'Type', 'Setting'])
+        df = pd.DataFrame(columns=['ID', 'Node1', 'Node2', 'Node1_x',
+                          'Node1_y', 'Node2_x', 'Node2_y', 'Type', 'Setting'])
         for l in range(start-1, end):
             d = utils.parse_line_to_dictionary(lines=lines, l=l, position=2)
 
@@ -169,8 +184,10 @@ def read_valves(inpFile):
             Node2 = d[3]
             Type = d[5]
             Setting = d[6]
-            coords1_row = globals.df_coords.index[globals.df_coords['ID'] == Node1].tolist()[0]
-            coords2_row = globals.df_coords.index[globals.df_coords['ID'] == Node2].tolist()[0]
+            coords1_row = globals.df_coords.index[globals.df_coords['ID'] == Node1].tolist()[
+                0]
+            coords2_row = globals.df_coords.index[globals.df_coords['ID'] == Node2].tolist()[
+                0]
             Node1_x = globals.df_coords.at[coords1_row, 'x']
             Node1_y = globals.df_coords.at[coords1_row, 'y']
             Node2_x = globals.df_coords.at[coords2_row, 'x']
@@ -198,11 +215,13 @@ def read_valves(inpFile):
 
 
 def read_pumps(inpFile):
+    """Read pump data from INP file and merge with curve data."""
     import pandas as pd
     try:
         lines = open(inpFile).readlines()
 
-        start_curve, end_curve = utils.line_start_end(inpFile, '[CURVES]', '[CONTROLS]', 2, 1)
+        start_curve, end_curve = utils.line_start_end(
+            inpFile, '[CURVES]', '[CONTROLS]', 2, 1)
         df_pump_curves = pd.DataFrame(columns=['ID', 'Q', 'H'])
         for l in range(start_curve-1, end_curve):
             if 'PUMP' in lines[l]:
@@ -210,7 +229,8 @@ def read_pumps(inpFile):
             elif '\n' == lines[l]:
                 continue
             else:
-                d = utils.parse_line_to_dictionary(lines=lines, l=l, position=2)
+                d = utils.parse_line_to_dictionary(
+                    lines=lines, l=l, position=2)
                 ID = d[1]
                 Q = d[2]
                 H = d[3]
@@ -226,14 +246,17 @@ def read_pumps(inpFile):
         df_pump_curves = df_pump_curves.reset_index(drop=True)
 
         start, end = utils.line_start_end(inpFile, '[PUMPS]', '[VALVES]', 2, 2)
-        df = pd.DataFrame(columns=['ID', 'Node1', 'Node2', 'Node1_x', 'Node1_y', 'Node2_x', 'Node2_y', 'x', 'y', 'Q', 'H'])
+        df = pd.DataFrame(columns=['ID', 'Node1', 'Node2', 'Node1_x',
+                          'Node1_y', 'Node2_x', 'Node2_y', 'x', 'y', 'Q', 'H'])
         for l in range(start-1, end):
             d = utils.parse_line_to_dictionary(lines=lines, l=l, position=2)
             ID = [d[1]][0]
             Node1 = [d[2]][0]
             Node2 = [d[3]][0]
-            coords1_row = globals.df_coords.index[globals.df_coords['ID'] == Node1].tolist()[0]
-            coords2_row = globals.df_coords.index[globals.df_coords['ID'] == Node2].tolist()[0]
+            coords1_row = globals.df_coords.index[globals.df_coords['ID'] == Node1].tolist()[
+                0]
+            coords2_row = globals.df_coords.index[globals.df_coords['ID'] == Node2].tolist()[
+                0]
             Node1_x = globals.df_coords.at[coords1_row, 'x']
             Node1_y = globals.df_coords.at[coords1_row, 'y']
             Node2_x = globals.df_coords.at[coords2_row, 'x']
@@ -269,11 +292,11 @@ def read_pumps(inpFile):
         traceback.print_exc()
 
 
-def read_node_results(*args, **kwargs):
+def read_node_results(hr, input_rpt_file):
+    """Read node results from RPT file for specified time period."""
     import pandas as pd
     try:
-        hr = kwargs.get('hr')
-        rpt_file = kwargs.get('input')
+        rpt_file = input_rpt_file
 
         if hr == None:
             start_str = 'Node Results:'
@@ -300,8 +323,9 @@ def read_node_results(*args, **kwargs):
                 }
 
             except:
-                globals.main_window.ui.browser_log.append(f'節點 {id} 資料錯誤，請手動修正.rpt檔內容')
-                globals.any_error=True
+                globals.main_window.ui.browser_log.append(
+                    f'節點 {id} 資料錯誤，請手動修正.rpt檔內容')
+                globals.any_error = True
                 # QMessageBox.warning(None, '警告', f'節點{id}資料錯誤，請手動修正.rpt檔內容')
 
                 data = {
@@ -321,13 +345,11 @@ def read_node_results(*args, **kwargs):
         traceback.print_exc()
 
 
-def read_link_results(*args, **kwargs):
+def read_link_results(hr1, hr2, input_rpt_file, digits):
+    """Read link results from RPT file for specified time period."""
     import pandas as pd
     try:
-        hr1 = kwargs.get('hr1')
-        hr2 = kwargs.get('hr2')
-        rpt_file = kwargs.get('input')
-        digits= kwargs.get('digits')
+        rpt_file = input_rpt_file
 
         if hr1 == None:     # without patteren
             start_str = 'Link Results:'
@@ -340,7 +362,8 @@ def read_link_results(*args, **kwargs):
             end_str = f'Node Results at {hr2} Hrs:'
         start, end = utils.line_start_end(rpt_file, start_str, end_str, 5, 2)
         lines = open(rpt_file).readlines()
-        df = pd.DataFrame(columns=['ID', 'Flow', 'Velocity', 'unitHeadloss', 'Headloss'])
+        df = pd.DataFrame(
+            columns=['ID', 'Flow', 'Velocity', 'unitHeadloss', 'Headloss'])
         for l in range(start-1, end):
             d = utils.parse_line_to_dictionary(lines=lines, l=l, position=2)
             pipe_id = d[1]
@@ -351,24 +374,28 @@ def read_link_results(*args, **kwargs):
             # calculate headloss number:
             # 2 side in link are node:
             if pipe_id in globals.df_pipes['ID'].tolist():
-                pipe_index = globals.df_pipes.index[globals.df_pipes['ID'] == pipe_id].tolist()[0]
+                pipe_index = globals.df_pipes.index[globals.df_pipes['ID'] == pipe_id].tolist()[
+                    0]
                 node1 = globals.df_pipes.at[pipe_index, 'Node1']
-                i1 = globals.df_node_results.index[globals.df_node_results['ID'] == node1].tolist()[0]
+                i1 = globals.df_node_results.index[globals.df_node_results['ID'] == node1].tolist()[
+                    0]
                 node2 = globals.df_pipes.at[pipe_index, 'Node2']
-                i2 = globals.df_node_results.index[globals.df_node_results['ID'] == node2].tolist()[0]
+                i2 = globals.df_node_results.index[globals.df_node_results['ID'] == node2].tolist()[
+                    0]
 
                 from decimal import Decimal
                 try:
-                    node1_head = Decimal(globals.df_node_results.at[i1, 'Head'])
-                    node2_head = Decimal(globals.df_node_results.at[i2, 'Head'])
+                    node1_head = Decimal(
+                        globals.df_node_results.at[i1, 'Head'])
+                    node2_head = Decimal(
+                        globals.df_node_results.at[i2, 'Head'])
 
                     Headloss = round(abs(node2_head-node1_head), digits)
-                    Headloss_str= f"{Headloss:.{digits}f}"
+                    Headloss_str = f"{Headloss:.{digits}f}"
 
                 except:
                     Headloss = 0
-                    Headloss_str= f"{Headloss:.{digits}f}"
-
+                    Headloss_str = f"{Headloss:.{digits}f}"
 
             data = {
                 'ID': pipe_id,
@@ -388,46 +415,48 @@ def read_link_results(*args, **kwargs):
         traceback.print_exc()
 
 
-def change_value_by_digits(*args, **kwargs):
-
-    digits= kwargs.get('digits')
-    
+def change_value_by_digits(digits):
+    """Format numerical values to specified decimal places."""
     try:
-        df_nodeResult=globals.df_node_results
-        df_junctions=globals.df_junctions
+        df_nodeResult = globals.df_node_results
+        df_junctions = globals.df_junctions
 
-        df_nodeResult['Demand']=df_nodeResult['Demand'].astype(float)
-        df_nodeResult['Head']=df_nodeResult['Head'].astype(float)
-        df_junctions['Elev']=df_junctions['Elev'].astype(float)
+        df_nodeResult['Demand'] = df_nodeResult['Demand'].astype(float)
+        df_nodeResult['Head'] = df_nodeResult['Head'].astype(float)
+        df_junctions['Elev'] = df_junctions['Elev'].astype(float)
 
-        df_nodeResult['Demand'] = df_nodeResult['Demand'].map(lambda x: f"{x:.{digits}f}")
-        df_nodeResult['Head'] = df_nodeResult['Head'].map(lambda x: f"{x:.{digits}f}")
+        df_nodeResult['Demand'] = df_nodeResult['Demand'].map(
+            lambda x: f"{x:.{digits}f}")
+        df_nodeResult['Head'] = df_nodeResult['Head'].map(
+            lambda x: f"{x:.{digits}f}")
 
         for index, row in df_nodeResult.iterrows():
             try:
-                id= row['ID']
-                head= float(row['Head'])
-                elev= float(df_junctions.loc[df_junctions['ID'] == id, 'Elev'].values[0])
-                pressure= head - elev
+                id = row['ID']
+                head = float(row['Head'])
+                elev = float(
+                    df_junctions.loc[df_junctions['ID'] == id, 'Elev'].values[0])
+                pressure = head - elev
                 df_nodeResult.at[index, 'Pressure'] = f"{pressure:.{digits}f}"
             except:
                 continue
 
-        df_junctions['Elev'] = df_junctions['Elev'].map(lambda x: f"{x:.{digits}f}")
-                # df['Pressure'] = df['Pressure'].round(0)
-        
+        df_junctions['Elev'] = df_junctions['Elev'].map(
+            lambda x: f"{x:.{digits}f}")
+        # df['Pressure'] = df['Pressure'].round(0)
+
         return (df_nodeResult, df_junctions)
     except Exception as e:
         traceback.print_exc()
 
+
 def merge_coordinates_to_dataframe(df):
-    '''
-    從config.df_Coords讀取Tank, Reservoir的座標
-    '''
+    """Merge coordinates into dataframe for tanks and reservoirs."""
     try:
         for i in range(0, len(df)):
             ID = df.at[i, 'ID']
-            row = globals.df_coords.index[globals.df_coords['ID'] == str(ID)].tolist()[0]
+            row = globals.df_coords.index[globals.df_coords['ID'] == str(ID)].tolist()[
+                0]
             globals.df_coords['x'] = globals.df_coords['x'].astype(float)
             globals.df_coords['y'] = globals.df_coords['y'].astype(float)
             df.at[i, 'x'] = globals.df_coords.at[row, 'x']

@@ -5,9 +5,12 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from main import MainWindow
 
+
 def calculate_progress_steps():
+    """Calculate total number of progress steps based on data elements."""
     # number steps for "insertBlocks"
-    steps_insert_blocks = len(globals.df_tanks) + len(globals.df_reservoirs) + len(globals.df_junctions)+ len(globals.df_pumps) + len(globals.df_valves)
+    steps_insert_blocks = len(globals.df_tanks) + len(globals.df_reservoirs) + len(
+        globals.df_junctions) + len(globals.df_pumps) + len(globals.df_valves)
 
     # number steps for "insertPipeLines"
     steps_insert_pipe_lines = len(globals.df_pipes)
@@ -34,10 +37,10 @@ def calculate_progress_steps():
     # steps_exportingFiles = 3  # dxf, svg, png
 
     total_steps = steps_insert_blocks + steps_insert_pipe_lines \
-                + steps_insert_demand_leader + steps_insert_head_pressure_leader \
-                + steps_insert_reservoirs_leader + steps_insert_tank_leader \
-                + steps_insert_pump_annotation + steps_insert_valve_annotation \
-    
+        + steps_insert_demand_leader + steps_insert_head_pressure_leader \
+        + steps_insert_reservoirs_leader + steps_insert_tank_leader \
+        + steps_insert_pump_annotation + steps_insert_valve_annotation \
+
     # print(f'steps_insertBlocks:{steps_insertBlocks}')
     # print(f'steps_insertPipeLines:{steps_insertPipeLines}')
     # print(f'steps_insertDemandLeader:{steps_insertDemandLeader}')
@@ -48,10 +51,12 @@ def calculate_progress_steps():
     # print(f'steps_insertValveAnnotation:{steps_insertValveAnnotation}')
     return total_steps
 
+
 def set_progress_bar(forced_value):
-    if forced_value==None:
+    """Update the progress bar with incremental or forced values."""
+    if forced_value == None:
         globals.progress_value += globals.progress_space
-        value=int(round(globals.progress_value,0))
+        value = int(round(globals.progress_value, 0))
         globals.main_window.ui.progressBar.setValue(value)
     else:
         globals.main_window.ui.progressBar.setValue(forced_value)

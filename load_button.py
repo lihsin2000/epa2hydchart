@@ -1,4 +1,6 @@
-import globals, utils, log
+import globals
+import utils
+import log
 import os
 from PyQt6.QtWidgets import QFileDialog
 from typing import TYPE_CHECKING
@@ -8,6 +10,7 @@ if TYPE_CHECKING:
 
 
 def handle_inp_file_selection():
+    """Handle selection of INP input file through file dialog."""
     file, type = QFileDialog.getOpenFileName(
         globals.main_window, '開啟inp檔', filter='inp (*.inp)')
 
@@ -24,7 +27,9 @@ def handle_inp_file_selection():
         globals.proj_name = os.path.splitext(os.path.basename(file))[0]
         globals.main_window.ui.l_projName.setText(globals.proj_name)
 
+
 def handle_rpt_file_selection():
+    """Handle selection of RPT report file through file dialog."""
     file, type = QFileDialog.getOpenFileName(
         globals.main_window, '開啟rpt檔', filter='rpt (*.rpt)')
 
@@ -53,7 +58,8 @@ def handle_rpt_file_selection():
             globals.rpt_file = file
 
         except Exception as e:
-            globals.main_window.ui.browser_log.append(f'[Error] 處理rpt檔時發生錯誤: {str(e)}')
+            globals.main_window.ui.browser_log.append(
+                f'[Error] 處理rpt檔時發生錯誤: {str(e)}')
             log.set_log_to_button()
 
     elif globals.main_window.ui.l_rpt_path.text():
