@@ -62,7 +62,6 @@ def find_unreasonable_pipes():
             diameter_suggest = 50*(int(diameter_suggest/50)+1)
             df_headloss_unreasonable.loc[index,
                                          'Diameter_suggest'] = f'{diameter_suggest:.0f}'
-        pass
 
     df_velocity_unreasonable = links[abs(
         links['Velocity'].astype(float)) < globals.unit_velocity_threshold]

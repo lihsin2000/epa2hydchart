@@ -18,13 +18,13 @@ def delete_all_files(base_directory):
             file_path = os.path.join(root, file)
             try:
                 os.remove(file_path)
-                globals.logger.info(f"Deleted: {file_path}")
+                print(f"Deleted: {file_path}")
                 deleted_files += 1
             except Exception as e:
-                globals.logger.error(f"Failed to delete {file_path}: {e}")
+                print(f"Failed to delete {file_path}: {e}")
                 globals.logger.exception(e)
 
-    globals.logger.info(f"Total deleted files: {deleted_files}")
+    print(f"Total deleted files: {deleted_files}")
 
 
 def delete_empty_directories(base_directory):
@@ -35,9 +35,9 @@ def delete_empty_directories(base_directory):
             try:
                 if not os.listdir(dir_path):  # Check if the directory is empty
                     os.rmdir(dir_path)
-                    globals.logger.info(f"Deleted empty directory: {dir_path}")
+                    print(f"Deleted empty directory: {dir_path}")
             except Exception as e:
-                globals.logger.error(f"Failed to delete directory {dir_path}: {e}")
+                print(f"Failed to delete directory {dir_path}: {e}")
                 globals.logger.exception(e)
 
 
