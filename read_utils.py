@@ -363,11 +363,12 @@ def read_node_results(hr, input_rpt_file):
         globals.logger.exception(e)
 
 def calculate_link_headloss():
+    
+    df_link_results = globals.df_link_results
+    df_pipes = globals.df_pipes
+    df_node_results = globals.df_node_results
 
-    df_link_result=globals.df_link_results
-    df_pipes=globals.df_pipes
-
-    for index, row in df_link_result.iterrows():
+    for index, row in df_link_results.iterrows():
         pipe_id = row['ID']
         digits = globals.digit_decimal
 
@@ -378,19 +379,19 @@ def calculate_link_headloss():
 
         pipe_index = df_pipes.index[df_pipes['ID'] == pipe_id].tolist()[0]
         node1 = df_pipes.at[pipe_index, 'Node1']
-        node1_row_index = globals.df_node_results.index[globals.df_node_results['ID'] == node1].tolist()[0]
+        node1_row_index = df_node_results.index[df_node_results['ID'] == node1].tolist()[0]
         node2 = df_pipes.at[pipe_index, 'Node2']
-        node2_row_index = globals.df_node_results.index[globals.df_node_results['ID'] == node2].tolist()[0]
+        node2_row_index = df_node_results.index[df_node_results['ID'] == node2].tolist()[0]
 
         from decimal import Decimal
         try:
-            node1_head = Decimal(globals.df_node_results.at[node1_row_index, 'Head'])
-            node2_head = Decimal(globals.df_node_results.at[node2_row_index, 'Head'])
+            node1_head = Decimal(df_node_results.at[node1_row_index, 'Head'])
+            node2_head = Decimal(df_node_results.at[node2_row_index, 'Head'])
 
             Headloss = round(abs(node2_head-node1_head), digits)
             Headloss_str = f"{Headloss:.{digits}f}"
 
-            df_link_result.at[index, 'Headloss'] = Headloss_str
+            df_link_results.at[index, 'Headloss'] = Headloss_str
 
         except Exception as e:
             globals.logger.exception(e)
@@ -442,9 +443,12 @@ def read_link_results(hr1, hr2, input_rpt_file, digits):
 
 def change_value_by_digits(digits):
     """Format numerical values to specified decimal places."""
+    
+    df_node_results = globals.df_node_results
+    df_junctions = globals.df_junctions
+    
     try:
-        df_nodeResult = globals.df_node_results
-        df_junctions = globals.df_junctions
+        df_nodeResult = df_node_results
 
         df_nodeResult['Demand'] = df_nodeResult['Demand'].astype(float)
         df_nodeResult['Head'] = df_nodeResult['Head'].astype(float)
@@ -453,6 +457,8 @@ def change_value_by_digits(digits):
         df_nodeResult['Demand'] = df_nodeResult['Demand'].map(
             lambda x: f"{x:.{digits}f}")
         df_nodeResult['Head'] = df_nodeResult['Head'].map(
+            lambda x: f"{x:.{digits}f}")
+        df_junctions['Elev'] = df_junctions['Elev'].map(
             lambda x: f"{x:.{digits}f}")
 
         for index, row in df_nodeResult.iterrows():
@@ -466,8 +472,6 @@ def change_value_by_digits(digits):
             except:
                 continue
 
-        df_junctions['Elev'] = df_junctions['Elev'].map(
-            lambda x: f"{x:.{digits}f}")
         # df['Pressure'] = df['Pressure'].round(0)
 
         return (df_nodeResult, df_junctions)

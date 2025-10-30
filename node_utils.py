@@ -11,11 +11,11 @@ if TYPE_CHECKING:
 def insert_reservoir_annotation_leader(color, digits):
     """Insert reservoir annotation leaders with head and elevation information."""
     from ezdxf.enums import TextEntityAlignment
-
-    text_size = globals.text_size
-    leader_distance = globals.leader_distance
+    
     df_reservoirs = globals.df_reservoirs
     msp = globals.msp
+    text_size = globals.text_size
+    leader_distance = globals.leader_distance
 
     try:
         for i in range(0, len(df_reservoirs)):
@@ -52,12 +52,12 @@ def insert_reservoir_annotation_leader(color, digits):
 def insert_pump_annotation(color, digits):
     """Insert pump annotations showing flow rate and head."""
     from ezdxf.enums import TextEntityAlignment
-
+    
+    df_pumps = globals.df_pumps
+    msp = globals.msp
     text_size = globals.text_size
     block_size = globals.block_size
     line_width = globals.line_width
-    df_pumps = globals.df_pumps
-    msp = globals.msp
     
     try:
         for i in range(0, len(df_pumps)):
@@ -111,11 +111,11 @@ def insert_pump_annotation(color, digits):
 def insert_valve_annotation(color):
     """Insert valve annotations showing type and setting."""
     from ezdxf.enums import TextEntityAlignment
-
-    text_size = globals.text_size
-    block_size = globals.block_size
+    
     df_valves = globals.df_valves
     msp = globals.msp
+    text_size = globals.text_size
+    block_size = globals.block_size
 
     try:
         for i in range(0, len(df_valves)):
@@ -152,11 +152,11 @@ def insert_valve_annotation(color):
 def insert_tank_annotation_leader(color, digits, width):
     """Insert tank annotation leaders with elevation and water level information."""
     from ezdxf.enums import TextEntityAlignment
-
-    text_size = globals.text_size
-    leader_distance = globals.leader_distance
+    
     df_tanks = globals.df_tanks
     msp = globals.msp
+    text_size = globals.text_size
+    leader_distance = globals.leader_distance
 
     try:
         for i in range(0, len(df_tanks)):

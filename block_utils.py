@@ -58,6 +58,16 @@ def create_blocks(cad: 'Drawing'):
 
 def insert_blocks(width):
     """Insert block references for all components at their locations."""
+    
+    df_tanks = globals.df_tanks
+    df_reservoirs = globals.df_reservoirs
+    df_junctions = globals.df_junctions
+    df_pumps = globals.df_pumps
+    df_valves = globals.df_valves
+    msp = globals.msp
+    block_size = globals.block_size
+    joint_size = globals.joint_size
+    
     try:
         mapping = {'tank': '水池',
                    'reservoir': '接水點',
@@ -65,16 +75,16 @@ def insert_blocks(width):
                    'pump': '抽水機',
                    'valve': '閥件'}
 
-        df_mapping = {'tank': globals.df_tanks,
-                      'reservoir': globals.df_reservoirs,
-                      'junction': globals.df_junctions,
-                      'pump': globals.df_pumps,
-                      'valve': globals.df_valves}
+        df_mapping = {'tank': df_tanks,
+                      'reservoir': df_reservoirs,
+                      'junction': df_junctions,
+                      'pump': df_pumps,
+                      'valve': df_valves}
 
         for item in ['tank', 'reservoir', 'junction', 'pump', 'valve']:
             if item == 'valve':
                 import math
-                df = globals.df_valves
+                df = df_valves
                 for i in range(0, len(df)):
                     id = df.at[i, 'ID']
                     x1 = float(df.at[i, 'Node1_x'])
@@ -88,9 +98,9 @@ def insert_blocks(width):
                     rotation = math.atan2(y2-y1, x2-x1)
                     rotation = rotation * 180 / math.pi
 
-                    globals.msp.add_blockref(item, [x, y], dxfattribs={
-                                             'xscale': globals.block_size, 'yscale': globals.block_size, 'rotation': rotation})
-                    globals.msp.add_polyline2d([(x1, y1), (x2, y2)], dxfattribs={
+                    msp.add_blockref(item, [x, y], dxfattribs={
+                                             'xscale': block_size, 'yscale': block_size, 'rotation': rotation})
+                    msp.add_polyline2d([(x1, y1), (x2, y2)], dxfattribs={
                                                'default_start_width': width, 'default_end_width': width})
                     msg = f'閥件 {id} 圖塊已插入'
                     message.renew_message(msg, False)
@@ -104,11 +114,11 @@ def insert_blocks(width):
                     x = float(df.at[i, 'x'])
                     y = float(df.at[i, 'y'])
                     if item == 'junction':
-                        globals.msp.add_blockref(item, [x, y], dxfattribs={
-                                                 'xscale': globals.joint_size, 'yscale': globals.joint_size})
+                        msp.add_blockref(item, [x, y], dxfattribs={
+                                                 'xscale': joint_size, 'yscale': joint_size})
                     else:
-                        globals.msp.add_blockref(item, [x, y], dxfattribs={
-                                                 'xscale': globals.block_size, 'yscale': globals.block_size})
+                        msp.add_blockref(item, [x, y], dxfattribs={
+                                                 'xscale': block_size, 'yscale': block_size})
                     msg = f'{mapping[item]} {id} 圖塊已插入'
                     message.renew_message(msg, False)
                     message.set_message_to_button()

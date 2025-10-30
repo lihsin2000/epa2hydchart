@@ -11,11 +11,11 @@ if TYPE_CHECKING:
 
 def pipe_annotation_block(link_id, start_x, start_y, end_x, end_y, i, pipe_boundaries):
     """Create pipe annotation block with flow direction and store boundary for overlap detection."""
-
-    text_size = globals.text_size
+    
     df_pipes = globals.df_pipes
     df_link_results = globals.df_link_results
     msp = globals.msp
+    text_size = globals.text_size
 
     try:
         center_x = (start_x+end_x)/2
@@ -84,6 +84,7 @@ def pipe_annotation_block(link_id, start_x, start_y, end_x, end_y, i, pipe_bound
 
 def insert_pipe_annotation():
     """Insert pipe annotations and collect their boundaries for overlap detection."""
+    
     df_pipes = globals.df_pipes
     df_vertices = globals.df_vertices
     
@@ -159,7 +160,7 @@ def calculate_text_rotation_angle(start_x, start_y, end_x, end_y):
 def draw_pipe_polylines(width):
     """Draw pipe polylines including vertices if available."""
     from PyQt6.QtCore import QCoreApplication
-
+    
     df_pipes = globals.df_pipes
     df_vertices = globals.df_vertices
     msp = globals.msp

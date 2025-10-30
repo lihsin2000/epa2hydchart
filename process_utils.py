@@ -93,6 +93,8 @@ def process1():
                                 h, '', globals.arranged_rpt_file_path, globals.digit_decimal)
 
                         progress_utils.set_progress_bar(0)
+                        (globals.df_node_results, globals.df_junctions) = read_utils.change_value_by_digits(
+                            digits=globals.digit_decimal)
 
                         match_link, match_node = utils.verify_inp_rpt_files_match()
                         
