@@ -1,6 +1,6 @@
 import globals
 import utils
-import log
+import message
 import os
 from PyQt6.QtWidgets import QFileDialog
 from typing import TYPE_CHECKING
@@ -42,7 +42,7 @@ def handle_rpt_file_selection():
         try:
             globals.arranged_rpt_file_path = utils.arrange_rpt_file(file)
             globals.main_window.ui.browser_log.append('.rpt前處理完成')
-            log.set_log_to_button()
+            message.set_message_to_button()
 
             globals.hr_list = utils.convert_patterns_to_hour_list(
                 globals.arranged_rpt_file_path)
@@ -60,7 +60,8 @@ def handle_rpt_file_selection():
         except Exception as e:
             globals.main_window.ui.browser_log.append(
                 f'[Error] 處理rpt檔時發生錯誤: {str(e)}')
-            log.set_log_to_button()
+            message.set_message_to_button()
+            globals.logger.exception(e)
 
     elif globals.main_window.ui.l_rpt_path.text():
         # If no file selected but there's already a path, use the existing one

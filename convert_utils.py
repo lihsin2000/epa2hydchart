@@ -1,7 +1,6 @@
 import globals
-import log
+import message
 import traceback
-from PyQt6.QtCore import QThread, pyqtSignal
 from PyQt6.QtWidgets import QApplication, QMessageBox
 from typing import TYPE_CHECKING
 
@@ -9,57 +8,23 @@ if TYPE_CHECKING:
     from main import MainWindow
 
 
-class PngConverterThread(QThread):
-    """Worker thread for PNG conversion to prevent UI freezing"""
-    finished = pyqtSignal(bool, str)  # success, error_message
+def save_png(png_path, svg_path):
+    """Convert SVG to PNG synchronously."""
 
-    def __init__(self, svg_path, png_path):
-        """Initialize the PNG converter thread."""
-        super().__init__()
-        self.svg_path = svg_path
-        self.png_path = png_path
-
-    def run(self):
-        """Run PNG conversion in a separate thread."""
-        try:
-            import cairosvg
-            cairosvg.svg2png(
-                url=self.svg_path,
-                write_to=self.png_path,
-                output_width=10000,
-                dpi=600
-            )
-            self.finished.emit(True, "")
-        except Exception as e:
-            self.finished.emit(False, str(e))
-
-
-def save_png(png_path, svg_path, callback):
-    """Convert SVG to PNG using a separate thread to prevent UI freezing."""
-
-    # Create and start the converter thread
-    png_thread = PngConverterThread(svg_path, png_path)
-
-    def on_conversion_finished(success, error_msg):
-        if success:
-            if callback:
-                callback(True)
-        else:
-            traceback.print_exc()
-            print(f"PNG conversion error: {error_msg}")
-            if callback:
-                callback(False)
-
-    png_thread.finished.connect(on_conversion_finished)
-    png_thread.start()
-
-    # Store reference to prevent garbage collection
-    if not hasattr(globals, '_png_threads'):
-        globals._png_threads = []
-    globals._png_threads.append(png_thread)
-
-    # Note: This now returns immediately, actual result is async
-    return True
+    try:
+        import cairosvg
+        cairosvg.svg2png(
+            url=svg_path,
+            write_to=png_path,
+            output_width=10000,
+            dpi=600
+        )
+        return True
+    except Exception as e:
+        # print(f"PNG conversion error: {str(e)}")
+        traceback.print_exc()
+        globals.logger.exception(e)
+        return False
 
 
 def save_dxf(dxf_path, main_window_instance):
@@ -71,6 +36,7 @@ def save_dxf(dxf_path, main_window_instance):
             return True
         except:
             traceback.print_exc()
+            globals.logger.exception(e)
 
             msg_box = QMessageBox(QApplication.activeWindow())
             msg_box.setIcon(QMessageBox.Icon.Critical)
@@ -86,7 +52,7 @@ def save_dxf(dxf_path, main_window_instance):
                 continue
             elif msg_box.clickedButton() == cancel_button:
                 msg = f'[Error]無法儲存 {dxf_path}，中止匯出'
-                log.renew_log(msg, True)
+                message.renew_message(msg, True)
                 return False
 
 
@@ -115,4 +81,5 @@ def save_svg(msp, cad, path):
         return True
     except Exception as e:
         traceback.print_exc()
+        globals.logger.exception(e)
         return False

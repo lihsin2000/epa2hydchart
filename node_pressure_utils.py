@@ -1,7 +1,7 @@
 import globals
 import progress_utils
 import traceback
-import log
+import message
 import SATdetect
 from typing import TYPE_CHECKING
 
@@ -17,18 +17,21 @@ def insert_pressure_annotation_leader(head_color, elev_color, width, auto_label_
     auto_label_post = auto_label_post
     pipe_boundaries = pipe_boundaries or []
     draw_boundaries = draw_boundaries
+    
+    df_junctions = globals.df_junctions
+    df_node_results = globals.df_node_results
 
     boundrys: dict = []
     try:
-        for i in range(0, len(globals.df_junctions)):
-            id = globals.df_junctions.at[i, 'ID']
-            start_x = float(globals.df_junctions.at[i, 'x'])
-            start_y = float(globals.df_junctions.at[i, 'y'])
-            result_row = globals.df_node_results.index[globals.df_node_results['ID'] == str(id)].tolist()[
+        for i in range(0, len(df_junctions)):
+            id = df_junctions.at[i, 'ID']
+            start_x = float(df_junctions.at[i, 'x'])
+            start_y = float(df_junctions.at[i, 'y'])
+            result_row = df_node_results.index[df_node_results['ID'] == str(id)].tolist()[
                 0]
-            Head = globals.df_node_results.at[result_row, 'Head']
-            Elev = globals.df_junctions.at[i, 'Elev']
-            Pressure = globals.df_node_results.at[result_row, 'Pressure']
+            Head = df_node_results.at[result_row, 'Head']
+            Elev = df_junctions.at[i, 'Elev']
+            Pressure = df_node_results.at[result_row, 'Pressure']
 
             if (Pressure == None) or (float(Pressure) < 0):
                 pressure_color = 1
@@ -88,11 +91,12 @@ def insert_pressure_annotation_leader(head_color, elev_color, width, auto_label_
                 draw_pressure_annotation_leader(
                     parameters=parameters, align="RightTop")
             msg = f'節點 {id} 水頭引線已完成繪圖'
-            log.renew_log(msg, False)
-            log.set_log_to_button()
+            message.renew_message(msg, False)
+            message.set_message_to_button()
             progress_utils.set_progress_bar(forced_value=None)
     except Exception as e:
         traceback.print_exc()
+        globals.logger.exception(e)
 
 
 def create_new_boundary(start_x, start_y, align, id) -> dict:
@@ -100,30 +104,33 @@ def create_new_boundary(start_x, start_y, align, id) -> dict:
     original_x = start_x
     original_y = start_y
 
+    text_size = globals.text_size
+    leader_distance = globals.leader_distance
+
     if align == "RightTop":
-        start_x = original_x + globals.text_size + globals.leader_distance
-        start_y = original_y + globals.text_size + \
-            globals.leader_distance-2*globals.text_size
-        end_x = original_x + globals.text_size + \
-            globals.leader_distance+6*globals.text_size
-        end_y = original_y + globals.text_size + \
-            globals.leader_distance+3*globals.text_size
+        start_x = original_x + text_size + leader_distance
+        start_y = original_y + text_size + \
+            leader_distance-2*text_size
+        end_x = original_x + text_size + \
+            leader_distance+6*text_size
+        end_y = original_y + text_size + \
+            leader_distance+3*text_size
     elif align == "LeftTop":
-        start_x = original_x - globals.text_size - globals.leader_distance
-        start_y = original_y + globals.text_size + \
-            globals.leader_distance-2*globals.text_size
-        end_x = original_x - globals.text_size - \
-            globals.leader_distance - 6 * globals.text_size
-        end_y = original_y + globals.text_size + \
-            globals.leader_distance+3*globals.text_size
+        start_x = original_x - text_size - leader_distance
+        start_y = original_y + text_size + \
+            leader_distance-2*text_size
+        end_x = original_x - text_size - \
+            leader_distance - 6 * text_size
+        end_y = original_y + text_size + \
+            leader_distance+3*text_size
     elif align == "LeftBottom":
-        start_x = original_x - globals.text_size - globals.leader_distance
-        start_y = original_y - globals.text_size - \
-            globals.leader_distance + 3 * globals.text_size
-        end_x = original_x - globals.text_size - \
-            globals.leader_distance - 6 * globals.text_size
-        end_y = original_y - globals.text_size - \
-            globals.leader_distance - 2 * globals.text_size
+        start_x = original_x - text_size - leader_distance
+        start_y = original_y - text_size - \
+            leader_distance + 3 * text_size
+        end_x = original_x - text_size - \
+            leader_distance - 6 * text_size
+        end_y = original_y - text_size - \
+            leader_distance - 2 * text_size
 
     # Convert to SAT rectangle format: (center_x, center_y, width, height, angle_deg)
     cx = (start_x + end_x) / 2
@@ -144,12 +151,14 @@ def create_new_boundary(start_x, start_y, align, id) -> dict:
 
 def draw_pressure_boundary(boundry):
     """Draw the boundary rectangle for debugging purposes."""
+    msp = globals.msp
+    
     start_x = boundry['start_x']
     start_y = boundry['start_y']
     end_x = boundry['end_x']
     end_y = boundry['end_y']
 
-    globals.msp.add_lwpolyline([(start_x, start_y), (end_x, start_y), (end_x, end_y), (start_x, end_y), (start_x, start_y)],
+    msp.add_lwpolyline([(start_x, start_y), (end_x, start_y), (end_x, end_y), (start_x, end_y), (start_x, start_y)],
                                dxfattribs={'color': 7})
 
 
@@ -164,7 +173,8 @@ def is_pressure_annotation_overlapping_any_boundary(new_boundry: dict, boundrys:
         # Use SAT algorithm for overlap detection
         if SATdetect.rectangles_overlap(new_rect, existing_rect):
             if verbose:
-                print(f'節點{id} 標示與節點 {boundry["id"]} 引線重疊，改變繪圖位置')
+                # print(f'節點 {id} 標示與節點 {boundry["id"]} 引線重疊，改變繪圖位置')
+                globals.logger.info(f'節點 {id} 標示與節點 {boundry["id"]} 引線重疊，改變繪圖位置')
             return True
 
     # Check overlap with pipe annotation boundaries
@@ -174,7 +184,8 @@ def is_pressure_annotation_overlapping_any_boundary(new_boundry: dict, boundrys:
         # Use SAT algorithm for overlap detection
         if SATdetect.rectangles_overlap(new_rect, pipe_rect):
             if verbose:
-                print(f'節點 {id} 標示與管線 {pipe_boundary["id"]} 標註重疊，改變繪圖位置')
+                # print(f'節點 {id} 標示與管線 {pipe_boundary["id"]} 標註重疊，改變繪圖位置')
+                globals.logger.info(f'節點 {id} 標示與管線 {pipe_boundary["id"]} 標註重疊，改變繪圖位置')
             return True
 
     # No overlap found with any boundary
@@ -194,43 +205,47 @@ def draw_pressure_annotation_leader(parameters, align):
     Elev_attribs = parameters['Elev_attribs']
     Pressure_attribs = parameters['Pressure_attribs']
 
+    text_size = globals.text_size
+    leader_distance = globals.leader_distance
+    msp = globals.msp
+
     if align == "RightTop":
 
-        line_x1, line_y1 = start_x + globals.text_size, start_y + globals.text_size
-        line_x2, line_y2 = line_x1+globals.leader_distance, line_y1+globals.leader_distance
-        line_x3, line_y3 = line_x2+6*globals.text_size, line_y2
+        line_x1, line_y1 = start_x + text_size, start_y + text_size
+        line_x2, line_y2 = line_x1+leader_distance, line_y1+leader_distance
+        line_x3, line_y3 = line_x2+6*text_size, line_y2
 
         text_start_x = line_x3
 
     elif align == "LeftTop":
-        line_x1, line_y1 = start_x - globals.text_size, start_y + globals.text_size
-        line_x2, line_y2 = line_x1 - globals.leader_distance, line_y1 + globals.leader_distance
-        line_x3, line_y3 = line_x2 - 6 * globals.text_size, line_y2
+        line_x1, line_y1 = start_x - text_size, start_y + text_size
+        line_x2, line_y2 = line_x1 - leader_distance, line_y1 + leader_distance
+        line_x3, line_y3 = line_x2 - 6 * text_size, line_y2
 
-        text_start_x = line_x3 + 6 * globals.text_size
+        text_start_x = line_x3 + 6 * text_size
 
     elif align == "LeftBottom":
-        line_x1, line_y1 = start_x - globals.text_size, start_y - globals.text_size
-        line_x2, line_y2 = line_x1 - globals.leader_distance, line_y1 - globals.leader_distance
-        line_x3, line_y3 = line_x2 - 6 * globals.text_size, line_y2
+        line_x1, line_y1 = start_x - text_size, start_y - text_size
+        line_x2, line_y2 = line_x1 - leader_distance, line_y1 - leader_distance
+        line_x3, line_y3 = line_x2 - 6 * text_size, line_y2
 
-        text_start_x = line_x3 + 6 * globals.text_size
+        text_start_x = line_x3 + 6 * text_size
 
-    Head_placement_y = line_y3 + 2 * globals.text_size
-    Elev_placement_y = line_y3 + 0.75 * globals.text_size
-    Pressure_placement_y = line_y3 - 0.75 * globals.text_size
+    Head_placement_y = line_y3 + 2 * text_size
+    Elev_placement_y = line_y3 + 0.75 * text_size
+    Pressure_placement_y = line_y3 - 0.75 * text_size
 
-    globals.msp.add_polyline2d(
+    msp.add_polyline2d(
         [(line_x1, line_y1), (line_x2, line_y2), (line_x3, line_y3)], dxfattribs=line_attribs)
 
     Head_placement = text_start_x, Head_placement_y
-    globals.msp.add_text(Head, height=globals.text_size,
+    msp.add_text(Head, height=text_size,
                          dxfattribs=Head_attribs).set_placement(Head_placement, align=TextEntityAlignment.MIDDLE_RIGHT)
 
     Elev_placement = text_start_x, Elev_placement_y
-    globals.msp.add_text(Elev, height=globals.text_size,
+    msp.add_text(Elev, height=text_size,
                          dxfattribs=Elev_attribs).set_placement(Elev_placement, align=TextEntityAlignment.MIDDLE_RIGHT)
 
     Pressure_placement = text_start_x, Pressure_placement_y
-    globals.msp.add_text(Pressure, height=globals.text_size,
+    msp.add_text(Pressure, height=text_size,
                          dxfattribs=Pressure_attribs).set_placement(Pressure_placement, align=TextEntityAlignment.MIDDLE_RIGHT)

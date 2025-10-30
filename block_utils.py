@@ -1,5 +1,5 @@
 import globals
-import log
+import message
 import progress_utils
 import traceback
 from typing import TYPE_CHECKING
@@ -53,6 +53,7 @@ def create_blocks(cad: 'Drawing'):
             (0, 0), align=TextEntityAlignment.MIDDLE_CENTER)
     except Exception as e:
         traceback.print_exc()
+        globals.logger.exception(e)
 
 
 def insert_blocks(width):
@@ -92,8 +93,8 @@ def insert_blocks(width):
                     globals.msp.add_polyline2d([(x1, y1), (x2, y2)], dxfattribs={
                                                'default_start_width': width, 'default_end_width': width})
                     msg = f'閥件 {id} 圖塊已插入'
-                    log.renew_log(msg, False)
-                    log.set_log_to_button()
+                    message.renew_message(msg, False)
+                    message.set_message_to_button()
                     progress_utils.set_progress_bar(forced_value=None)
 
             else:
@@ -109,9 +110,10 @@ def insert_blocks(width):
                         globals.msp.add_blockref(item, [x, y], dxfattribs={
                                                  'xscale': globals.block_size, 'yscale': globals.block_size})
                     msg = f'{mapping[item]} {id} 圖塊已插入'
-                    log.renew_log(msg, False)
-                    log.set_log_to_button()
+                    message.renew_message(msg, False)
+                    message.set_message_to_button()
                     progress_utils.set_progress_bar(forced_value=None)
 
     except Exception as e:
         traceback.print_exc()
+        globals.logger.exception(e)

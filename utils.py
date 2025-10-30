@@ -2,7 +2,7 @@ import globals
 import re
 import traceback
 import read_utils
-import log
+import message
 from PyQt6.QtCore import QCoreApplication
 
 from typing import TYPE_CHECKING
@@ -65,6 +65,7 @@ def auto_size():
                 str(block_size_estimate/2))
     except Exception as e:
         traceback.print_exc()
+        globals.logger.exception(e)
 
 
 def parse_line_to_dictionary(lines, l, position):
@@ -87,6 +88,7 @@ def parse_line_to_dictionary(lines, l, position):
 
     except Exception as e:
         traceback.print_exc()
+        globals.logger.exception(e)
 
 
 def line_start_end(input, startStr, endStr, start_offset, end_offset):
@@ -123,6 +125,7 @@ def line_start_end(input, startStr, endStr, start_offset, end_offset):
             return start, end
     except Exception as e:
         traceback.print_exc()
+        globals.logger.exception(e)
 
 
 def arrange_rpt_file(rptPath):
@@ -184,6 +187,7 @@ def arrange_rpt_file(rptPath):
         return output
     except Exception as e:
         traceback.print_exc()
+        globals.logger.exception(e)
 
 
 def convert_patterns_to_hour_list(rptFile2):
@@ -220,6 +224,7 @@ def convert_patterns_to_hour_list(rptFile2):
         return hr_list
     except Exception as e:
         traceback.print_exc()
+        globals.logger.exception(e)
 
 
 def load_inp_file_to_dataframe(inpFile, showtime):
@@ -262,6 +267,7 @@ def load_inp_file_to_dataframe(inpFile, showtime):
             globals.main_window.ui.browser_log.append(
                 f'水池參數讀取完畢({t4-t3:.2f}s)')
         QCoreApplication.processEvents()
+        globals.df_pump_curves = read_utils.read_pump_curves(inpFile)
         globals.df_pumps = read_utils.read_pumps(inpFile)
         t5 = time.time()
         if showtime:
@@ -291,6 +297,7 @@ def load_inp_file_to_dataframe(inpFile, showtime):
         #         globals.df_vertices)
     except Exception as e:
         traceback.print_exc()
+        globals.logger.exception(e)
 
 
 def verify_inp_rpt_files_match():
@@ -322,6 +329,7 @@ def verify_inp_rpt_files_match():
         return match_link, match_node
     except Exception as e:
         traceback.print_exc()
+        globals.logger.exception(e)
 
 
 def add_title(hr_str):
@@ -356,7 +364,7 @@ def add_title(hr_str):
                 Q = Q+Decimal(globals.df_node_results.at[row, 'Demand'])
             else:
                 msg = f'[Error]節點 {id} Demand數值錯誤，Q值總計可能有誤'
-                log.renew_log(msg, False)
+                message.renew_message(msg, False)
 
         # 匯整C值
         C_str = ''
@@ -367,17 +375,28 @@ def add_title(hr_str):
 
         # 加入文字
         from ezdxf.enums import TextEntityAlignment
-        globals.msp.add_text(proj_name, height=2*globals.text_size, dxfattribs={"style": "epa2HydChart"}).set_placement(
-            (x_min, y_max+16*globals.text_size), align=TextEntityAlignment.TOP_LEFT)
+        text_size = globals.text_size
+        globals.msp.add_text(proj_name, height=2*text_size, dxfattribs={"style": "epa2HydChart"}).set_placement(
+            (x_min, y_max+16*text_size), align=TextEntityAlignment.TOP_LEFT)
 
         if hr == '':
-            globals.msp.add_text(f'Q={Q} CMD', height=2*globals.text_size, dxfattribs={"style": "epa2HydChart"}
-                                 ).set_placement((x_min, y_max+13*globals.text_size), align=TextEntityAlignment.TOP_LEFT)
+            globals.msp.add_text(f'Q={Q} CMD', height=2*text_size, dxfattribs={"style": "epa2HydChart"}
+                                 ).set_placement((x_min, y_max+13*text_size), align=TextEntityAlignment.TOP_LEFT)
         else:
-            globals.msp.add_text(f'{hr} Q={Q} CMD', height=2*globals.text_size, dxfattribs={"style": "epa2HydChart"}
-                                 ).set_placement((x_min, y_max+13*globals.text_size), align=TextEntityAlignment.TOP_LEFT)
+            globals.msp.add_text(f'{hr} Q={Q} CMD', height=2*text_size, dxfattribs={"style": "epa2HydChart"}
+                                 ).set_placement((x_min, y_max+13*text_size), align=TextEntityAlignment.TOP_LEFT)
 
-        globals.msp.add_text(f'C={C_str}', height=2*globals.text_size, dxfattribs={"style": "epa2HydChart"}
-                             ).set_placement((x_min, y_max+10*globals.text_size), align=TextEntityAlignment.TOP_LEFT)
+        globals.msp.add_text(f'C={C_str}', height=2*text_size, dxfattribs={"style": "epa2HydChart"}
+                             ).set_placement((x_min, y_max+10*text_size), align=TextEntityAlignment.TOP_LEFT)
     except Exception as e:
         traceback.print_exc()
+        globals.logger.exception(e)
+
+def inerpolate_from_two_points(x0, y0, x1, y1, distance):
+    import math
+    D=math.sqrt((x1 - x0)**2 + (y1 - y0)**2)
+
+    x= x0 + (distance / D) * (x1 - x0)
+    y= y0 + (distance / D) * (y1 - y0)
+
+    return x, y
