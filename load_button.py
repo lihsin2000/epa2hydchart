@@ -26,6 +26,10 @@ def handle_inp_file_selection():
         globals.inp_file = file
         globals.proj_name = os.path.splitext(os.path.basename(file))[0]
         globals.main_window.ui.l_projName.setText(globals.proj_name)
+    
+    # Check if both files are loaded and enable autoSize checkbox
+    check_and_enable_autosize()
+
 
 
 def handle_rpt_file_selection():
@@ -67,3 +71,18 @@ def handle_rpt_file_selection():
         # If no file selected but there's already a path, use the existing one
         file = globals.main_window.ui.l_rpt_path.text()
         globals.rpt_file = file
+    
+    # Check if both files are loaded and enable autoSize checkbox
+    check_and_enable_autosize()
+
+
+def check_and_enable_autosize():
+    """
+    Check if both inp and rpt files are loaded.
+    If both are loaded, enable the autoSize checkbox.
+    """
+    if globals.inp_file and globals.rpt_file:
+        globals.main_window.ui.chk_autoSize.setEnabled(True)
+    else:
+        globals.main_window.ui.chk_autoSize.setEnabled(False)
+

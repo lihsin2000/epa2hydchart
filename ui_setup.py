@@ -39,6 +39,8 @@ def setup_ui_elements():
 
     # Connect autoSize checkbox
     globals.main_window.ui.chk_autoSize.stateChanged.connect(lambda: utils.auto_size())
+    # Initially disable autoSize checkbox until both inp and rpt files are loaded
+    globals.main_window.ui.chk_autoSize.setEnabled(False)
 
     # Set default combo box value
     globals.main_window.ui.comboBox_digits.setCurrentText('0.00')

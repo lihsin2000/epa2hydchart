@@ -62,6 +62,7 @@ class MainWindow(QMainWindow):
         self.ui.l_line_width.setText(str(globals.LINE_WIDTH_DEFAULT))
         self.ui.chk_export_0cmd.setChecked(False)
         self.ui.chk_autoSize.setChecked(False)
+        self.ui.chk_autoSize.setEnabled(False)  # Disable until both files are loaded
         self.ui.chk_autoLabelPost.setChecked(False)
 
         self.ui.l_inp_path.setText('')
@@ -71,6 +72,7 @@ class MainWindow(QMainWindow):
         globals.inp_file = None
         globals.rpt_file = None
         globals.proj_name = None
+
 
     def start_processing(self):
         """
