@@ -8,13 +8,14 @@ if TYPE_CHECKING:
     from main import MainWindow
 
 
-def save_png(png_path, svg_path):
+def save_png(png_path, svg_path=None, bytestring=None):
     """Convert SVG to PNG synchronously."""
 
     try:
         import cairosvg
         cairosvg.svg2png(
             url=svg_path,
+            bytestring=bytestring,
             write_to=png_path,
             output_width=10000,
             dpi=600
@@ -78,8 +79,8 @@ def save_svg(msp, cad, path):
 
         with open(svg_path, "wt", encoding="utf8") as fp:
             fp.write(svg_string)
-        return True
+        return True, svg_string
     except Exception as e:
         traceback.print_exc()
         globals.logger.exception(e)
-        return False
+        return False, None

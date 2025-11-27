@@ -197,7 +197,8 @@ def process2(dxf_path, hr):
         message.set_message_to_button()
         progress_utils.set_progress_bar(97)
 
-        if convert_utils.save_svg(msp=globals.msp, cad=globals.cad, path=svg_path):
+        success, svg_string = convert_utils.save_svg(msp=globals.msp, cad=globals.cad, path=svg_path)
+        if success:
             globals.export_svg_success = True
             msg = f'{dxf_path_without_extension}.svg 匯出完成'
         else:
@@ -208,7 +209,7 @@ def process2(dxf_path, hr):
         progress_utils.set_progress_bar(98)
 
         # Synchronous PNG conversion
-        if convert_utils.save_png(png_path=png_path, svg_path=svg_path):
+        if convert_utils.save_png(png_path=png_path, bytestring=svg_string):
             globals.export_png_success = True
             msg = f'{dxf_path_without_extension}.png 匯出完成'
         else:
