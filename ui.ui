@@ -174,7 +174,7 @@ p, li { white-space: pre-wrap; }
         <item row="3" column="0" colspan="2">
          <widget class="QCheckBox" name="chk_autoSize">
           <property name="text">
-           <string>自動調整大小</string>
+           <string>自動調整文字大小</string>
           </property>
          </widget>
         </item>

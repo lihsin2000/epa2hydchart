@@ -25,6 +25,7 @@ def read_vertices(inpFile):
         return df
     except Exception as e:
         traceback.print_exc()
+        globals.logger.exception(e)
 
 
 def read_pipes(inpFile):
@@ -56,6 +57,7 @@ def read_pipes(inpFile):
         return df
     except Exception as e:
         traceback.print_exc()
+        globals.logger.exception(e)
 
 
 def read_coords(inpFile):
@@ -81,6 +83,7 @@ def read_coords(inpFile):
         return df
     except Exception as e:
         traceback.print_exc()
+        globals.logger.exception(e)
 
 
 def read_junctions(inpFile):
@@ -107,6 +110,7 @@ def read_junctions(inpFile):
         return df
     except Exception as e:
         traceback.print_exc()
+        globals.logger.exception(e)
 
 
 def read_reservoirs(inpFile):
@@ -132,6 +136,7 @@ def read_reservoirs(inpFile):
         return df
     except Exception as e:
         traceback.print_exc()
+        globals.logger.exception(e)
 
 
 def read_tanks(inpFile):
@@ -166,6 +171,7 @@ def read_tanks(inpFile):
         return df
     except Exception as e:
         traceback.print_exc()
+        globals.logger.exception(e)
 
 
 def read_valves(inpFile):
@@ -212,25 +218,25 @@ def read_valves(inpFile):
         return df
     except Exception as e:
         traceback.print_exc()
+        globals.logger.exception(e)
 
-
-def read_pumps(inpFile):
-    """Read pump data from INP file and merge with curve data."""
+def read_pump_curves(inpFile):
     import pandas as pd
+
     try:
         lines = open(inpFile).readlines()
 
-        start_curve, end_curve = utils.line_start_end(
-            inpFile, '[CURVES]', '[CONTROLS]', 2, 1)
-        df_pump_curves = pd.DataFrame(columns=['ID', 'Q', 'H'])
+        start_curve, end_curve = utils.line_start_end(inpFile, '[CURVES]', '[CONTROLS]', 2, 1)
+        df = pd.DataFrame(columns=['ID', 'Q', 'H'])
         for l in range(start_curve-1, end_curve):
-            if 'PUMP' in lines[l]:
+            if ';PUMP:' in lines[l]:
                 continue
             elif '\n' == lines[l]:
                 continue
+            # elif lines[l]==';PUMP: \n':
+            #     continue
             else:
-                d = utils.parse_line_to_dictionary(
-                    lines=lines, l=l, position=2)
+                d = utils.parse_line_to_dictionary(lines=lines, l=l, position=2)
                 ID = d[1]
                 Q = d[2]
                 H = d[3]
@@ -239,11 +245,23 @@ def read_pumps(inpFile):
                 'Q': Q,
                 'H': H
             }
-            if df_pump_curves.empty:
-                df_pump_curves.loc[0] = data_curve
+            if df.empty:
+                df.loc[0] = data_curve
             else:
-                df_pump_curves.loc[len(df_pump_curves)] = data_curve
-        df_pump_curves = df_pump_curves.reset_index(drop=True)
+                df.loc[len(df)] = data_curve
+        df = df.reset_index(drop=True)
+
+        return df
+    except Exception as e:
+        traceback.print_exc()
+        globals.logger.exception(e)
+
+def read_pumps(inpFile):
+    """Read pump data from INP file and merge with curve data."""
+    import pandas as pd
+
+    try:
+        lines = open(inpFile).readlines()
 
         start, end = utils.line_start_end(inpFile, '[PUMPS]', '[VALVES]', 2, 2)
         df = pd.DataFrame(columns=['ID', 'Node1', 'Node2', 'Node1_x',
@@ -253,10 +271,8 @@ def read_pumps(inpFile):
             ID = [d[1]][0]
             Node1 = [d[2]][0]
             Node2 = [d[3]][0]
-            coords1_row = globals.df_coords.index[globals.df_coords['ID'] == Node1].tolist()[
-                0]
-            coords2_row = globals.df_coords.index[globals.df_coords['ID'] == Node2].tolist()[
-                0]
+            coords1_row = globals.df_coords.index[globals.df_coords['ID'] == Node1].tolist()[0]
+            coords2_row = globals.df_coords.index[globals.df_coords['ID'] == Node2].tolist()[0]
             Node1_x = globals.df_coords.at[coords1_row, 'x']
             Node1_y = globals.df_coords.at[coords1_row, 'y']
             Node2_x = globals.df_coords.at[coords2_row, 'x']
@@ -265,9 +281,9 @@ def read_pumps(inpFile):
             y = 0.5*(float(Node1_y)+float(Node2_y))
 
             curve_id = d[5]
-            i = int(df_pump_curves.index[df_pump_curves['ID'] == curve_id][0])
-            Q = df_pump_curves.at[i, 'Q']
-            H = df_pump_curves.at[i, 'H']
+            i = int(globals.df_pump_curves.index[globals.df_pump_curves['ID'] == curve_id][0])
+            Q = globals.df_pump_curves.at[i, 'Q']
+            H = globals.df_pump_curves.at[i, 'H']
 
             data = {
                 'ID': ID,
@@ -290,6 +306,7 @@ def read_pumps(inpFile):
         return df
     except Exception as e:
         traceback.print_exc()
+        globals.logger.exception(e)
 
 
 def read_node_results(hr, input_rpt_file):
@@ -322,7 +339,7 @@ def read_node_results(hr, input_rpt_file):
                     'Pressure': pressure,
                 }
 
-            except:
+            except Exception as e:
                 globals.main_window.ui.browser_log.append(
                     f'節點 {id} 資料錯誤，請手動修正.rpt檔內容')
                 globals.any_error = True
@@ -334,7 +351,7 @@ def read_node_results(hr, input_rpt_file):
                     'Head': None,
                     'Pressure': None,
                 }
-
+                globals.logger.exception(e)
             # if df.empty:
             #     df.loc[0] = data
             # else:
@@ -343,7 +360,41 @@ def read_node_results(hr, input_rpt_file):
         return df
     except Exception as e:
         traceback.print_exc()
+        globals.logger.exception(e)
 
+def calculate_link_headloss():
+    
+    df_link_results = globals.df_link_results
+    df_pipes = globals.df_pipes
+    df_node_results = globals.df_node_results
+
+    for index, row in df_link_results.iterrows():
+        pipe_id = row['ID']
+        digits = globals.digit_decimal
+
+        # Check if this link is a pipe (not a pump or valve)
+        if pipe_id not in df_pipes['ID'].values:
+            # This is not a pipe (could be a pump or valve), skip headloss calculation
+            continue
+
+        pipe_index = df_pipes.index[df_pipes['ID'] == pipe_id].tolist()[0]
+        node1 = df_pipes.at[pipe_index, 'Node1']
+        node1_row_index = df_node_results.index[df_node_results['ID'] == node1].tolist()[0]
+        node2 = df_pipes.at[pipe_index, 'Node2']
+        node2_row_index = df_node_results.index[df_node_results['ID'] == node2].tolist()[0]
+
+        from decimal import Decimal
+        try:
+            node1_head = Decimal(df_node_results.at[node1_row_index, 'Head'])
+            node2_head = Decimal(df_node_results.at[node2_row_index, 'Head'])
+
+            Headloss = round(abs(node2_head-node1_head), digits)
+            Headloss_str = f"{Headloss:.{digits}f}"
+
+            df_link_results.at[index, 'Headloss'] = Headloss_str
+
+        except Exception as e:
+            globals.logger.exception(e)
 
 def read_link_results(hr1, hr2, input_rpt_file, digits):
     """Read link results from RPT file for specified time period."""
@@ -371,38 +422,12 @@ def read_link_results(hr1, hr2, input_rpt_file, digits):
             velocity = d[3]
             unit_headloss = d[4]
 
-            # calculate headloss number:
-            # 2 side in link are node:
-            if pipe_id in globals.df_pipes['ID'].tolist():
-                pipe_index = globals.df_pipes.index[globals.df_pipes['ID'] == pipe_id].tolist()[
-                    0]
-                node1 = globals.df_pipes.at[pipe_index, 'Node1']
-                i1 = globals.df_node_results.index[globals.df_node_results['ID'] == node1].tolist()[
-                    0]
-                node2 = globals.df_pipes.at[pipe_index, 'Node2']
-                i2 = globals.df_node_results.index[globals.df_node_results['ID'] == node2].tolist()[
-                    0]
-
-                from decimal import Decimal
-                try:
-                    node1_head = Decimal(
-                        globals.df_node_results.at[i1, 'Head'])
-                    node2_head = Decimal(
-                        globals.df_node_results.at[i2, 'Head'])
-
-                    Headloss = round(abs(node2_head-node1_head), digits)
-                    Headloss_str = f"{Headloss:.{digits}f}"
-
-                except:
-                    Headloss = 0
-                    Headloss_str = f"{Headloss:.{digits}f}"
-
             data = {
                 'ID': pipe_id,
                 'Flow': flow,
                 'Velocity': velocity,
                 'unitHeadloss': unit_headloss,
-                'Headloss': Headloss_str
+                # 'Headloss': Headloss_str
             }
             if df.empty:
                 df.loc[0] = data
@@ -413,13 +438,17 @@ def read_link_results(hr1, hr2, input_rpt_file, digits):
         return df
     except Exception as e:
         traceback.print_exc()
+        globals.logger.exception(e)
 
 
 def change_value_by_digits(digits):
     """Format numerical values to specified decimal places."""
+    
+    df_node_results = globals.df_node_results
+    df_junctions = globals.df_junctions
+    
     try:
-        df_nodeResult = globals.df_node_results
-        df_junctions = globals.df_junctions
+        df_nodeResult = df_node_results
 
         df_nodeResult['Demand'] = df_nodeResult['Demand'].astype(float)
         df_nodeResult['Head'] = df_nodeResult['Head'].astype(float)
@@ -428,6 +457,8 @@ def change_value_by_digits(digits):
         df_nodeResult['Demand'] = df_nodeResult['Demand'].map(
             lambda x: f"{x:.{digits}f}")
         df_nodeResult['Head'] = df_nodeResult['Head'].map(
+            lambda x: f"{x:.{digits}f}")
+        df_junctions['Elev'] = df_junctions['Elev'].map(
             lambda x: f"{x:.{digits}f}")
 
         for index, row in df_nodeResult.iterrows():
@@ -441,13 +472,12 @@ def change_value_by_digits(digits):
             except:
                 continue
 
-        df_junctions['Elev'] = df_junctions['Elev'].map(
-            lambda x: f"{x:.{digits}f}")
         # df['Pressure'] = df['Pressure'].round(0)
 
         return (df_nodeResult, df_junctions)
     except Exception as e:
         traceback.print_exc()
+        globals.logger.exception(e)
 
 
 def merge_coordinates_to_dataframe(df):
@@ -464,3 +494,4 @@ def merge_coordinates_to_dataframe(df):
         return df
     except Exception as e:
         traceback.print_exc()
+        globals.logger.exception(e)

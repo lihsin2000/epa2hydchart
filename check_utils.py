@@ -8,9 +8,11 @@ if TYPE_CHECKING:
 
 def find_negative_low_pressure_junctions():
     """Find junctions with negative and low pressure conditions."""
-    df = globals.df_node_results
-    reservoirs = globals.df_reservoirs
-    df = df[~df['ID'].isin(reservoirs['ID'])]
+    
+    df_node_results = globals.df_node_results
+    df_reservoirs = globals.df_reservoirs
+    
+    df = df_node_results[~df_node_results['ID'].isin(df_reservoirs['ID'])]
     df_nagaive_pressure = df[df['Pressure'].astype(
         float) < globals.nagaive_pressure_threshold]
     df_low_pressure_junctions = df[df['Pressure'].astype(
@@ -20,10 +22,16 @@ def find_negative_low_pressure_junctions():
 
 def find_unreasonable_pipes():
     """Find pipes with unreasonable headloss or velocity characteristics."""
-    links = globals.df_link_results
-    pipes = globals.df_pipes
-    pumps = globals.df_pumps
-    valves = globals.df_valves
+    
+    df_link_results = globals.df_link_results
+    df_pipes = globals.df_pipes
+    df_pumps = globals.df_pumps
+    df_valves = globals.df_valves
+    
+    links = df_link_results.copy()
+    pipes = df_pipes
+    pumps = df_pumps
+    valves = df_valves
     links = links[~links['ID'].isin(pumps['ID'])]
     links = links[~links['ID'].isin(valves['ID'])]
 
@@ -54,7 +62,6 @@ def find_unreasonable_pipes():
             diameter_suggest = 50*(int(diameter_suggest/50)+1)
             df_headloss_unreasonable.loc[index,
                                          'Diameter_suggest'] = f'{diameter_suggest:.0f}'
-        pass
 
     df_velocity_unreasonable = links[abs(
         links['Velocity'].astype(float)) < globals.unit_velocity_threshold]
@@ -65,8 +72,11 @@ def find_unreasonable_pipes():
 def list_pipe_dimension():
     """List all unique pipe diameters and their counts."""
     import pandas as pd
+    
+    df_pipes = globals.df_pipes
+    
     df = pd.DataFrame(columns=['Diameter', 'Amount'])
-    pipes = globals.df_pipes
+    pipes = df_pipes
     unique_diameters = pipes['Diameter'].unique().tolist()
     unique_diameters.sort()
     # unique_diameters=[int(x) for x in unique_diameters]

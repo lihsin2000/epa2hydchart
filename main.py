@@ -3,11 +3,13 @@ from PyQt6.QtWidgets import QMainWindow, QApplication
 import sys
 import warnings
 import traceback
+import logging
 
 # Suppress PyQt6 SIP deprecation warnings
 warnings.filterwarnings(
     "ignore", category=DeprecationWarning, message=".*sipPyTypeDict.*")
 
+logging.basicConfig(level=logging.INFO, filename='log.txt', filemode='w', encoding='utf-8-sig')
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -46,6 +48,7 @@ class MainWindow(QMainWindow):
             return cad, msp
         except Exception as e:
             traceback.print_exc()
+            globals.logger.exception(e)
             return None, None
 
     def reset_form_to_defaults(self):
@@ -84,6 +87,7 @@ class MainWindow(QMainWindow):
             process1()
         except Exception as e:
             traceback.print_exc()
+            globals.logger.exception(e)
 
 
 warnings.simplefilter(action='ignore', category=FutureWarning)

@@ -1,11 +1,15 @@
 
 from typing import TYPE_CHECKING, Optional
+import logging
 
 if TYPE_CHECKING:
     from main import MainWindow
     from ezdxf.document import Drawing
     from ezdxf.layouts import Modelspace
     import pandas as pd
+
+# Global logger
+logger = logging.getLogger('epa2hydchart')
 
 # main window instance
 main_window: Optional['MainWindow'] = None
@@ -41,6 +45,7 @@ df_coords = None  # Optional[pd.DataFrame]
 df_junctions = None  # Optional[pd.DataFrame]
 df_reservoirs = None  # Optional[pd.DataFrame]
 df_tanks = None  # Optional[pd.DataFrame]
+df_pump_curves = None  # Optional[pd.DataFrame]
 df_pumps = None  # Optional[pd.DataFrame]
 df_valves = None  # Optional[pd.DataFrame]
 df_pipes = None  # Optional[pd.DataFrame]

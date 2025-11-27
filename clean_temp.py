@@ -1,5 +1,6 @@
 import os
 import shutil
+import globals
 
 
 def delete_all_files(base_directory):
@@ -21,6 +22,7 @@ def delete_all_files(base_directory):
                 deleted_files += 1
             except Exception as e:
                 print(f"Failed to delete {file_path}: {e}")
+                globals.logger.exception(e)
 
     print(f"Total deleted files: {deleted_files}")
 
@@ -36,6 +38,7 @@ def delete_empty_directories(base_directory):
                     print(f"Deleted empty directory: {dir_path}")
             except Exception as e:
                 print(f"Failed to delete directory {dir_path}: {e}")
+                globals.logger.exception(e)
 
 
 # Example usage

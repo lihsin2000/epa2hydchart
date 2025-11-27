@@ -1,4 +1,5 @@
 import os
+import globals
 
 
 def delete_files(base_directory, extensions):
@@ -12,12 +13,13 @@ def delete_files(base_directory, extensions):
                 file_path = os.path.join(root, file)
                 try:
                     os.remove(file_path)
-                    print(f"Deleted: {file_path}")
+                    globals.logger.info(f"Deleted: {file_path}")
                     deleted_files += 1
                 except Exception as e:
-                    print(f"Failed to delete {file_path}: {e}")
+                    globals.logger.error(f"Failed to delete {file_path}: {e}")
+                    globals.logger.exception(e)
 
-    print(f"Total deleted files: {deleted_files}")
+    globals.logger.info(f"Total deleted files: {deleted_files}")
 
 
 # Example usage

@@ -124,4 +124,4 @@ def rectangles_overlap(rect1, rect2):
 rect1 = (0, 0, 4, 2, 0)       # Rectangle centered at (0,0), no rotation
 rect2 = (2, 0, 4, 2, 30)      # Rectangle centered at (2,0), rotated 30°
 
-print("Overlap:", rectangles_overlap(rect1, rect2))
+# print("Overlap:", rectangles_overlap(rect1, rect2))
