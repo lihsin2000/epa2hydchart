@@ -162,10 +162,10 @@ def process2(dxf_path, hr):
 
         pipe_utils.draw_pipe_polylines(width=line_width)
         # Collect pipe annotation boundaries for overlap detection
-        pipe_boundaries = pipe_utils.insert_pipe_annotation()
+        auto_label_post = globals.main_window.ui.chk_autoLabelPost.isChecked()
+        pipe_boundaries = pipe_utils.insert_pipe_annotation(auto_label_post=auto_label_post)
 
         draw_0cmd = globals.main_window.ui.chk_export_0cmd.isChecked()
-        auto_label_post = globals.main_window.ui.chk_autoLabelPost.isChecked()
         node_demand_utils.insert_demand_annotation_leader(
             color=demand_color, draw0cmd=draw_0cmd)
         # Pass pipe boundaries to check for overlaps with node pressure annotations
