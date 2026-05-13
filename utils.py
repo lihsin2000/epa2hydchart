@@ -115,7 +115,7 @@ def line_start_end(input, startStr, endStr, start_offset, end_offset):
     """
     try:
         index = 0
-        with open(input, 'r') as file:
+        with open(input, 'r', errors='ignore') as file:
             for line in file:
                 index += 1
                 if startStr in line:
@@ -155,34 +155,27 @@ def arrange_rpt_file(rptPath):
         if os.path.exists(output):
             os.remove(output)
 
-        with open(rptPath, 'r') as file_in, open(output, 'w') as file_out:
+        with open(rptPath, 'r', errors='ignore') as file_in, open(output, 'w', errors='ignore') as file_out:
             lines = file_in.readlines()
             i = 0
             while i < len(lines):
                 if '\x0c\n' in lines[i]:
                     i += 1
                     continue
-
                 elif 'Page' in lines[i]:
                     i += 1
                     continue
-
-                elif '\n' == lines[i]:
+                elif not lines[i].strip():
                     i += 1
                     continue
-
                 elif 'continued' in lines[i]:
                     i += 5
                     continue
                 else:
-                    if i == len(lines)-1:
-                        file_out.write('\n')
-                        file_out.write('[END]')
-                        break
-                    else:
-                        file_out.write(lines[i])
-                        i += 1
-        file_out.close()
+                    file_out.write(lines[i])
+                    i += 1
+            file_out.write('\n')
+            file_out.write('[END]')
 
         return output
     except Exception as e:
@@ -205,7 +198,7 @@ def convert_patterns_to_hour_list(rptFile2):
         List of unique hour values found.
     """
     try:
-        rptFile2_lines = open(rptFile2).readlines()
+        rptFile2_lines = open(rptFile2, errors='ignore').readlines()
 
         i = 0
         hr_list = []

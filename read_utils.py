@@ -15,7 +15,7 @@ def read_vertices(inpFile):
     try:
         start, end = utils.line_start_end(
             inpFile, '[VERTICES]', '[LABELS]', 2, 2)
-        lines = open(inpFile).readlines()
+        lines = open(inpFile, errors='ignore').readlines()
 
         data = []
         for l in range(start-1, end):
@@ -33,7 +33,7 @@ def read_pipes(inpFile):
     import pandas as pd
     try:
         start, end = utils.line_start_end(inpFile, '[PIPES]', '[PUMPS]', 2, 2)
-        lines = open(inpFile).readlines()
+        lines = open(inpFile, errors='ignore').readlines()
 
         data = []
         for l in range(start - 1, end):
@@ -66,7 +66,7 @@ def read_coords(inpFile):
     try:
         start, end = utils.line_start_end(
             inpFile, '[COORDINATES]', '[VERTICES]', 2, 2)
-        lines = open(inpFile).readlines()
+        lines = open(inpFile, errors='ignore').readlines()
         df = pd.DataFrame(columns=['ID', 'x', 'y'])
         for l in range(start-1, end):
             d = utils.parse_line_to_dictionary(lines=lines, l=l, position=2)
@@ -92,7 +92,7 @@ def read_junctions(inpFile):
     try:
         start, end = utils.line_start_end(
             inpFile, '[JUNCTIONS]', '[RESERVOIRS]', 2, 2)
-        lines = open(inpFile).readlines()
+        lines = open(inpFile, errors='ignore').readlines()
         df = pd.DataFrame(columns=['ID', 'Elev', 'BaseDemand', 'x', 'y'])
         for l in range(start-1, end):
             d = utils.parse_line_to_dictionary(lines=lines, l=l, position=2)
@@ -119,7 +119,7 @@ def read_reservoirs(inpFile):
     try:
         start, end = utils.line_start_end(
             inpFile, '[RESERVOIRS]', '[TANKS]', 2, 2)
-        lines = open(inpFile).readlines()
+        lines = open(inpFile, errors='ignore').readlines()
         df = pd.DataFrame(columns=['ID', 'Head', 'x', 'y'])
         for l in range(start-1, end):
             d = utils.parse_line_to_dictionary(lines=lines, l=l, position=2)
@@ -144,7 +144,7 @@ def read_tanks(inpFile):
     import pandas as pd
     try:
         start, end = utils.line_start_end(inpFile, '[TANKS]', '[PIPES]', 2, 2)
-        lines = open(inpFile).readlines()
+        lines = open(inpFile, errors='ignore').readlines()
         df = pd.DataFrame(
             columns=['ID', 'Elev', 'MinLevel', 'MaxLevel', 'MinElev', 'MaxElev', 'x', 'y'])
         for l in range(start-1, end):
@@ -179,7 +179,7 @@ def read_valves(inpFile):
     import pandas as pd
     try:
         start, end = utils.line_start_end(inpFile, '[VALVES]', '[TAGS]', 2, 2)
-        lines = open(inpFile).readlines()
+        lines = open(inpFile, errors='ignore').readlines()
         df = pd.DataFrame(columns=['ID', 'Node1', 'Node2', 'Node1_x',
                           'Node1_y', 'Node2_x', 'Node2_y', 'Type', 'Setting'])
         for l in range(start-1, end):
@@ -224,7 +224,7 @@ def read_pump_curves(inpFile):
     import pandas as pd
 
     try:
-        lines = open(inpFile).readlines()
+        lines = open(inpFile, errors='ignore').readlines()
 
         start_curve, end_curve = utils.line_start_end(inpFile, '[CURVES]', '[CONTROLS]', 2, 1)
         df = pd.DataFrame(columns=['ID', 'Q', 'H'])
@@ -261,7 +261,7 @@ def read_pumps(inpFile):
     import pandas as pd
 
     try:
-        lines = open(inpFile).readlines()
+        lines = open(inpFile, errors='ignore').readlines()
 
         start, end = utils.line_start_end(inpFile, '[PUMPS]', '[VALVES]', 2, 2)
         df = pd.DataFrame(columns=['ID', 'Node1', 'Node2', 'Node1_x',
@@ -321,8 +321,8 @@ def read_node_results(hr, input_rpt_file):
         else:
             start_str = f'Node Results at {hr} Hrs:'
             end_str = f'Link Results at {hr} Hrs:'
-        start, end = utils.line_start_end(rpt_file, start_str, end_str, 5, 2)
-        lines = open(rpt_file).readlines()
+        start, end = utils.line_start_end(rpt_file, start_str, end_str, 5, 1)
+        lines = open(rpt_file, errors='ignore').readlines()
         df = pd.DataFrame(columns=['ID', 'Demand', 'Head', 'Pressure'])
         for l in range(start-1, end):
             d = utils.parse_line_to_dictionary(lines=lines, l=l, position=2)
@@ -405,9 +405,11 @@ def read_link_results(hr1, hr2, input_rpt_file, digits):
         if hr1 == None:     # without patteren
             start_str = 'Link Results:'
             end_str = '[END]'
+            end_offset = 2
         elif hr2 == '':    # with patteren and last hour
             start_str = f'Link Results at {hr1} Hrs:'
             end_str = '[END]'
+            end_offset = 2
         elif hr1 != '' and hr2 != '':
             start_str = f'Link Results at {hr1} Hrs:'
             end_str = f'Node Results at {hr2} Hrs:'
