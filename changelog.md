@@ -43,10 +43,7 @@
 
 ## [0.4.0]
 - Add: 取小數位數功能
-- Add: 預覽功能(修正中)
 - Add: 資料處理進度條
-- Add: 區分圖層顯示(修正中)
-- Add: 將標註改為圖塊，方便使用者調整比例(修正中)
 - Add: 自動調整標示位置
 - Change: 調整預設線粗及箭頭樣式，以增加可讀性
 - Fix: 修正計算數值很大或是很小的負值時，無法正常處理的問題
@@ -54,21 +51,8 @@
 - Fix: 改善大型輸入檔造成的UI Freeze問題
 
 ## [0.4.1]
-- Fix: 修正讀取含特殊字元（無法以cp950解碼）之.inp檔時發生UnicodeDecodeError的問題
-- Fix: 修正arrange_rpt_file將.rpt最後一筆連結資料漏寫的問題
-- Fix: 修正arrange_rpt_file空行過濾條件不完整，導致帶有前導空格的空行殘留並造成解析錯誤的問題
-- Fix: 修正read_node_results在處理後的.rpt中漏讀最後一個節點的問題
-- Fix: 修正read_link_results在有pattern情況下漏讀最後一筆連結資料的問題
-- Fix: 修正read_link_results在有pattern且為最後時段時end_offset設定錯誤的問題
-- Add: autoSize核取方塊在兩個輸入檔案皆載入前停用，避免誤操作
-- Change: SVG轉PNG最佳化，直接傳遞SVG內容bytestring，減少磁碟I/O
-- Refactor: check_utils.py變數命名優化，提升可讀性
-
-## [0.4.2]
-- Change: 封裝設定將相依library集中至library/子資料夾，根目錄僅保留執行檔
-- Change: 封裝後自動將example、fonts、icon.ico複製至根目錄，方便使用者存取
-- Change: 封裝設定停用UPX壓縮，啟用Python bytecode最佳化(optimize=1)
-- Change: 封裝設定新增hiddenimports(cairosvg等)並排除非必要套件，縮減封裝大小
-- Change: auto_size()改用已快取的globals.df_coords/df_vertices，避免重複讀取輸入檔
-- Refactor: 各模組import順序統一整理為stdlib→third-party→local(符合PEP 8)
-- Refactor: version_info.txt清理格式，補齊FileDescription、ProductName等版本描述欄位
+- Fix: 修正.inp和.rpt解析錯誤問題
+- Change: SVG轉PNG最佳化，減少磁碟I/O
+- Change: 改善auto_size()運作邏輯
+- Refactor: 變數命名優化
+- Refactor: 調整模組import順序，改善啟動速度
