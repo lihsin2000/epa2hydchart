@@ -3,43 +3,70 @@ import progress_utils
 import traceback
 import message
 import math
+import SATdetect
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from main import MainWindow
 
 
-def pipe_annotation_block(link_id, start_x, start_y, end_x, end_y, i, pipe_boundaries):
+def pipe_annotation_block(link_id, segments, preferred_idx, i, pipe_boundaries, auto_label_post=False):
     """Create pipe annotation block with flow direction and store boundary for overlap detection."""
-    
+
     df_pipes = globals.df_pipes
     df_link_results = globals.df_link_results
     msp = globals.msp
     text_size = globals.text_size
 
     try:
-        center_x = (start_x+end_x)/2
-        center_y = (start_y+end_y)/2
         diameter = df_pipes.at[i, 'Diameter']
         length = df_pipes.at[i, 'Length']
 
-        link_row = df_link_results.index[df_link_results['ID'] == link_id].tolist()[
-            0]
+        link_row = df_link_results.index[df_link_results['ID'] == link_id].tolist()[0]
         flow = float(df_link_results.at[link_row, 'Flow'])
+        headloss = df_link_results.at[link_row, 'Headloss']
 
-        import math
-        rotation = math.atan2(end_y-start_y, end_x-start_x)
-        rotation = math.degrees(rotation)
+        text = f"""{diameter}-{length}\n{abs(flow)} ({headloss})"""
+        line1_len = len(f"{diameter}-{length}")
+        line2_len = len(f"{abs(flow)} ({headloss})")
+        max_chars = max(line1_len, line2_len)
+        text_width = max_chars * 0.6 * text_size
+        text_height = 2.5 * text_size
 
+        # Try each candidate segment, use first non-overlapping position
+        chosen_idx = preferred_idx
+        if auto_label_post:
+            n = len(segments)
+            order = []
+            for step in range(n):
+                if step == 0:
+                    order.append(preferred_idx)
+                else:
+                    if preferred_idx - step >= 0:
+                        order.append(preferred_idx - step)
+                    if preferred_idx + step < n:
+                        order.append(preferred_idx + step)
+
+            for idx in order:
+                (sx, sy), (ex, ey) = segments[idx]
+                cx = (sx + ex) / 2
+                cy = (sy + ey) / 2
+                rot = math.degrees(math.atan2(ey - sy, ex - sx))
+                if rot < 0:
+                    rot += 360
+                rot_ann = rot - 180 if 90 < rot < 270 else rot
+                candidate = (cx, cy, text_width, text_height, rot_ann)
+                if not any(SATdetect.rectangles_overlap(candidate, p['rect']) for p in pipe_boundaries):
+                    chosen_idx = idx
+                    break
+
+        (start_x, start_y), (end_x, end_y) = segments[chosen_idx]
+        center_x = (start_x + end_x) / 2
+        center_y = (start_y + end_y) / 2
+        rotation = math.degrees(math.atan2(end_y - start_y, end_x - start_x))
         if rotation < 0:
             rotation += 360
-
-        if rotation > 90 and rotation < 270:
-            rotation_annotaion = rotation-180
-        else:
-            rotation_annotaion = rotation
-
-        headloss = df_link_results.at[link_row, 'Headloss']
+        rotation_annotaion = rotation - 180 if 90 < rotation < 270 else rotation
 
         attrib = {"char_height": text_size,
                   "style": "epa2HydChart",
@@ -47,26 +74,12 @@ def pipe_annotation_block(link_id, start_x, start_y, end_x, end_y, i, pipe_bound
                   "line_spacing_factor": 1,
                   'rotation': rotation_annotaion}
 
-        text = f"""{diameter}-{length}\n{abs(flow)} ({headloss})"""
+        msp.add_mtext(text, dxfattribs=attrib).set_location(insert=(center_x, center_y))
 
-        msp.add_mtext(text, dxfattribs=attrib).set_location(
-            insert=(center_x, center_y))
-
-        # Calculate approximate text bounding box (2 lines of text)
-        line1_len = len(f"{diameter}-{length}")
-        line2_len = len(f"{abs(flow)} ({headloss})")
-        max_chars = max(line1_len, line2_len)
-
-        # Approximate dimensions (character width ~0.6 * text_size, 2 lines with spacing)
-        text_width = max_chars * 0.6 * text_size
-        text_height = 2.5 * text_size  # 2 lines plus spacing
-
-        # Store pipe annotation boundary in SAT format
-        pipe_boundary = {
+        pipe_boundaries.append({
             'id': link_id,
             'rect': (center_x, center_y, text_width, text_height, rotation_annotaion)
-        }
-        pipe_boundaries.append(pipe_boundary)
+        })
 
         if flow >= 0:
             msp.add_blockref('flowDirectionArrow', [center_x, center_y], dxfattribs={
@@ -82,12 +95,12 @@ def pipe_annotation_block(link_id, start_x, start_y, end_x, end_y, i, pipe_bound
         globals.logger.exception(e)
 
 
-def insert_pipe_annotation():
+def insert_pipe_annotation(auto_label_post=False):
     """Insert pipe annotations and collect their boundaries for overlap detection."""
-    
+
     df_pipes = globals.df_pipes
     df_vertices = globals.df_vertices
-    
+
     pipe_boundaries = []
 
     try:
@@ -100,33 +113,19 @@ def insert_pipe_annotation():
 
         for i, row in df_pipes.iterrows():
             link_id = row['ID']
+            node1 = (float(row['Node1_x']), float(row['Node1_y']))
+            node2 = (float(row['Node2_x']), float(row['Node2_y']))
 
             if link_id in link_ids:
                 verts = vertices_dict[link_id]
-                num_verts = len(verts)
+                points = [node1] + list(verts) + [node2]
+            else:
+                points = [node1, node2]
 
-                if num_verts == 1:  # 1 vertex
-                    start_x, start_y = float(
-                        row['Node1_x']), float(row['Node1_y'])
-                    end_x, end_y = verts[0]  # First and only vertex
+            segments = [(points[k], points[k + 1]) for k in range(len(points) - 1)]
+            preferred_idx = (len(segments) - 1) // 2
 
-                elif num_verts % 2 == 0:  # Even number of vertices
-                    mid = num_verts // 2
-                    start_x, start_y = verts[mid - 1]
-                    end_x, end_y = verts[mid]
-
-                else:  # Odd number of vertices
-                    mid = num_verts // 2
-                    start_x, start_y = verts[mid - 1]
-                    end_x, end_y = verts[mid]
-
-            else:  # No vertices
-                start_x, start_y = float(row['Node1_x']), float(row['Node1_y'])
-                end_x, end_y = float(row['Node2_x']), float(row['Node2_y'])
-
-            # Call annotation function once per pipe
-            pipe_annotation_block(link_id, start_x, start_y,
-                                  end_x, end_y, i, pipe_boundaries)
+            pipe_annotation_block(link_id, segments, preferred_idx, i, pipe_boundaries, auto_label_post)
             # msg= f'管線 {link_id} 已插入標示'
             # log.renew_log(msg, False)
             # log.setLogToButton()

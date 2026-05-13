@@ -68,6 +68,8 @@ low_pressure_threshold = 10.0
 
 any_error = False
 
+reservoir_user_elev = {}  # reservoir_id -> user-provided elev (float), for pressure = head - elev
+
 progress_steps = None
 progress_value = None
 progress_space = None
