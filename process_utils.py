@@ -2,7 +2,7 @@ import os
 import traceback
 from typing import TYPE_CHECKING
 
-from PyQt6.QtWidgets import QDialog, QFileDialog
+from PyQt6.QtWidgets import QFileDialog
 
 if TYPE_CHECKING:
     from main import MainWindow
@@ -20,66 +20,6 @@ import progress_utils
 import read_utils
 import utils
 
-
-class ReservoirElevDialog(QDialog):
-    """Dialog asking the user to supply an elevation for each reservoir (for pressure = head - elev)."""
-
-    def __init__(self, reservoir_ids, parent=None):
-        super().__init__(parent)
-        from PyQt6.QtWidgets import (
-            QVBoxLayout, QHBoxLayout, QLabel, QLineEdit,
-            QPushButton, QScrollArea, QWidget, QFormLayout,
-        )
-
-        self.setWindowTitle('接水點高程輸入')
-        self.setMinimumWidth(420)
-
-        layout = QVBoxLayout(self)
-
-        info = QLabel(
-            '偵測到接水點(Reservoir)，請輸入各接水點的高程(Elev)以計算壓力。\n'
-            '留空略過，留空則維持原本標示。'
-        )
-        info.setWordWrap(True)
-        layout.addWidget(info)
-
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-        container = QWidget()
-        form = QFormLayout(container)
-
-        self.inputs: dict[str, QLineEdit] = {}
-        for res_id in reservoir_ids:
-            edit = QLineEdit()
-            edit.setPlaceholderText('留空略過')
-            form.addRow(f'接水點 {res_id}  高程 (m):', edit)
-            self.inputs[res_id] = edit
-
-        scroll.setWidget(container)
-        layout.addWidget(scroll)
-
-        btn_row = QHBoxLayout()
-        btn_skip = QPushButton('略過全部')
-        btn_ok = QPushButton('確定')
-        btn_skip.clicked.connect(self.reject)
-        btn_ok.clicked.connect(self.accept)
-        btn_row.addWidget(btn_skip)
-        btn_row.addStretch()
-        btn_row.addWidget(btn_ok)
-        layout.addLayout(btn_row)
-
-    def get_values(self) -> dict:
-        result = {}
-        for res_id, edit in self.inputs.items():
-            text = edit.text().strip()
-            if text:
-                try:
-                    result[res_id] = float(text)
-                except ValueError:
-                    result[res_id] = None
-            else:
-                result[res_id] = None
-        return result
 
 
 def process1():
@@ -105,10 +45,15 @@ def process1():
                 utils.load_inp_file_to_dataframe(inp_file, showtime=True)
 
                 if globals.df_reservoirs is not None and len(globals.df_reservoirs) > 0:
-                    res_ids = globals.df_reservoirs['ID'].tolist()
-                    dlg = ReservoirElevDialog(res_ids, parent=globals.main_window)
-                    if dlg.exec():
-                        globals.reservoir_user_elev = dlg.get_values()
+                    from PyQt6.QtWidgets import QInputDialog
+                    for res_id in globals.df_reservoirs['ID'].tolist():
+                        val, ok = QInputDialog.getDouble(
+                            globals.main_window,
+                            '接水點高程輸入',
+                            f'接水點 {res_id} 高程 (m)：\n（取消則標示「ELEV」）',
+                            0.0, -99999.0, 99999.0, 2,
+                        )
+                        globals.reservoir_user_elev[res_id] = val if ok else None
 
                 check_utils.write_report_header()
                 pipe_dimension = check_utils.list_pipe_dimension()
