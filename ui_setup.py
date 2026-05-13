@@ -1,6 +1,7 @@
-import globals
+from PyQt6.QtGui import QDoubleValidator, QIntValidator
+
 from load_button import handle_inp_file_selection, handle_rpt_file_selection
-from PyQt6.QtGui import QIntValidator, QDoubleValidator
+import globals
 import utils
 
 

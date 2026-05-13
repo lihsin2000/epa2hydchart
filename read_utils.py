@@ -1,12 +1,12 @@
 import traceback
-import globals
-import utils
-from PyQt6.QtWidgets import QMessageBox
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from main import MainWindow
     import pandas as pd
+
+import globals
+import utils
 
 
 def read_vertices(inpFile):

@@ -1,15 +1,14 @@
-import globals
 import re
 import traceback
-import read_utils
-import message
-from PyQt6.QtCore import QCoreApplication
-
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from main import MainWindow
     import pandas as pd
+
+import globals
+import message
+import read_utils
 
 
 def auto_size():
@@ -31,22 +30,25 @@ def auto_size():
                 item.setEnabled(True)
 
         if globals.main_window.ui.chk_autoSize.isChecked() and globals.inp_file:
-            df_Vertices = read_utils.read_vertices(globals.inp_file)
-            df_Coords = read_utils.read_coords(globals.inp_file)
             try:
-                coords = df_Coords[['x', 'y']]
+                coords = globals.df_coords[['x', 'y']] if globals.df_coords is not None else pd.DataFrame()
             except:
                 coords = pd.DataFrame()
 
             try:
-                vertices = df_Vertices[['x', 'y']]
+                vertices = globals.df_vertices[['x', 'y']] if globals.df_vertices is not None else pd.DataFrame()
             except:
                 vertices = pd.DataFrame()
 
-            min_xs = [float(vertices['x'].min()), float(coords['x'].min())]
-            min_xs = [x for x in min_xs if str(x) != 'nan']
-            max_xs = [float(vertices['x'].max()), float(coords['x'].max())]
-            max_xs = [x for x in max_xs if str(x) != 'nan']
+            min_xs = []
+            max_xs = []
+            for df in [vertices, coords]:
+                if not df.empty and 'x' in df.columns:
+                    min_xs.append(float(df['x'].min()))
+                    max_xs.append(float(df['x'].max()))
+
+            if not min_xs or not max_xs:
+                return
 
             x_min = min(min_xs)
             x_max = max(max_xs)

@@ -1,9 +1,11 @@
-import globals
-from PyQt6.QtWidgets import QMainWindow, QApplication
-import sys
-import warnings
-import traceback
 import logging
+import sys
+import traceback
+import warnings
+
+from PyQt6.QtWidgets import QMainWindow, QApplication
+
+import globals
 
 # Suppress PyQt6 SIP deprecation warnings
 warnings.filterwarnings(

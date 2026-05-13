@@ -1,9 +1,10 @@
-import globals
 import traceback
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     import pandas as pd
+
+import globals
 
 
 def find_negative_low_pressure_junctions():
