@@ -54,5 +54,6 @@
 - Fix: 修正.inp和.rpt解析錯誤問題
 - Change: SVG轉PNG最佳化，減少磁碟I/O
 - Change: 改善auto_size()運作邏輯
+- Change: 封裝的時候去除不必要的模組，減少程式容量
 - Refactor: 變數命名優化
 - Refactor: 調整模組import順序，改善啟動速度
