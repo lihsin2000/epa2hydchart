@@ -1,12 +1,14 @@
-import globals
-import utils
-import message
 import os
-from PyQt6.QtWidgets import QFileDialog
 from typing import TYPE_CHECKING
+
+from PyQt6.QtWidgets import QFileDialog
 
 if TYPE_CHECKING:
     from main import MainWindow
+
+import globals
+import message
+import utils
 
 
 def handle_inp_file_selection():

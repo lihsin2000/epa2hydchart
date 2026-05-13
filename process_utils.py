@@ -1,23 +1,24 @@
 import os
 import traceback
-from PyQt6.QtWidgets import QFileDialog
-import globals
-import read_utils
-import utils
-import check_utils
-import progress_utils
-import node_utils
-import node_pressure_utils
-import pipe_utils
-import node_demand_utils
-import block_utils
-import convert_utils
-import message
-
 from typing import TYPE_CHECKING
+
+from PyQt6.QtWidgets import QFileDialog
 
 if TYPE_CHECKING:
     from main import MainWindow
+
+import block_utils
+import check_utils
+import convert_utils
+import globals
+import message
+import node_demand_utils
+import node_pressure_utils
+import node_utils
+import pipe_utils
+import progress_utils
+import read_utils
+import utils
 
 
 def process1():

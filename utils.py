@@ -1,15 +1,14 @@
-import globals
 import re
 import traceback
-import read_utils
-import message
-from PyQt6.QtCore import QCoreApplication
-
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from main import MainWindow
     import pandas as pd
+
+import globals
+import message
+import read_utils
 
 
 def auto_size():
@@ -31,22 +30,25 @@ def auto_size():
                 item.setEnabled(True)
 
         if globals.main_window.ui.chk_autoSize.isChecked() and globals.inp_file:
-            df_Vertices = read_utils.read_vertices(globals.inp_file)
-            df_Coords = read_utils.read_coords(globals.inp_file)
             try:
-                coords = df_Coords[['x', 'y']]
+                coords = globals.df_coords[['x', 'y']] if globals.df_coords is not None else pd.DataFrame()
             except:
                 coords = pd.DataFrame()
 
             try:
-                vertices = df_Vertices[['x', 'y']]
+                vertices = globals.df_vertices[['x', 'y']] if globals.df_vertices is not None else pd.DataFrame()
             except:
                 vertices = pd.DataFrame()
 
-            min_xs = [float(vertices['x'].min()), float(coords['x'].min())]
-            min_xs = [x for x in min_xs if str(x) != 'nan']
-            max_xs = [float(vertices['x'].max()), float(coords['x'].max())]
-            max_xs = [x for x in max_xs if str(x) != 'nan']
+            min_xs = []
+            max_xs = []
+            for df in [vertices, coords]:
+                if not df.empty and 'x' in df.columns:
+                    min_xs.append(float(df['x'].min()))
+                    max_xs.append(float(df['x'].max()))
+
+            if not min_xs or not max_xs:
+                return
 
             x_min = min(min_xs)
             x_max = max(max_xs)
@@ -115,7 +117,7 @@ def line_start_end(input, startStr, endStr, start_offset, end_offset):
     """
     try:
         index = 0
-        with open(input, 'r') as file:
+        with open(input, 'r', errors='ignore') as file:
             for line in file:
                 index += 1
                 if startStr in line:
@@ -155,34 +157,27 @@ def arrange_rpt_file(rptPath):
         if os.path.exists(output):
             os.remove(output)
 
-        with open(rptPath, 'r') as file_in, open(output, 'w') as file_out:
+        with open(rptPath, 'r', errors='ignore') as file_in, open(output, 'w', errors='ignore') as file_out:
             lines = file_in.readlines()
             i = 0
             while i < len(lines):
                 if '\x0c\n' in lines[i]:
                     i += 1
                     continue
-
                 elif 'Page' in lines[i]:
                     i += 1
                     continue
-
-                elif '\n' == lines[i]:
+                elif not lines[i].strip():
                     i += 1
                     continue
-
                 elif 'continued' in lines[i]:
                     i += 5
                     continue
                 else:
-                    if i == len(lines)-1:
-                        file_out.write('\n')
-                        file_out.write('[END]')
-                        break
-                    else:
-                        file_out.write(lines[i])
-                        i += 1
-        file_out.close()
+                    file_out.write(lines[i])
+                    i += 1
+            file_out.write('\n')
+            file_out.write('[END]')
 
         return output
     except Exception as e:
@@ -205,7 +200,7 @@ def convert_patterns_to_hour_list(rptFile2):
         List of unique hour values found.
     """
     try:
-        rptFile2_lines = open(rptFile2).readlines()
+        rptFile2_lines = open(rptFile2, errors='ignore').readlines()
 
         i = 0
         hr_list = []

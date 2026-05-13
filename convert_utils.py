@@ -1,11 +1,13 @@
-import globals
-import message
 import traceback
-from PyQt6.QtWidgets import QApplication, QMessageBox
 from typing import TYPE_CHECKING
+
+from PyQt6.QtWidgets import QApplication, QMessageBox
 
 if TYPE_CHECKING:
     from main import MainWindow
+
+import globals
+import message
 
 
 def save_png(png_path, svg_path=None, bytestring=None):
