@@ -10,11 +10,8 @@ a = Analysis(
         ('fonts', 'fonts'),
     ],
     hiddenimports=[
-        'cairosvg',
-        'cairocffi',
-        'cssselect2',
-        'tinycss2',
-        'webencodings',
+        'PyQt6.QtSvg',
+        'PyQt6.QtSvgWidgets',
         'defusedxml',
     ],
     hookspath=[],
