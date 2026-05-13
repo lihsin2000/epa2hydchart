@@ -32,14 +32,15 @@ def process1():
         globals.digit_decimal = digits.count('0')-1
 
         if inp_file and rpt_file:
-            dxf_path, _ = QFileDialog.getSaveFileName(
-                globals.main_window, "儲存", "", filter='dxf (*.dxf)')
-            file_name = os.path.basename(dxf_path)
+            output_dir = QFileDialog.getExistingDirectory(
+                globals.main_window, "選擇輸出資料夾")
 
-            if dxf_path != '':
+            if output_dir:
+                proj_name = globals.proj_name or 'output'
+                dxf_path = os.path.join(output_dir, proj_name + '.dxf')
+                globals.output_folder = output_dir
 
                 utils.load_inp_file_to_dataframe(inp_file, showtime=True)
-                globals.output_folder = os.path.dirname(dxf_path)
                 check_utils.write_report_header()
                 pipe_dimension = check_utils.list_pipe_dimension()
                 check_utils.write_report_pipe_dimension(pipe_dimension)
@@ -188,6 +189,26 @@ def process2(dxf_path, hr):
         svg_path = dxf_path.replace('.dxf', '.svg')
         png_path = dxf_path.replace('.dxf', '.png')
 
+        # Step 1: 在記憶體產生 SVG（不寫磁碟）
+        success, svg_string = convert_utils.save_svg(msp=globals.msp, cad=globals.cad, path=None)
+        if not success:
+            globals.export_svg_success = False
+            message.renew_message(f'[Error]{dxf_path_without_extension}.svg 生成失敗', True)
+            message.set_message_to_button()
+            progress_utils.set_progress_bar(100)
+            return
+
+        # Step 2: 顯示預覽，等使用者確認
+        dialog = convert_utils.SvgPreviewDialog(
+            svg_string.encode('utf-8'), parent=globals.main_window
+        )
+        if not dialog.exec():
+            message.renew_message('已取消匯出，未儲存任何檔案', True)
+            message.set_message_to_button()
+            progress_utils.set_progress_bar(100)
+            return
+
+        # Step 3: 使用者按繼續，依序儲存 DXF → SVG → PNG
         if convert_utils.save_dxf(main_window_instance=globals.main_window, dxf_path=dxf_path):
             globals.export_dxf_success = True
             msg = f'{dxf_path_without_extension}.dxf 匯出完成'
@@ -198,18 +219,19 @@ def process2(dxf_path, hr):
         message.set_message_to_button()
         progress_utils.set_progress_bar(97)
 
-        success, svg_string = convert_utils.save_svg(msp=globals.msp, cad=globals.cad, path=svg_path)
-        if success:
+        try:
+            with open(svg_path, 'wt', encoding='utf8') as fp:
+                fp.write(svg_string)
             globals.export_svg_success = True
             msg = f'{dxf_path_without_extension}.svg 匯出完成'
-        else:
+        except Exception as svg_e:
             globals.export_svg_success = False
             msg = f'[Error]{dxf_path_without_extension}.svg 匯出失敗'
+            globals.logger.exception(svg_e)
         message.renew_message(msg, False)
         message.set_message_to_button()
         progress_utils.set_progress_bar(98)
 
-        # Synchronous PNG conversion
         if convert_utils.save_png(png_path=png_path, bytestring=svg_string):
             globals.export_png_success = True
             msg = f'{dxf_path_without_extension}.png 匯出完成'

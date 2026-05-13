@@ -52,8 +52,15 @@
 
 ## [0.4.1]
 - Fix: 修正.inp和.rpt解析錯誤問題
+- Fix: 修正其他問題
 - Change: SVG轉PNG最佳化，減少磁碟I/O
 - Change: 改善auto_size()運作邏輯
 - Change: 封裝的時候去除不必要的模組，減少程式容量
 - Refactor: 變數命名優化
 - Refactor: 調整模組import順序，改善啟動速度
+
+## [1.0.0]
+- Add: 匯出前顯示 SVG 預覽視窗，支援滾輪縮放及拖曳平移，可確認後繼續或取消匯出
+- Change: 移除 cairosvg 依賴，改用 PyQt6.QtSvg 進行 PNG 轉換，簡化安裝需求
+- Change: SVG 優先在記憶體中產生，確認後再寫入磁碟，避免產生未確認的暫存檔
+- Change: 匯出改為指定輸出資料夾，檔名自動以工程名稱命名
