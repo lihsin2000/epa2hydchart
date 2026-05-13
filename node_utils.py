@@ -22,8 +22,8 @@ def insert_reservoir_annotation_leader(color, digits):
             id = df_reservoirs.at[i, 'ID']
             x = float(df_reservoirs.at[i, 'x'])
             y = float(df_reservoirs.at[i, 'y'])
-            head = float(df_reservoirs.at[i, 'Head'])
-            head = f'{head:.{digits}f}'
+            head_float = float(df_reservoirs.at[i, 'Head'])
+            head = f'{head_float:.{digits}f}'
 
             leader_up_start_x = x+text_size
             leader_up_start_y = y+text_size
@@ -31,15 +31,26 @@ def insert_reservoir_annotation_leader(color, digits):
             leader_up_end_x = leader_up_start_x+leader_distance
             leader_up_end_y = leader_up_start_y+leader_distance
 
+            user_elev = globals.reservoir_user_elev.get(str(id)) if globals.reservoir_user_elev else None
+
             msp.add_polyline2d([(leader_up_start_x, leader_up_start_y),
                                         (leader_up_end_x, leader_up_end_y),
                                         (leader_up_end_x+6*text_size, leader_up_end_y)], dxfattribs={'color': color})
             msp.add_text(head, height=text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement(
                 (leader_up_end_x+6*text_size, leader_up_end_y+2*text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
-            msp.add_text('ELEV', height=text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement(
-                (leader_up_end_x+6*text_size, leader_up_end_y+0.75*text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
-            msp.add_text('Pressure', height=text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement(
-                (leader_up_end_x+6*text_size, leader_up_end_y-0.75*text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
+
+            if user_elev is not None:
+                elev_str = f'{user_elev:.{digits}f}'
+                pressure_str = f'{head_float - user_elev:.{digits}f}'
+                msp.add_text(elev_str, height=text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement(
+                    (leader_up_end_x+6*text_size, leader_up_end_y+0.75*text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
+                msp.add_text(pressure_str, height=text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement(
+                    (leader_up_end_x+6*text_size, leader_up_end_y-0.75*text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
+            else:
+                msp.add_text('ELEV', height=text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement(
+                    (leader_up_end_x+6*text_size, leader_up_end_y+0.75*text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
+                msp.add_text('Pressure', height=text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement(
+                    (leader_up_end_x+6*text_size, leader_up_end_y-0.75*text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
             msg = f'接水點 {id} 引線已完成繪圖'
             message.renew_message(msg, False)
             message.set_message_to_button()
@@ -190,6 +201,7 @@ def insert_tank_annotation_leader(color, digits, width):
                 (leader_up_end_x+10*text_size, leader_up_end_y+0.75*text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
             msp.add_text(f'Elev:{elev}', height=text_size, dxfattribs={'color': color, "style": "epa2HydChart"}).set_placement(
                 (leader_up_end_x+10*text_size, leader_up_end_y-0.75*text_size), align=TextEntityAlignment.MIDDLE_RIGHT)
+
             msg = f'水池 {id} 引線已完成繪圖'
             message.renew_message(msg, False)
             message.set_message_to_button()
