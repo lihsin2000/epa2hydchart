@@ -37,6 +37,12 @@ a = Analysis(
         'docutils', 'sphinx',
         # network protocols not used
         'xmlrpc', 'ftplib', 'imaplib', 'poplib', 'smtplib',
+        # CairoSVG and its dependencies — SVG is rendered via ezdxf + PyQt6.QtSvg
+        'cairosvg', 'cairocffi',
+        'cssselect2', 'tinycss2', 'webencodings',
+        # not used anywhere in source code
+        'colorama',
+        'dotenv',
         # Qt modules not used
         'PyQt6.QtPdf', 'PyQt6.QtPdfWidgets',
         'PyQt6.QtMultimedia', 'PyQt6.QtMultimediaWidgets',
