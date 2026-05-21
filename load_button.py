@@ -1,4 +1,5 @@
 import os
+import traceback
 from typing import TYPE_CHECKING
 
 from PyQt6.QtWidgets import QFileDialog
@@ -28,7 +29,10 @@ def handle_inp_file_selection():
         globals.inp_file = file
         globals.proj_name = os.path.splitext(os.path.basename(file))[0]
         globals.main_window.ui.l_projName.setText(globals.proj_name)
-    
+
+    # Enable WGS84 conversion checkbox whenever an INP file is available
+    globals.main_window.ui.chk_wgs84_to_twd97.setEnabled(bool(globals.inp_file))
+
     # Check if both files are loaded and enable autoSize checkbox
     check_and_enable_autosize()
 
@@ -76,6 +80,7 @@ def handle_rpt_file_selection():
     
     # Check if both files are loaded and enable autoSize checkbox
     check_and_enable_autosize()
+
 
 
 def check_and_enable_autosize():

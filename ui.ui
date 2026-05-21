@@ -60,10 +60,17 @@
           </property>
          </widget>
         </item>
-        <item row="2" column="1" colspan="2">
+        <item row="2" column="1">
          <widget class="QLineEdit" name="l_projName">
           <property name="alignment">
            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="2">
+         <widget class="QPushButton" name="b_wgs84_to_twd97">
+          <property name="text">
+           <string>WGS84→TWD97</string>
           </property>
          </widget>
         </item>

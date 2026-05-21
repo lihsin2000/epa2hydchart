@@ -222,7 +222,7 @@ def convert_patterns_to_hour_list(rptFile2):
         globals.logger.exception(e)
 
 
-def load_inp_file_to_dataframe(inpFile, showtime):
+def load_inp_file_to_dataframe(inpFile, showtime, convert_coords=False):
     """
     Load INP file data into global dataframes and optionally display timing.
 
@@ -239,6 +239,9 @@ def load_inp_file_to_dataframe(inpFile, showtime):
     try:
         t0 = time.time()
         globals.df_coords = read_utils.read_coords(inpFile)
+        if convert_coords:
+            import coord_convert
+            globals.df_coords = coord_convert.convert_df_wgs84_to_twd97(globals.df_coords)
         t1 = time.time()
         if showtime:
             globals.main_window.ui.browser_log.append(
@@ -282,6 +285,9 @@ def load_inp_file_to_dataframe(inpFile, showtime):
                 f'管線參數讀取完畢({t7-t6:.2f}s)')
         QCoreApplication.processEvents()
         globals.df_vertices = read_utils.read_vertices(inpFile)
+        if convert_coords and globals.df_vertices is not None and not globals.df_vertices.empty:
+            import coord_convert
+            globals.df_vertices = coord_convert.convert_df_wgs84_to_twd97(globals.df_vertices)
         t8 = time.time()
         if showtime:
             globals.main_window.ui.browser_log.append(

@@ -42,7 +42,8 @@ def process1():
                 globals.output_folder = output_dir
 
                 globals.reservoir_user_elev = {}
-                utils.load_inp_file_to_dataframe(inp_file, showtime=True)
+                convert_coords = globals.main_window.ui.chk_wgs84_to_twd97.isChecked()
+                utils.load_inp_file_to_dataframe(inp_file, showtime=True, convert_coords=convert_coords)
 
                 if globals.df_reservoirs is not None and len(globals.df_reservoirs) > 0:
                     from PyQt6.QtWidgets import QInputDialog

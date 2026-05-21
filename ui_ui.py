@@ -37,7 +37,10 @@ class Ui_MainWindow(object):
         self.l_projName = QtWidgets.QLineEdit(parent=self.centralwidget)
         self.l_projName.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeading|QtCore.Qt.AlignmentFlag.AlignLeft|QtCore.Qt.AlignmentFlag.AlignVCenter)
         self.l_projName.setObjectName("l_projName")
-        self.gridLayout_2.addWidget(self.l_projName, 2, 1, 1, 2)
+        self.gridLayout_2.addWidget(self.l_projName, 2, 1, 1, 1)
+        self.chk_wgs84_to_twd97 = QtWidgets.QCheckBox(parent=self.centralwidget)
+        self.chk_wgs84_to_twd97.setObjectName("chk_wgs84_to_twd97")
+        self.gridLayout_2.addWidget(self.chk_wgs84_to_twd97, 2, 2, 1, 1)
         self.b_browser_inp = QtWidgets.QPushButton(parent=self.centralwidget)
         self.b_browser_inp.setObjectName("b_browser_inp")
         self.gridLayout_2.addWidget(self.b_browser_inp, 0, 2, 1, 1)
@@ -185,6 +188,7 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "epa2HydChart"))
         self.label.setText(_translate("MainWindow", "inp 檔案"))
+        self.chk_wgs84_to_twd97.setText(_translate("MainWindow", "WGS84→TWD97"))
         self.b_browser_inp.setText(_translate("MainWindow", "瀏覽"))
         self.label_4.setText(_translate("MainWindow", "工程名稱"))
         self.browser_log.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"

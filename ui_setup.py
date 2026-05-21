@@ -14,6 +14,7 @@ def setup_ui_elements():
     globals.main_window.ui.b_browser_rpt.clicked.connect(lambda: handle_rpt_file_selection())
     globals.main_window.ui.b_reset.clicked.connect(globals.main_window.reset_form_to_defaults)
     globals.main_window.ui.b_draw.clicked.connect(globals.main_window.start_processing)
+    globals.main_window.ui.chk_wgs84_to_twd97.setEnabled(False)
 
     # Set default values and validators for input fields
     globals.main_window.ui.l_block_size.setText(str(globals.BLOCK_SIZE_DEFAULT))

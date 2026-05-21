@@ -66,6 +66,8 @@ class MainWindow(QMainWindow):
         self.ui.chk_autoSize.setChecked(False)
         self.ui.chk_autoSize.setEnabled(False)  # Disable until both files are loaded
         self.ui.chk_autoLabelPost.setChecked(False)
+        self.ui.chk_wgs84_to_twd97.setChecked(False)
+        self.ui.chk_wgs84_to_twd97.setEnabled(False)
 
         self.ui.l_projName.setText('')
         self.ui.list_hrs.clear()
