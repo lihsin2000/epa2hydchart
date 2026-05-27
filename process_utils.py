@@ -46,15 +46,28 @@ def process1():
                 utils.load_inp_file_to_dataframe(inp_file, showtime=True, convert_coords=convert_coords)
 
                 if globals.df_reservoirs is not None and len(globals.df_reservoirs) > 0:
-                    from PyQt6.QtWidgets import QInputDialog
+                    from PyQt6.QtWidgets import (QDialog, QDialogButtonBox,
+                                                 QDoubleSpinBox, QLabel,
+                                                 QVBoxLayout)
                     for res_id in globals.df_reservoirs['ID'].tolist():
-                        val, ok = QInputDialog.getDouble(
-                            globals.main_window,
-                            '接水點高程輸入',
-                            f'接水點 {res_id} 高程 (m)：\n（取消則標示「ELEV」）',
-                            0.0, -99999.0, 99999.0, 2,
-                        )
-                        globals.reservoir_user_elev[res_id] = val if ok else None
+                        dlg = QDialog(globals.main_window)
+                        dlg.setWindowTitle('接水點高程輸入')
+                        layout = QVBoxLayout(dlg)
+                        layout.addWidget(QLabel(f'接水點 {res_id} 高程 (m)：\n（略過則標示「ELEV」）'))
+                        spin = QDoubleSpinBox()
+                        spin.setRange(-99999.0, 99999.0)
+                        spin.setDecimals(2)
+                        spin.setValue(0.0)
+                        layout.addWidget(spin)
+                        btn_box = QDialogButtonBox()
+                        btn_continue = btn_box.addButton('繼續', QDialogButtonBox.ButtonRole.AcceptRole)
+                        btn_box.addButton('略過', QDialogButtonBox.ButtonRole.RejectRole)
+                        btn_continue.setDefault(True)
+                        btn_box.accepted.connect(dlg.accept)
+                        btn_box.rejected.connect(dlg.reject)
+                        layout.addWidget(btn_box)
+                        ok = dlg.exec() == QDialog.DialogCode.Accepted
+                        globals.reservoir_user_elev[res_id] = spin.value() if ok else None
 
                 check_utils.write_report_header()
                 pipe_dimension = check_utils.list_pipe_dimension()

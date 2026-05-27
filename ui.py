@@ -1,4 +1,4 @@
-# Form implementation generated from reading ui file 'd:\Work\code\epa2hydchart\ui.ui'
+# Form implementation generated from reading ui file 'ui.ui'
 #
 # Created by: PyQt6 UI code generator 6.4.2
 #
@@ -17,7 +17,7 @@ class Ui_MainWindow(object):
         MainWindow.setMinimumSize(QtCore.QSize(0, 0))
         MainWindow.setMaximumSize(QtCore.QSize(16777215, 16777215))
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("d:\\Work\\code\\epa2hydchart\\../../li2021/.designer/backup/icon.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        icon.addPixmap(QtGui.QPixmap("../../li2021/.designer/backup/icon.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         MainWindow.setWindowIcon(icon)
         MainWindow.setDocumentMode(False)
         self.centralwidget = QtWidgets.QWidget(parent=MainWindow)
@@ -188,18 +188,13 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "epa2HydChart"))
         self.label.setText(_translate("MainWindow", "inp 檔案"))
+        self.chk_wgs84_to_twd97.setText(_translate("MainWindow", "WGS84→TWD97"))
         self.b_browser_inp.setText(_translate("MainWindow", "瀏覽"))
         self.label_4.setText(_translate("MainWindow", "工程名稱"))
-        self.chk_wgs84_to_twd97.setText(_translate("MainWindow", "WGS84→TWD97"))
-        self.browser_log.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'PMingLiU\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>"))
         self.b_browser_rpt.setText(_translate("MainWindow", "瀏覽"))
         self.label_2.setText(_translate("MainWindow", "rpt 檔案"))
         self.chk_export_0cmd.setText(_translate("MainWindow", "匯出0CMD"))
-        self.chk_autoSize.setText(_translate("MainWindow", "自動調整大小"))
+        self.chk_autoSize.setText(_translate("MainWindow", "自動調整文字大小"))
         self.b_draw.setText(_translate("MainWindow", "開始處理"))
         self.label_5.setText(_translate("MainWindow", "節點圖塊大小"))
         self.label_7.setText(_translate("MainWindow", "引線長度"))

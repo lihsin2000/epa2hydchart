@@ -29,8 +29,10 @@ def setup_ui_elements():
     globals.main_window.ui.l_leader_distance.setText(str(globals.LEADER_DISTANCE_DEFAULT))
     globals.main_window.ui.l_leader_distance.setValidator(QIntValidator())
 
-    globals.main_window.ui.l_line_width.setText(str(globals.LINE_WIDTH_DEFAULT))
-    globals.main_window.ui.l_line_width.setValidator(QIntValidator())
+    validator = QDoubleValidator(0.0, 99.9, 1)
+    validator.setNotation(QDoubleValidator.Notation.StandardNotation)
+    globals.main_window.ui.l_line_width.setValidator(validator)
+    globals.main_window.ui.l_line_width.setText(f"{globals.LINE_WIDTH_DEFAULT:.1f}")
 
     globals.main_window.ui.l_headloss_threshold.setText(str(globals.HEADLOSS_THRESHOLD_DEFAULT))
     globals.main_window.ui.l_headloss_threshold.setValidator(QDoubleValidator())

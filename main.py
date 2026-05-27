@@ -61,7 +61,7 @@ class MainWindow(QMainWindow):
         self.ui.l_joint_size.setText(str(globals.JOINT_SIZE_DEFAULT))
         self.ui.l_text_size.setText(str(globals.TEXT_SIZE_DEFAULT))
         self.ui.l_leader_distance.setText(str(globals.LEADER_DISTANCE_DEFAULT))
-        self.ui.l_line_width.setText(str(globals.LINE_WIDTH_DEFAULT))
+        self.ui.l_line_width.setText(f"{globals.LINE_WIDTH_DEFAULT:.1f}")
         self.ui.chk_export_0cmd.setChecked(False)
         self.ui.chk_autoSize.setChecked(False)
         self.ui.chk_autoSize.setEnabled(False)  # Disable until both files are loaded
